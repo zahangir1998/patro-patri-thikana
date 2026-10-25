@@ -101,5 +101,26 @@ const supabaseClient = window.supabase.createClient(
   "https://ekrablggrintqifpsdou.supabase.co",
   "sb_publishable_n7RIZqEDvlyMxng5l8H6aA_cDNXvka4"
 );
+ async function registerProfile() {
+  const name = document.getElementById("regName").value.trim();
+  const age = Number(document.getElementById("regAge").value);
+  const district = document.getElementById("regDistrict").value.trim();
+  const phone = document.getElementById("regPhone").value.trim();
+
+  if (!name || !age || !district || !phone) {
+    alert("সব তথ্য পূরণ করুন।");
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("profiles")
+    .insert([{ name, age, district, phone }]);
+
+  if (error) {
+    alert("তথ্য জমা হয়নি: " + error.message);
+  } else {
+    alert("রেজিস্ট্রেশন সফল হয়েছে!");
+  }
+}
 </script>
 </div></body></html>
