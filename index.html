@@ -77,5 +77,21 @@ function hidePerson(id){hiddenProfiles=hiddenProfiles.includes(id)?hiddenProfile
 function showPage(id){document.querySelectorAll(".page").forEach(x=>x.classList.toggle("hidden",x.id!==id));document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("active",x.dataset.page===id));if(id==="admin"){renderSettings();renderAdminProfiles();}if(id==="favorites")renderFavorites();window.scrollTo(0,0);}
 document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
 try{let s=JSON.parse(localStorage.getItem("ppt_settings")||"null");if(s)settings={...defaults,...s}}catch(e){}
-applySettings();renderSettings();renderProfiles();
+applySettings();renderSettings();renderProfiles();<div style="text-align:center; padding:10px;">
+  <button onclick="document.getElementById('registerForm').style.display='block'"
+  style="padding:10px 20px; background:#198754; color:white; border:0; border-radius:6px;">
+    রেজিস্টার
+  </button>
+
+  <div id="registerForm" style="display:none; margin-top:15px;">
+    <h3>পাত্র-পাত্রী ঠিকানা — রেজিস্ট্রেশন</h3>
+    <input type="text" placeholder="আপনার নাম"><br><br>
+    <input type="number" placeholder="বয়স"><br><br>
+    <input type="text" placeholder="জেলা"><br><br>
+    <input type="tel" placeholder="মোবাইল নম্বর"><br><br>
+    <button onclick="alert('রেজিস্ট্রেশন সিস্টেম এখনো সংযুক্ত করা হয়নি।')">
+      জমা দিন
+    </button>
+  </div>
+</div>
 </script></body></html>
