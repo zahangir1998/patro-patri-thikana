@@ -7,19 +7,49 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--primary:#a30d43;--secondary:#f8dbe5;--background:#fff8fa;--text:#28151c}
-*{box-sizing:border-box}body{margin:0;background:var(--background);color:var(--text);font-family:system-ui,"Noto Sans Bengali",sans-serif}
-header{background:var(--primary);color:white;padding:14px 16px;position:sticky;top:0;z-index:5}.brand{font-size:20px;font-weight:800}header small{display:block;margin-top:5px}
-main{max-width:960px;margin:auto;padding:16px}.tabs{display:flex;gap:8px;overflow:auto;padding:12px 0}
-button{cursor:pointer;font:inherit;border:0;border-radius:10px;padding:10px 14px}.tabs button{background:var(--secondary);white-space:nowrap}.tabs button.active,.primary{background:var(--primary);color:white}
-.panel{background:white;border:1px solid #f0dfe5;border-radius:16px;padding:16px;margin:14px 0}.hero{background:linear-gradient(135deg,#fff0f5,#f7d4e0);border-radius:20px;padding:22px;display:flex;justify-content:space-between;gap:15px;align-items:center}.hero h1{color:#7f0a35;font-size:26px}.couple{font-size:55px}
-.profile{border:1px solid #eedbe2;border-radius:14px;padding:12px;display:flex;gap:12px;align-items:center;margin:10px 0;min-width:0}.avatar{width:60px;height:60px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;background:#f7dce6;font-size:28px;overflow:hidden}.avatar img{width:100%;height:100%;object-fit:cover}
-.muted{color:#79666e;font-size:13px}.searchrow{display:flex;gap:8px;flex-wrap:wrap}input,select,textarea{font:inherit;border:1px solid #decbd2;border-radius:10px;padding:11px;min-width:0;max-width:100%;width:100%;background:white;color:#28151c}.searchrow input,.searchrow select{flex:1;width:auto}.field{display:grid;gap:6px;margin:12px 0}.field label{font-weight:700;font-size:14px}.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid #f0e1e6}.edit{background:#fff0f5;color:var(--primary)}.notice{background:#fff4d8;color:#674c00;padding:12px;border-radius:12px;font-size:13px;line-height:1.6}.hidden{display:none!important}footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
-@media(max-width:560px){main{padding:12px}.hero{padding:16px}.hero h1{font-size:22px}.couple{font-size:42px}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--background);color:var(--text);font-family:system-ui,"Noto Sans Bengali",sans-serif}
+header{background:var(--primary);color:white;padding:14px 16px;position:sticky;top:0;z-index:5}
+.brand{font-size:20px;font-weight:800}
+header small{display:block;margin-top:5px}
+main{max-width:960px;margin:auto;padding:16px}
+.tabs{display:flex;gap:8px;overflow:auto;padding:12px 0}
+button{cursor:pointer;font:inherit;border:0;border-radius:10px;padding:10px 14px}
+.tabs button{background:var(--secondary);white-space:nowrap}
+.tabs button.active,.primary{background:var(--primary);color:white}
+.panel{background:white;border:1px solid #f0dfe5;border-radius:16px;padding:16px;margin:14px 0}
+.hero{background:linear-gradient(135deg,#fff0f5,#f7d4e0);border-radius:20px;padding:22px;display:flex;justify-content:space-between;gap:15px;align-items:center}
+.hero h1{color:#7f0a35;font-size:26px}
+.couple{font-size:55px}
+.profile{border:1px solid #eedbe2;border-radius:14px;padding:12px;display:flex;gap:12px;align-items:center;margin:10px 0;min-width:0}
+.avatar{width:60px;height:60px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;background:#f7dce6;font-size:28px;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.muted{color:#79666e;font-size:13px}
+.searchrow{display:flex;gap:8px;flex-wrap:wrap}
+input,select,textarea{font:inherit;border:1px solid #decbd2;border-radius:10px;padding:11px;min-width:0;max-width:100%;width:100%;background:white;color:#28151c}
+.searchrow input,.searchrow select{flex:1;width:auto}
+.field{display:grid;gap:6px;margin:12px 0}
+.field label{font-weight:700;font-size:14px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid #f0e1e6}
+.edit{background:#fff0f5;color:var(--primary)}
+.notice{background:#fff4d8;color:#674c00;padding:12px;border-radius:12px;font-size:13px;line-height:1.6}
+.hidden{display:none!important}
+footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
+@media(max-width:560px){
+ main{padding:12px}
+ .hero{padding:16px}
+ .hero h1{font-size:22px}
+ .couple{font-size:42px}
+}
 </style>
 </head>
 <body>
 <div id="app">
-<header><div class="brand" id="brandTitle">♡ পাত্র-পাত্রী ঠিকানা</div><small id="tagline">সঠিক পরিচয়ে, সুন্দর জীবনের শুরু</small></header>
+<header>
+<div class="brand" id="brandTitle">♡ পাত্র-পাত্রী ঠিকানা</div>
+<small id="tagline">সঠিক পরিচয়ে, সুন্দর জীবনের শুরু</small>
+</header>
+
 <main>
 <nav class="tabs" id="tabs" aria-label="প্রধান মেনু">
 <button type="button" class="active" data-page="home">🏠 হোম</button>
@@ -29,120 +59,595 @@ button{cursor:pointer;font:inherit;border:0;border-radius:10px;padding:10px 14px
 <button type="button" data-page="profile">👤 প্রোফাইল / রেজিস্ট্রেশন</button>
 <button type="button" data-page="admin">⚙ অ্যাডমিন</button>
 </nav>
+
 <section id="home" class="page">
-<div class="hero"><div><h1 id="heroTitle">জীবনসঙ্গী খুঁজুন সহজে</h1><p id="heroText">আপনার পছন্দ ও প্রয়োজন অনুযায়ী পাত্র-পাত্রী খুঁজুন।</p><button type="button" class="primary" data-open-page="search">পাত্র-পাত্রী খুঁজুন →</button> <button type="button" class="primary" data-open-page="profile">👤 রেজিস্ট্রেশন করুন</button></div><div class="couple">💞</div></div>
-<div class="panel"><h2>কীভাবে ব্যবহার করবেন?</h2><p>🧾 প্রোফাইল তৈরি করুন</p><p>🔎 বয়স ও জেলা দিয়ে খুঁজুন</p><p>🤝 সম্মতি নিয়ে যোগাযোগ করুন</p></div>
-<div class="notice">প্রোফাইলের তথ্য সংশ্লিষ্ট ব্যক্তির সম্মতি নিয়ে যোগ করুন। সদস্যদের ব্যক্তিগত তথ্যের গোপনীয়তা রক্ষা করুন।</div>
-</section>
-<section id="search" class="page hidden"><div class="panel"><h2>পাত্র-পাত্রী খুঁজুন</h2><div class="searchrow"><select id="gender"><option value="সব">সব প্রোফাইল</option><option value="পাত্র">পাত্র</option><option value="পাত্রী">পাত্রী</option></select><input id="age" type="number" min="18" placeholder="সর্বোচ্চ বয়স"><input id="district" placeholder="জেলা লিখুন"><button type="button" class="primary" id="searchButton">খুঁজুন</button></div></div><div id="profiles">প্রোফাইল লোড হচ্ছে...</div></section>
-<section id="favorites" class="page hidden"><div class="panel"><h2>আমার পছন্দ</h2><div id="favList">এখনো কোনো প্রোফাইল পছন্দ করা হয়নি।</div></div></section>
-<section id="messages" class="page hidden"><div class="panel"><h2>বার্তা</h2><p>বার্তা পাঠানোর সুবিধা পরবর্তী ধাপে তৈরি করতে হবে।</p></div></section>
-<section id="profile" class="page hidden"><div class="panel"><h2>রেজিস্ট্রেশন</h2><p class="muted">নিচের তথ্য পূরণ করে রেজিস্ট্রেশন করুন। নাম, বয়স, পরিচয়, জেলা ও মোবাইল নম্বর আবশ্যক।</p>
-<form id="registerForm">
-<div class="field"><label for="regName">নাম *</label><input id="regName" required maxlength="100" placeholder="আপনার নাম"></div>
-<div class="field"><label for="regAge">বয়স *</label><input id="regAge" type="number" min="18" max="100" required placeholder="১৮ বা তার বেশি"></div>
-<div class="field"><label for="regGender">আপনি *</label><select id="regGender" required><option value="">নির্বাচন করুন</option><option value="পাত্র">পাত্র</option><option value="পাত্রী">পাত্রী</option></select></div>
-<div class="field"><label for="regDistrict">জেলা *</label><input id="regDistrict" required maxlength="100" placeholder="আপনার জেলা"></div>
-<div class="field"><label for="regPhone">মোবাইল নম্বর *</label><input id="regPhone" type="tel" required maxlength="30" placeholder="মোবাইল নম্বর"></div>
-<div class="field"><label for="regEducation">শিক্ষাগত যোগ্যতা</label><input id="regEducation" maxlength="150" placeholder="শিক্ষাগত যোগ্যতা"></div>
-<div class="field"><label for="regOccupation">পেশা</label><input id="regOccupation" maxlength="150" placeholder="পেশা"></div>
-<div class="field"><label for="regHeight">উচ্চতা</label><input id="regHeight" maxlength="30" placeholder="যেমন: ৫ ফুট ৫ ইঞ্চি"></div>
-<div class="field"><label for="regReligion">ধর্ম</label><select id="regReligion"><option value="">নির্বাচন করুন</option><option>ইসলাম</option><option>হিন্দু</option><option>বৌদ্ধ</option><option>খ্রিষ্টান</option><option>অন্যান্য</option></select></div>
-<div class="field"><label for="regMarital">বৈবাহিক অবস্থা</label><select id="regMarital"><option value="">নির্বাচন করুন</option><option>অবিবাহিত</option><option>তালাকপ্রাপ্ত</option><option>বিধবা/বিপত্নীক</option></select></div>
-<div class="field"><label for="regBio">নিজের সম্পর্কে</label><textarea id="regBio" rows="4" maxlength="1000" placeholder="নিজের সম্পর্কে সংক্ষেপে লিখুন"></textarea></div>
-<button type="submit" id="registerButton" class="primary">রেজিস্ট্রেশন করুন / তথ্য জমা দিন</button>
-</form></div></section>
-<section id="admin" class="page hidden"><div class="panel"><h2>অ্যাডমিন প্যানেল</h2><div class="notice">এটি প্রাথমিক ব্যবস্থাপনা অংশ। এখানে পাসওয়ার্ডভিত্তিক নিরাপদ অ্যাডমিন লগইন এখনো যুক্ত নেই।</div><div class="field"><label for="adminPassword">অ্যাডমিন পাসওয়ার্ড</label><input id="adminPassword" type="password" placeholder="পাসওয়ার্ড"></div><button type="button" class="primary" id="adminLogin">প্রবেশ করুন</button><div id="adminContent" class="hidden"><div class="field"><label for="siteTitleInput">অ্যাপের নাম</label><input id="siteTitleInput"></div><div class="field"><label for="siteTaglineInput">উপশিরোনাম</label><input id="siteTaglineInput"></div><div class="field"><label for="siteHeroTitleInput">হোম শিরোনাম</label><input id="siteHeroTitleInput"></div><div class="field"><label for="siteHeroTextInput">হোমের বিবরণ</label><textarea id="siteHeroTextInput"></textarea></div><button type="button" class="primary" id="saveSettings">পরিবর্তন সংরক্ষণ করুন</button></div></div></section>
-</main>
-<footer>© <span id="year"></span> পাত্র-পাত্রী ঠিকানা</footer>
+<div class="hero">
+<div>
+<h1 id="heroTitle">জীবনসঙ্গী খুঁজুন সহজে</h1>
+<p id="heroText">আপনার পছন্দ ও প্রয়োজন অনুযায়ী পাত্র-পাত্রী খুঁজুন।</p>
+<button type="button" class="primary" data-open-page="search">পাত্র-পাত্রী খুঁজুন →</button>
+<button type="button" class="primary" data-open-page="profile">👤 রেজিস্ট্রেশন করুন</button>
 </div>
+<div class="couple">💞</div>
+</div>
+
+<div class="panel">
+<h2>কীভাবে ব্যবহার করবেন?</h2>
+<p>🧾 প্রোফাইল তৈরি করুন</p>
+<p>🔎 বয়স ও জেলা দিয়ে খুঁজুন</p>
+<p>🤝 সম্মতি নিয়ে যোগাযোগ করুন</p>
+</div>
+
+<div class="notice">
+প্রোফাইলের তথ্য সংশ্লিষ্ট ব্যক্তির সম্মতি নিয়ে যোগ করুন। সদস্যদের ব্যক্তিগত তথ্যের গোপনীয়তা রক্ষা করুন।
+</div>
+</section>
+
+<section id="search" class="page hidden">
+<div class="panel">
+<h2>পাত্র-পাত্রী খুঁজুন</h2>
+<div class="searchrow">
+<select id="gender">
+<option value="সব">সব প্রোফাইল</option>
+<option value="পাত্র">পাত্র</option>
+<option value="পাত্রী">পাত্রী</option>
+</select>
+<input id="age" type="number" min="18" placeholder="সর্বোচ্চ বয়স">
+<input id="district" placeholder="জেলা লিখুন">
+<button type="button" class="primary" id="searchButton">খুঁজুন</button>
+</div>
+</div>
+<div id="profiles">প্রোফাইল লোড হচ্ছে...</div>
+</section>
+
+<section id="favorites" class="page hidden">
+<div class="panel">
+<h2>আমার পছন্দ</h2>
+<div id="favList">এখনো কোনো প্রোফাইল পছন্দ করা হয়নি।</div>
+</div>
+</section>
+
+<section id="messages" class="page hidden">
+<div class="panel">
+<h2>বার্তা</h2>
+<p>বার্তা পাঠানোর সুবিধা পরবর্তী ধাপে তৈরি করতে হবে।</p>
+</div>
+</section>
+
+<section id="profile" class="page hidden">
+<div class="panel">
+<h2>রেজিস্ট্রেশন</h2>
+<p class="muted">নিচের তথ্য পূরণ করে রেজিস্ট্রেশন করুন। নাম, বয়স, পরিচয়, জেলা ও মোবাইল নম্বর আবশ্যক।</p>
+
+<form id="registerForm">
+<div class="field">
+<label for="regName">নাম *</label>
+<input id="regName" required maxlength="100" placeholder="আপনার নাম">
+</div>
+
+<div class="field">
+<label for="regAge">বয়স *</label>
+<input id="regAge" type="number" min="18" max="100" required placeholder="১৮ বা তার বেশি">
+</div>
+
+<div class="field">
+<label for="regGender">আপনি *</label>
+<select id="regGender" required>
+<option value="">নির্বাচন করুন</option>
+<option value="পাত্র">পাত্র</option>
+<option value="পাত্রী">পাত্রী</option>
+</select>
+</div>
+
+<div class="field">
+<label for="regDistrict">জেলা *</label>
+<input id="regDistrict" required maxlength="100" placeholder="আপনার জেলা">
+</div>
+
+<div class="field">
+<label for="regPhone">মোবাইল নম্বর *</label>
+<input id="regPhone" type="tel" required maxlength="30" placeholder="মোবাইল নম্বর">
+</div>
+
+<div class="field">
+<label for="regEducation">শিক্ষাগত যোগ্যতা</label>
+<input id="regEducation" maxlength="150" placeholder="শিক্ষাগত যোগ্যতা">
+</div>
+
+<div class="field">
+<label for="regOccupation">পেশা</label>
+<input id="regOccupation" maxlength="150" placeholder="আপনার পেশা">
+</div>
+
+<div class="field">
+<label for="regHeight">উচ্চতা</label>
+<input id="regHeight" maxlength="30" placeholder="যেমন: ৫ ফুট ৫ ইঞ্চি">
+</div>
+
+<div class="field">
+<label for="regReligion">ধর্ম</label>
+<input id="regReligion" maxlength="50" placeholder="ধর্ম">
+</div>
+
+<div class="field">
+<label for="regMarital">বৈবাহিক অবস্থা</label>
+<select id="regMarital">
+<option value="">নির্বাচন করুন</option>
+<option value="অবিবাহিত">অবিবাহিত</option>
+<option value="বিবাহিত">বিবাহিত</option>
+<option value="তালাকপ্রাপ্ত">তালাকপ্রাপ্ত</option>
+<option value="বিধবা/বিপত্নীক">বিধবা/বিপত্নীক</option>
+</select>
+</div>
+
+<div class="field">
+<label for="regBio">নিজের সম্পর্কে</label>
+<textarea id="regBio" maxlength="1000" placeholder="নিজের সম্পর্কে সংক্ষেপে লিখুন"></textarea>
+</div>
+
+<button class="primary" id="registerButton" type="submit">রেজিস্ট্রেশন করুন / তথ্য জমা দিন</button>
+</form>
+</div>
+</section>
+
+<section id="admin" class="page hidden">
+<div class="panel" id="adminLoginPanel">
+<h2>অ্যাডমিন লগইন</h2>
+<p class="muted">Supabase Auth-এ তৈরি করা অ্যাডমিন ইমেইল ও পাসওয়ার্ড ব্যবহার করুন।</p>
+
+<form id="adminLoginForm">
+<div class="field">
+<label for="adminEmail">অ্যাডমিন ইমেইল</label>
+<input id="adminEmail" type="email" autocomplete="username" required>
+</div>
+<div class="field">
+<label for="adminPassword">পাসওয়ার্ড</label>
+<input id="adminPassword" type="password" autocomplete="current-password" required>
+</div>
+<button type="submit" class="primary" id="adminLoginButton">প্রবেশ করুন</button>
+</form>
+<p id="adminAuthMessage" class="muted" role="status"></p>
+</div>
+
+<div id="adminContent" class="hidden">
+<div class="panel">
+<p id="adminSignedIn" class="muted"></p>
+<button type="button" id="adminLogoutButton">লগআউট</button>
+</div>
+
+<div class="notice">
+গুরুত্বপূর্ণ: অ্যাডমিন অনুমতি ডেটাবেসের Row Level Security (RLS) নীতিতেও সেট করতে হবে। শুধু এই পেজে লগইন যথেষ্ট নয়।
+</div>
+
+<div class="panel">
+<h2>অ্যাপের লেখা</h2>
+<div id="settings"></div>
+<button type="button" class="primary" id="saveSettings">পরিবর্তন সেভ করুন</button>
+<button type="button" id="resetSettings">ডিফল্ট ফিরিয়ে আনুন</button>
+</div>
+
+<div class="panel">
+<h2>প্রোফাইল ব্যবস্থাপনা</h2>
+<div id="adminProfiles"></div>
+</div>
+</div>
+</section>
+</main>
+
+<footer>পাত্র-পাত্রী ঠিকানা • প্রাথমিক সংস্করণ</footer>
+</div>
+
 <script>
-const SUPABASE_URL="https://ekrablggrintqifpsdou.supabase.co";
-const SUPABASE_ANON_KEY="sb_publishable_n7RIZqEDvlyMxng5l8H6aA_cDNXvka4";
-const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
-const pages=[...document.querySelectorAll(".page")];
-function showPage(id){pages.forEach(p=>p.classList.toggle("hidden",p.id!==id));document.querySelectorAll("[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===id));if(id==="favorites")renderFavorites();window.scrollTo({top:0,behavior:"smooth"})}
-document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
-document.querySelectorAll("[data-open-page]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.openPage)));
-document.getElementById("year").textContent=new Date().getFullYear();
-function getFavorites(){try{return JSON.parse(localStorage.getItem("patroPatriFavorites")||"[]")}catch{return[]}}
-function setFavorites(ids){localStorage.setItem("patroPatriFavorites",JSON.stringify(ids))}
-function toggleFavorite(id){let f=getFavorites();f=f.includes(id)?f.filter(x=>x!==id):[...f,id];setFavorites(f);renderProfiles();renderFavorites()}
-function escapeHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-async function renderProfiles(){const box=document.getElementById("profiles");box.textContent="প্রোফাইল লোড হচ্ছে...";try{let q=supabaseClient.from("public_profiles").select("*").order("created_at",{ascending:false});const g=document.getElementById("gender").value;if(g!=="সব")q=q.eq("gender",g);const a=Number(document.getElementById("age").value);if(a>0)q=q.lte("age",a);const d=document.getElementById("district").value.trim();if(d)q=q.ilike("district","%"+d+"%");const {data,error}=await q.limit(100);if(error)throw error;if(!data?.length){box.innerHTML='<div class="panel">এখনো কোনো প্রোফাইল নেই। চাইলে রেজিস্ট্রেশন করুন।</div>';return}box.innerHTML=data.map(p=>`<article class="profile"><div class="avatar">${p.photo_url?`<img src="${escapeHtml(p.photo_url)}" alt="প্রোফাইল ছবি">`:"👤"}</div><div style="flex:1;min-width:0"><b>${escapeHtml(p.name)}</b><div>${escapeHtml(p.gender)} · ${escapeHtml(p.age)} বছর · ${escapeHtml(p.district)}</div><div class="muted">${escapeHtml(p.education||"")} ${escapeHtml(p.occupation||"")}</div><div class="muted">${escapeHtml(p.height||"")} ${escapeHtml(p.religion||"")} ${escapeHtml(p.marital_status||"")}</div><p>${escapeHtml(p.bio||"")}</p><button type="button" class="edit" data-fav="${escapeHtml(p.id)}">${getFavorites().includes(p.id)?"♥ পছন্দ থেকে সরান":"♡ পছন্দ করুন"}</button></div></article>`).join("");box.querySelectorAll("[data-fav]").forEach(b=>b.addEventListener("click",()=>toggleFavorite(b.dataset.fav)))}catch(e){console.error(e);box.innerHTML='<div class="panel">প্রোফাইল লোড হয়নি। Supabase সংযোগ ও public_profiles অনুমতি পরীক্ষা করুন।</div>'}}
-document.getElementById("searchButton").addEventListener("click",renderProfiles);
-document.getElementById("registerForm").addEventListener("submit",async function(e){
- e.preventDefault();
- const btn=document.getElementById("registerButton");
- btn.disabled=true;
- btn.textContent="জমা হচ্ছে...";
- const profile={
-  name:document.getElementById("regName").value.trim(),
-  age:Number(document.getElementById("regAge").value),
-  gender:document.getElementById("regGender").value,
-  district:document.getElementById("regDistrict").value.trim(),
-  phone:document.getElementById("regPhone").value.trim(),
-  education:document.getElementById("regEducation").value.trim()||null,
-  occupation:document.getElementById("regOccupation").value.trim()||null,
-  height:document.getElementById("regHeight").value.trim()||null,
-  religion:document.getElementById("regReligion").value||null,
-  marital_status:document.getElementById("regMarital").value||null,
-  bio:document.getElementById("regBio").value.trim()||null,
-  is_active:true
- };
- try{
-  const {error}=await supabaseClient.from("profiles").insert([profile]);
-  if(error)throw error;
-  alert("রেজিস্ট্রেশন সফল হয়েছে।");
-  this.reset();
-  showPage("search");
-  await renderProfiles();
- }catch(err){
-  console.error(err);
-  alert("তথ্য জমা হয়নি। ইন্টারনেট ও Supabase সেটিংস পরীক্ষা করুন।");
- }finally{
-  btn.disabled=false;
-  btn.textContent="রেজিস্ট্রেশন করুন / তথ্য জমা দিন";
- }
-});
-const settingsKey="patroPatriSiteSettings";
-function loadSettings(){
- let s={};
- try{s=JSON.parse(localStorage.getItem(settingsKey)||"{}")}catch{}
- if(s.title)document.getElementById("brandTitle").textContent=s.title;
- if(s.tagline)document.getElementById("tagline").textContent=s.tagline;
- if(s.heroTitle)document.getElementById("heroTitle").textContent=s.heroTitle;
- if(s.heroText)document.getElementById("heroText").textContent=s.heroText;
- document.getElementById("siteTitleInput").value=s.title||"♡ পাত্র-পাত্রী ঠিকানা";
- document.getElementById("siteTaglineInput").value=s.tagline||"সঠিক পরিচয়ে, সুন্দর জীবনের শুরু";
- document.getElementById("siteHeroTitleInput").value=s.heroTitle||"জীবনসঙ্গী খুঁজুন সহজে";
- document.getElementById("siteHeroTextInput").value=s.heroText||"আপনার পছন্দ ও প্রয়োজন অনুযায়ী পাত্র-পাত্রী খুঁজুন।";
+"use strict";
+
+const supabaseClient = window.supabase.createClient(
+"https://ekrablggrintqifpsdou.supabase.co",
+"sb_publishable_n7RIZqEDvlyMxng5l8H6aA_cDNXvka4"
+);
+
+// Supabase Dashboard > Authentication-এ অ্যাডমিন ইউজার তৈরি করুন।
+// এরপর নিচে সেই অ্যাডমিনের ইমেইল বসান।
+// ডেটাবেসে RLS নীতিও সঠিকভাবে সেট করতে হবে।
+const ADMIN_EMAIL = "CHANGE-THIS-TO-YOUR-ADMIN-EMAIL";
+
+const defaults = {
+brandTitle:"পাত্র-পাত্রী ঠিকানা",
+tagline:"সঠিক পরিচয়ে, সুন্দর জীবনের শুরু",
+heroTitle:"জীবনসঙ্গী খুঁজুন সহজে",
+heroText:"আপনার পছন্দ ও প্রয়োজন অনুযায়ী পাত্র-পাত্রী খুঁজুন।",
+fee:"100",
+days:"30"
+};
+
+let settings = {...defaults};
+let people = [];
+let hiddenProfiles = [];
+let favorites = [];
+
+try {
+settings = {
+...defaults,
+...JSON.parse(localStorage.getItem("ppt_settings") || "{}")
+};
+favorites = JSON.parse(localStorage.getItem("ppt_favs") || "[]").map(String);
+} catch (e) {
+settings = {...defaults};
+favorites = [];
 }
-document.getElementById("adminLogin").addEventListener("click",()=>{
- alert("নিরাপদ অ্যাডমিন লগইন এখনো তৈরি হয়নি।");
-});
-document.getElementById("saveSettings").addEventListener("click",()=>{
- const s={
-  title:document.getElementById("siteTitleInput").value.trim(),
-  tagline:document.getElementById("siteTaglineInput").value.trim(),
-  heroTitle:document.getElementById("siteHeroTitleInput").value.trim(),
-  heroText:document.getElementById("siteHeroTextInput").value.trim()
- };
- localStorage.setItem(settingsKey,JSON.stringify(s));
- loadSettings();
- alert("এই ব্রাউজারে পরিবর্তন সংরক্ষিত হয়েছে।");
-});
-function renderFavorites(){
- const box=document.getElementById("favList"),ids=getFavorites();
- if(!ids.length){box.textContent="এখনো কোনো প্রোফাইল পছন্দ করা হয়নি।";return}
- box.textContent="পছন্দের প্রোফাইল লোড হচ্ছে...";
- supabaseClient.from("public_profiles").select("*").in("id",ids).then(({data,error})=>{
-  if(error||!data?.length){box.textContent="পছন্দের প্রোফাইল পাওয়া যায়নি।";return}
-  box.innerHTML=data.map(p=>`<div class="profile"><div class="avatar">👤</div><div><b>${escapeHtml(p.name)}</b><div>${escapeHtml(p.gender)} · ${escapeHtml(p.age)} বছর · ${escapeHtml(p.district)}</div><button type="button" class="edit" data-remove="${escapeHtml(p.id)}">পছন্দ থেকে সরান</button></div></div>`).join("");
-  box.querySelectorAll("[data-remove]").forEach(b=>b.addEventListener("click",()=>toggleFavorite(b.dataset.remove)));
- });
+
+function escapeHTML(v) {
+return String(v ?? "").replace(/[&<>"']/g, c => ({
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#39;"
+}[c]));
 }
-loadSettings();
+
+function applySettings() {
+["brandTitle","tagline","heroTitle","heroText"].forEach(k => {
+const el = document.getElementById(k);
+if (el) el.textContent = settings[k];
+});
+}
+
+function renderSettings() {
+const labels = {
+brandTitle:"অ্যাপের নাম",
+tagline:"স্লোগান",
+heroTitle:"হোম পেজের শিরোনাম",
+heroText:"হোম পেজের লেখা",
+fee:"প্রোফাইল দেখার ফি (টাকা)",
+days:"প্রবেশাধিকারের মেয়াদ (দিন)"
+};
+
+document.getElementById("settings").innerHTML =
+Object.keys(labels).map(k => `
+<div class="row">
+<div>
+<b>${escapeHTML(labels[k])}</b>
+<div class="muted">${escapeHTML(settings[k])}</div>
+</div>
+<button type="button" class="edit" data-edit-setting="${k}">✏️</button>
+</div>
+`).join("");
+}
+
+function editSetting(k) {
+const labels = {
+brandTitle:"অ্যাপের নাম",
+tagline:"স্লোগান",
+heroTitle:"হোম পেজের শিরোনাম",
+heroText:"হোম পেজের লেখা",
+fee:"ফি (টাকা)",
+days:"মেয়াদ (দিন)"
+};
+
+const v = prompt(labels[k] + " পরিবর্তন করুন:", settings[k]);
+
+if (v !== null && v.trim()) {
+settings[k] = v.trim();
+renderSettings();
+}
+}
+
+function saveSettings() {
+localStorage.setItem("ppt_settings", JSON.stringify(settings));
+applySettings();
+alert("এই ব্রাউজারে সেটিংস সেভ হয়েছে।");
+}
+
+function resetSettings() {
+settings = {...defaults};
+localStorage.removeItem("ppt_settings");
+applySettings();
+renderSettings();
+}
+
+function showPage(id) {
+const target = document.getElementById(id);
+if (!target || !target.classList.contains("page")) return;
+
+document.querySelectorAll(".page").forEach(p => {
+p.classList.toggle("hidden", p.id !== id);
+});
+
+document.querySelectorAll(".tabs [data-page]").forEach(b => {
+b.classList.toggle("active", b.dataset.page === id);
+});
+
+if (id === "admin") {
+refreshAdminState();
+if (adminAllowed()) {
+renderSettings();
+renderAdminProfiles();
+}
+}
+
+if (id === "favorites") renderFavorites();
+
+window.scrollTo(0, 0);
+}
+
+document.querySelectorAll(".tabs [data-page]").forEach(b => {
+b.addEventListener("click", () => showPage(b.dataset.page));
+});
+
+document.querySelectorAll("[data-open-page]").forEach(b => {
+b.addEventListener("click", () => showPage(b.dataset.openPage));
+});
+
+document.getElementById("settings").addEventListener("click", e => {
+const b = e.target.closest("[data-edit-setting]");
+if (b) editSetting(b.dataset.editSetting);
+});
+
+document.getElementById("saveSettings").addEventListener("click", saveSettings);
+document.getElementById("resetSettings").addEventListener("click", resetSettings);
+document.getElementById("searchButton").addEventListener("click", renderProfiles);
+
+async function renderProfiles() {
+const c = document.getElementById("profiles");
+c.textContent = "প্রোফাইল লোড হচ্ছে...";
+
+try {
+const g = document.getElementById("gender").value;
+const a = Number(document.getElementById("age").value) || 100;
+const d = document.getElementById("district").value.trim().toLowerCase();
+
+const {data, error} = await supabaseClient
+.from("public_profiles")
+.select("id,name,age,gender,district,education,occupation,photo_url,created_at")
+.order("created_at", {ascending:false});
+
+if (error) throw error;
+
+people = (data || []).filter(p =>
+!hiddenProfiles.includes(String(p.id)) &&
+(g === "সব" || p.gender === g) &&
+(!p.age || Number(p.age) <= a) &&
+String(p.district || "").toLowerCase().includes(d)
+);
+
+c.innerHTML = people.length
+? people.map(p => `
+<div class="profile">
+<div class="avatar">
+${p.photo_url
+? `<img src="${escapeHTML(p.photo_url)}" alt="প্রোফাইল ছবি">`
+: "👤"}
+</div>
+<div style="flex:1;min-width:0">
+<b>${escapeHTML(p.name)}</b>
+<div class="muted">${escapeHTML(p.gender)} • ${escapeHTML(p.age || "")} বছর</div>
+<div class="muted">${escapeHTML(p.education || "")}</div>
+<div class="muted">📍 ${escapeHTML(p.district || "")}</div>
+</div>
+<button type="button" class="edit" data-fav="${escapeHTML(p.id)}">
+${favorites.includes(String(p.id)) ? "♥" : "♡"}
+</button>
+</div>
+`).join("")
+: "কোনো প্রোফাইল পাওয়া যায়নি।";
+
+renderFavorites();
+renderAdminProfiles();
+
+} catch (e) {
+console.error(e);
+c.textContent = "প্রোফাইল লোড হয়নি। ইন্টারনেট ও Supabase অনুমতি পরীক্ষা করুন।";
+}
+}
+
+function toggleFav(id) {
+id = String(id);
+favorites = favorites.includes(id)
+? favorites.filter(x => x !== id)
+: [...favorites, id];
+
+localStorage.setItem("ppt_favs", JSON.stringify(favorites));
+renderProfiles();
+}
+
+function renderFavorites() {
+const list = people.filter(p => favorites.includes(String(p.id)));
+
+document.getElementById("favList").innerHTML = list.length
+? list.map(p => `
+<div class="row">
+<span>${escapeHTML(p.name)} — ${escapeHTML(p.district || "")}</span>
+<button type="button" class="edit" data-unfav="${escapeHTML(p.id)}">♥ সরান</button>
+</div>
+`).join("")
+: "এখনো কোনো প্রোফাইল পছন্দ করা হয়নি।";
+}
+
+function renderAdminProfiles() {
+const c = document.getElementById("adminProfiles");
+if (!c) return;
+
+c.innerHTML = people.length
+? people.map(p => `
+<div class="row">
+<span>
+<b>${escapeHTML(p.name)}</b>
+<div class="muted">${escapeHTML(p.district || "")}</div>
+</span>
+<button type="button" class="edit" data-hide="${escapeHTML(p.id)}">লুকান</button>
+</div>
+`).join("")
+: "দেখানোর মতো কোনো প্রোফাইল নেই।";
+}
+
+document.addEventListener("click", e => {
+const fav = e.target.closest("[data-fav]");
+if (fav) toggleFav(fav.dataset.fav);
+
+const unfav = e.target.closest("[data-unfav]");
+if (unfav) toggleFav(unfav.dataset.unfav);
+
+const hide = e.target.closest("[data-hide]");
+if (hide) {
+hiddenProfiles.push(String(hide.dataset.hide));
+renderProfiles();
+}
+});
+
+document.getElementById("registerForm").addEventListener("submit", registerProfile);
+
+async function registerProfile(event) {
+event.preventDefault();
+
+const b = document.getElementById("registerButton");
+const name = document.getElementById("regName").value.trim();
+const age = Number(document.getElementById("regAge").value);
+const gender = document.getElementById("regGender").value;
+const district = document.getElementById("regDistrict").value.trim();
+const phone = document.getElementById("regPhone").value.trim();
+const education = document.getElementById("regEducation").value.trim();
+const occupation = document.getElementById("regOccupation").value.trim();
+const height = document.getElementById("regHeight").value.trim();
+const religion = document.getElementById("regReligion").value.trim();
+const marital_status = document.getElementById("regMarital").value;
+const bio = document.getElementById("regBio").value.trim();
+
+if (!name || age < 18 || age > 100 || !gender || !district || !phone) {
+alert("নাম, ১৮–১০০ বছরের মধ্যে বয়স, পরিচয়, জেলা ও মোবাইল নম্বর দিন।");
+return;
+}
+
+b.disabled = true;
+b.textContent = "জমা হচ্ছে...";
+
+try {
+const {error} = await supabaseClient.from("profiles").insert([{
+name,
+age,
+gender,
+district,
+phone,
+education:education || null,
+occupation:occupation || null,
+height:height || null,
+religion:religion || null,
+marital_status:marital_status || null,
+bio:bio || null
+}]);
+
+if (error) throw error;
+
+alert("রেজিস্ট্রেশন সফল হয়েছে।");
+document.getElementById("registerForm").reset();
+showPage("search");
+await renderProfiles();
+
+} catch (e) {
+console.error(e);
+alert("তথ্য জমা হয়নি। ইন্টারনেট, Supabase-এর অনুমতি ও ডেটাবেস কলাম পরীক্ষা করতে হবে।");
+
+} finally {
+b.disabled = false;
+b.textContent = "রেজিস্ট্রেশন করুন / তথ্য জমা দিন";
+}
+}
+
+let currentAdminSession = null;
+
+function adminAllowed() {
+return !!(
+currentAdminSession &&
+currentAdminSession.user &&
+currentAdminSession.user.email &&
+currentAdminSession.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() &&
+ADMIN_EMAIL !== "CHANGE-THIS-TO-YOUR-ADMIN-EMAIL"
+);
+}
+
+function refreshAdminState() {
+const ok = adminAllowed();
+
+document.getElementById("adminLoginPanel").classList.toggle("hidden", ok);
+document.getElementById("adminContent").classList.toggle("hidden", !ok);
+
+if (ok) {
+document.getElementById("adminSignedIn").textContent =
+"লগইন: " + currentAdminSession.user.email;
+}
+}
+
+async function loadAdminSession() {
+try {
+const {data, error} = await supabaseClient.auth.getSession();
+if (error) throw error;
+
+currentAdminSession = data.session;
+refreshAdminState();
+
+} catch (e) {
+document.getElementById("adminAuthMessage").textContent =
+"লগইন অবস্থা যাচাই করা যায়নি। Supabase সেটিংস পরীক্ষা করুন।";
+}
+}
+
+document.getElementById("adminLoginForm").addEventListener("submit", async e => {
+e.preventDefault();
+
+const msg = document.getElementById("adminAuthMessage");
+const btn = document.getElementById("adminLoginButton");
+
+if (ADMIN_EMAIL === "CHANGE-THIS-TO-YOUR-ADMIN-EMAIL") {
+msg.textContent = "আগে কোডে ADMIN_EMAIL-এ আপনার Supabase অ্যাডমিন ইমেইল বসান।";
+return;
+}
+
+btn.disabled = true;
+msg.textContent = "যাচাই হচ্ছে...";
+
+try {
+const {data, error} = await supabaseClient.auth.signInWithPassword({
+email:document.getElementById("adminEmail").value.trim(),
+password:document.getElementById("adminPassword").value
+});
+
+if (error) throw error;
+
+currentAdminSession = data.session;
+
+if (!adminAllowed()) {
+await supabaseClient.auth.signOut();
+currentAdminSession = null;
+throw new Error("এই ইমেইল অ্যাডমিন হিসেবে অনুমোদিত নয়।");
+}
+
+msg.textContent = "লগইন সফল।";
+refreshAdminState();
+renderSettings();
+renderAdminProfiles();
+
+} catch (err) {
+msg.textContent = err.message || "লগইন হয়নি। ইমেইল ও পাসওয়ার্ড পরীক্ষা করুন।";
+
+} finally {
+btn.disabled = false;
+}
+});
+
+document.getElementById("adminLogoutButton").addEventListener("click", async () => {
+await supabaseClient.auth.signOut();
+currentAdminSession = null;
+refreshAdminState();
+document.getElementById("adminAuthMessage").textContent = "লগআউট হয়েছে।";
+});
+
+supabaseClient.auth.onAuthStateChange((_event, session) => {
+currentAdminSession = session;
+refreshAdminState();
+});
+
+loadAdminSession();
+applySettings();
+renderSettings();
 renderProfiles();
 </script>
 </body>
