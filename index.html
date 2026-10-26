@@ -70,5 +70,80 @@ function setFavorites(ids){localStorage.setItem("patroPatriFavorites",JSON.strin
 function toggleFavorite(id){let f=getFavorites();f=f.includes(id)?f.filter(x=>x!==id):[...f,id];setFavorites(f);renderProfiles();renderFavorites()}
 function escapeHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 async function renderProfiles(){const box=document.getElementById("profiles");box.textContent="প্রোফাইল লোড হচ্ছে...";try{let q=supabaseClient.from("public_profiles").select("*").order("created_at",{ascending:false});const g=document.getElementById("gender").value;if(g!=="সব")q=q.eq("gender",g);const a=Number(document.getElementById("age").value);if(a>0)q=q.lte("age",a);const d=document.getElementById("district").value.trim();if(d)q=q.ilike("district","%"+d+"%");const {data,error}=await q.limit(100);if(error)throw error;if(!data?.length){box.innerHTML='<div class="panel">এখনো কোনো প্রোফাইল নেই। চাইলে রেজিস্ট্রেশন করুন।</div>';return}box.innerHTML=data.map(p=>`<article class="profile"><div class="avatar">${p.photo_url?`<img src="${escapeHtml(p.photo_url)}" alt="প্রোফাইল ছবি">`:"👤"}</div><div style="flex:1;min-width:0"><b>${escapeHtml(p.name)}</b><div>${escapeHtml(p.gender)} · ${escapeHtml(p.age)} বছর · ${escapeHtml(p.district)}</div><div class="muted">${escapeHtml(p.education||"")} ${escapeHtml(p.occupation||"")}</div><div class="muted">${escapeHtml(p.height||"")} ${escapeHtml(p.religion||"")} ${escapeHtml(p.marital_status||"")}</div><p>${escapeHtml(p.bio||"")}</p><button type="button" class="edit" data-fav="${escapeHtml(p.id)}">${getFavorites().includes(p.id)?"♥ পছন্দ থেকে সরান":"♡ পছন্দ করুন"}</button></div></article>`).join("");box.querySelectorAll("[data-fav]").forEach(b=>b.addEventListener("click",()=>toggleFavorite(b.dataset.fav)))}catch(e){console.error(e);box.innerHTML='<div class="panel">প্রোফাইল লোড হয়নি। Supabase সংযোগ ও public_profiles অনুমতি পরীক্ষা করুন।</div>'}}
-
-  
+document.getElementById("searchButton").addEventListener("click",renderProfiles);
+document.getElementById("registerForm").addEventListener("submit",async function(e){
+ e.preventDefault();
+ const btn=document.getElementById("registerButton");
+ btn.disabled=true;
+ btn.textContent="জমা হচ্ছে...";
+ const profile={
+  name:document.getElementById("regName").value.trim(),
+  age:Number(document.getElementById("regAge").value),
+  gender:document.getElementById("regGender").value,
+  district:document.getElementById("regDistrict").value.trim(),
+  phone:document.getElementById("regPhone").value.trim(),
+  education:document.getElementById("regEducation").value.trim()||null,
+  occupation:document.getElementById("regOccupation").value.trim()||null,
+  height:document.getElementById("regHeight").value.trim()||null,
+  religion:document.getElementById("regReligion").value||null,
+  marital_status:document.getElementById("regMarital").value||null,
+  bio:document.getElementById("regBio").value.trim()||null,
+  is_active:true
+ };
+ try{
+  const {error}=await supabaseClient.from("profiles").insert([profile]);
+  if(error)throw error;
+  alert("রেজিস্ট্রেশন সফল হয়েছে।");
+  this.reset();
+  showPage("search");
+  await renderProfiles();
+ }catch(err){
+  console.error(err);
+  alert("তথ্য জমা হয়নি। ইন্টারনেট ও Supabase সেটিংস পরীক্ষা করুন।");
+ }finally{
+  btn.disabled=false;
+  btn.textContent="রেজিস্ট্রেশন করুন / তথ্য জমা দিন";
+ }
+});
+const settingsKey="patroPatriSiteSettings";
+function loadSettings(){
+ let s={};
+ try{s=JSON.parse(localStorage.getItem(settingsKey)||"{}")}catch{}
+ if(s.title)document.getElementById("brandTitle").textContent=s.title;
+ if(s.tagline)document.getElementById("tagline").textContent=s.tagline;
+ if(s.heroTitle)document.getElementById("heroTitle").textContent=s.heroTitle;
+ if(s.heroText)document.getElementById("heroText").textContent=s.heroText;
+ document.getElementById("siteTitleInput").value=s.title||"♡ পাত্র-পাত্রী ঠিকানা";
+ document.getElementById("siteTaglineInput").value=s.tagline||"সঠিক পরিচয়ে, সুন্দর জীবনের শুরু";
+ document.getElementById("siteHeroTitleInput").value=s.heroTitle||"জীবনসঙ্গী খুঁজুন সহজে";
+ document.getElementById("siteHeroTextInput").value=s.heroText||"আপনার পছন্দ ও প্রয়োজন অনুযায়ী পাত্র-পাত্রী খুঁজুন।";
+}
+document.getElementById("adminLogin").addEventListener("click",()=>{
+ alert("নিরাপদ অ্যাডমিন লগইন এখনো তৈরি হয়নি।");
+});
+document.getElementById("saveSettings").addEventListener("click",()=>{
+ const s={
+  title:document.getElementById("siteTitleInput").value.trim(),
+  tagline:document.getElementById("siteTaglineInput").value.trim(),
+  heroTitle:document.getElementById("siteHeroTitleInput").value.trim(),
+  heroText:document.getElementById("siteHeroTextInput").value.trim()
+ };
+ localStorage.setItem(settingsKey,JSON.stringify(s));
+ loadSettings();
+ alert("এই ব্রাউজারে পরিবর্তন সংরক্ষিত হয়েছে।");
+});
+function renderFavorites(){
+ const box=document.getElementById("favList"),ids=getFavorites();
+ if(!ids.length){box.textContent="এখনো কোনো প্রোফাইল পছন্দ করা হয়নি।";return}
+ box.textContent="পছন্দের প্রোফাইল লোড হচ্ছে...";
+ supabaseClient.from("public_profiles").select("*").in("id",ids).then(({data,error})=>{
+  if(error||!data?.length){box.textContent="পছন্দের প্রোফাইল পাওয়া যায়নি।";return}
+  box.innerHTML=data.map(p=>`<div class="profile"><div class="avatar">👤</div><div><b>${escapeHtml(p.name)}</b><div>${escapeHtml(p.gender)} · ${escapeHtml(p.age)} বছর · ${escapeHtml(p.district)}</div><button type="button" class="edit" data-remove="${escapeHtml(p.id)}">পছন্দ থেকে সরান</button></div></div>`).join("");
+  box.querySelectorAll("[data-remove]").forEach(b=>b.addEventListener("click",()=>toggleFavorite(b.dataset.remove)));
+ });
+}
+loadSettings();
+renderProfiles();
+</script>
+</body>
+</html>
