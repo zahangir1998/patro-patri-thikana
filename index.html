@@ -64,7 +64,6 @@ function renderSettings(){let labels={brandTitle:"অ্যাপের না�
 function editSetting(k){let labels={brandTitle:"অ্যাপের নাম",tagline:"স্লোগান",heroTitle:"হোম পেজের শিরোনাম",heroText:"হোম পেজের লেখা",fee:"ফি (টাকা)",days:"মেয়াদ (দিন)"};let v=prompt(labels[k]+" পরিবর্তন করুন:",settings[k]);if(v!==null&&v.trim()!==""){settings[k]=v.trim();renderSettings();}}
 function saveSettings(){localStorage.setItem("ppt_settings",JSON.stringify(settings));applySettings();alert("এই ডেমো ব্রাউজারে পরিবর্তন সেভ হয়েছে।");}
 function resetSettings(){settings={...defaults};localStorage.removeItem("ppt_settings");applySettings();renderSettings();}
-function renderProfiles(){async function renderProfiles(){
 const g=document.getElementById("gender").value;
 const age=Number(document.getElementById("age").value)||99;
 const d=document.getElementById("district").value.trim().toLowerCase();
@@ -115,9 +114,7 @@ applySettings();renderSettings();renderProfiles();
     <input type="number" id="regAge" placeholder="বয়স" required><br><br>
     <input type="text" id="regDistrict" placeholder="জেলা" required><br><br>
     <input type="tel" id="regPhone" placeholder="মোবাইল নম্বর" required><br><br>
-    <button  <button type="button" onclick="registerProfile()">
   জমা দিন
-     
     </button>
   </div>
 <script>
