@@ -1,4 +1,48 @@
-
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>পাত্র-পাত্রী ঠিকানা</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--primary:#a30d43;--secondary:#f8dbe5;--background:#fff8fa;--text:#28151c}
+*{box-sizing:border-box}body{margin:0;background:var(--background);color:var(--text);font-family:system-ui,"Noto Sans Bengali",sans-serif}
+header{background:var(--primary);color:white;padding:14px 16px;position:sticky;top:0;z-index:5}.brand{font-size:20px;font-weight:800}header small{display:block;margin-top:5px}
+main{max-width:960px;margin:auto;padding:16px}.tabs{display:flex;gap:8px;overflow:auto;padding:12px 0}
+button{cursor:pointer;font:inherit;border:0;border-radius:10px;padding:10px 14px}.tabs button{background:var(--secondary);white-space:nowrap}.tabs button.active,.primary{background:var(--primary);color:white}
+.panel{background:white;border:1px solid #f0dfe5;border-radius:16px;padding:16px;margin:14px 0}.hero{background:linear-gradient(135deg,#fff0f5,#f7d4e0);border-radius:20px;padding:22px;display:flex;justify-content:space-between;gap:15px;align-items:center}.hero h1{color:#7f0a35;font-size:26px}.couple{font-size:55px}
+.profile{border:1px solid #eedbe2;border-radius:14px;padding:12px;display:flex;gap:12px;align-items:center;margin:10px 0;min-width:0}.avatar{width:60px;height:60px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;background:#f7dce6;font-size:28px;overflow:hidden}.avatar img{width:100%;height:100%;object-fit:cover}
+.muted{color:#79666e;font-size:13px}.searchrow{display:flex;gap:8px;flex-wrap:wrap}input,select,textarea{font:inherit;border:1px solid #decbd2;border-radius:10px;padding:11px;min-width:0;max-width:100%;width:100%;background:white;color:#28151c}.searchrow input,.searchrow select{flex:1;width:auto}.field{display:grid;gap:6px;margin:12px 0}.field label{font-weight:700;font-size:14px}.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid #f0e1e6}.edit{background:#fff0f5;color:var(--primary)}.notice{background:#fff4d8;color:#674c00;padding:12px;border-radius:12px;font-size:13px;line-height:1.6}.hidden{display:none!important}footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
+@media(max-width:560px){main{padding:12px}.hero{padding:16px}.hero h1{font-size:22px}.couple{font-size:42px}}
+</style>
+</head>
+<body>
+<div id="app">
+<header><div class="brand" id="brandTitle">♡ পাত্র-পাত্রী ঠিকানা</div><small id="tagline">সঠিক পরিচয়ে, সুন্দর জীবনের শুরু</small></header>
+<main>
+<nav class="tabs" id="tabs" aria-label="প্রধান মেনু">
+<button type="button" class="active" data-page="home">🏠 হোম</button>
+<button type="button" data-page="search">🔎 পাত্র-পাত্রী খুঁজুন</button>
+<button type="button" data-page="favorites">♡ পছন্দ</button>
+<button type="button" data-page="messages">✉ বার্তা</button>
+<button type="button" data-page="profile">👤 প্রোফাইল / রেজিস্ট্রেশন</button>
+<button type="button" data-page="admin">⚙ অ্যাডমিন</button>
+</nav>
+<section id="home" class="page">
+<div class="hero"><div><h1 id="heroTitle">জীবনসঙ্গী খুঁজুন সহজে</h1><p id="heroText">আপনার পছন্দ ও প্রয়োজন অনুযায়ী পাত্র-পাত্রী খুঁজুন।</p><button type="button" class="primary" data-open-page="search">পাত্র-পাত্রী খুঁজুন →</button> <button type="button" class="primary" data-open-page="profile">👤 রেজিস্ট্রেশন করুন</button></div><div class="couple">💞</div></div>
+<div class="panel"><h2>কীভাবে ব্যবহার করবেন?</h2><p>🧾 প্রোফাইল তৈরি করুন</p><p>🔎 বয়স ও জেলা দিয়ে খুঁজুন</p><p>🤝 সম্মতি নিয়ে যোগাযোগ করুন</p></div>
+<div class="notice">প্রোফাইলের তথ্য সংশ্লিষ্ট ব্যক্তির সম্মতি নিয়ে যোগ করুন। সদস্যদের ব্যক্তিগত তথ্যের গোপনীয়তা রক্ষা করুন।</div>
+</section>
+<section id="search" class="page hidden"><div class="panel"><h2>পাত্র-পাত্রী খুঁজুন</h2><div class="searchrow"><select id="gender"><option value="সব">সব প্রোফাইল</option><option value="পাত্র">পাত্র</option><option value="পাত্রী">পাত্রী</option></select><input id="age" type="number" min="18" placeholder="সর্বোচ্চ বয়স"><input id="district" placeholder="জেলা লিখুন"><button type="button" class="primary" id="searchButton">খুঁজুন</button></div></div><div id="profiles">প্রোফাইল লোড হচ্ছে...</div></section>
+<section id="favorites" class="page hidden"><div class="panel"><h2>আমার পছন্দ</h2><div id="favList">এখনো কোনো প্রোফাইল পছন্দ করা হয়নি।</div></div></section>
+<section id="messages" class="page hidden"><div class="panel"><h2>বার্তা</h2><p>বার্তা পাঠানোর সুবিধা পরবর্তী ধাপে তৈরি করতে হবে।</p></div></section>
+<section id="profile" class="page hidden"><div class="panel"><h2>রেজিস্ট্রেশন</h2><p class="muted">নিচের তথ্য পূরণ করে রেজিস্ট্রেশন করুন। নাম, বয়স, পরিচয়, জেলা ও মোবাইল নম্বর আবশ্যক।</p>
+<form id="registerForm">
+<div class="field"><label for="regName">নাম *</label><input id="regName" required maxlength="100" placeholder="আপনার নাম"></div>
+<div class="field"><label for="regAge">বয়স *</label><input id="regAge" type="number" min="18" max="100" required placeholder="১৮ বা তার বেশি"></div>
+<div class="field"><label for="regGender">আপনি *</label><select id="regGender" required><option value="">নির্বাচন করুন</option><option value="পাত্র">পাত্র</option><option value="পাত্রী">পাত্রী</option></select></div>
+<div class="field"><label for="regDistrict">জেলা *</label><input id="regDistrict" required maxlength="100" placeholder="আপনার জেলা"></div>
 <div class="field"><label for="regPhone">মোবাইল নম্বর *</label><input id="regPhone" type="tel" required maxlength="30" placeholder="মোবাইল নম্বর"></div>
 <div class="field"><label for="regEducation">শিক্ষাগত যোগ্যতা</label><input id="regEducation" maxlength="150" placeholder="শিক্ষাগত যোগ্যতা"></div>
 <div class="field"><label for="regOccupation">পেশা</label><input id="regOccupation" maxlength="150" placeholder="পেশা"></div>
@@ -26,3 +70,5 @@ function setFavorites(ids){localStorage.setItem("patroPatriFavorites",JSON.strin
 function toggleFavorite(id){let f=getFavorites();f=f.includes(id)?f.filter(x=>x!==id):[...f,id];setFavorites(f);renderProfiles();renderFavorites()}
 function escapeHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 async function renderProfiles(){const box=document.getElementById("profiles");box.textContent="প্রোফাইল লোড হচ্ছে...";try{let q=supabaseClient.from("public_profiles").select("*").order("created_at",{ascending:false});const g=document.getElementById("gender").value;if(g!=="সব")q=q.eq("gender",g);const a=Number(document.getElementById("age").value);if(a>0)q=q.lte("age",a);const d=document.getElementById("district").value.trim();if(d)q=q.ilike("district","%"+d+"%");const {data,error}=await q.limit(100);if(error)throw error;if(!data?.length){box.innerHTML='<div class="panel">এখনো কোনো প্রোফাইল নেই। চাইলে রেজিস্ট্রেশন করুন।</div>';return}box.innerHTML=data.map(p=>`<article class="profile"><div class="avatar">${p.photo_url?`<img src="${escapeHtml(p.photo_url)}" alt="প্রোফাইল ছবি">`:"👤"}</div><div style="flex:1;min-width:0"><b>${escapeHtml(p.name)}</b><div>${escapeHtml(p.gender)} · ${escapeHtml(p.age)} বছর · ${escapeHtml(p.district)}</div><div class="muted">${escapeHtml(p.education||"")} ${escapeHtml(p.occupation||"")}</div><div class="muted">${escapeHtml(p.height||"")} ${escapeHtml(p.religion||"")} ${escapeHtml(p.marital_status||"")}</div><p>${escapeHtml(p.bio||"")}</p><button type="button" class="edit" data-fav="${escapeHtml(p.id)}">${getFavorites().includes(p.id)?"♥ পছন্দ থেকে সরান":"♡ পছন্দ করুন"}</button></div></article>`).join("");box.querySelectorAll("[data-fav]").forEach(b=>b.addEventListener("click",()=>toggleFavorite(b.dataset.fav)))}catch(e){console.error(e);box.innerHTML='<div class="panel">প্রোফাইল লোড হয়নি। Supabase সংযোগ ও public_profiles অনুমতি পরীক্ষা করুন।</div>'}}
+
+  
