@@ -57,12 +57,7 @@ h2{font-size:calc(20px * var(--site-heading-scale));margin:0 0 12px}.grid{displa
 <script>
 const defaults={brandTitle:"পাত্র-পাত্রী ঠিকানা",tagline:"সঠিক পরিচয়ে, সুন্দর জীবনের শুরু",heroTitle:"জীবনসঙ্গী খুঁজুন সহজে",heroText:"আপনার পছন্দ ও প্রয়োজন অনুযায়ী পাত্র-পাত্রী খুঁজুন। নিরাপদ ও সম্মানজনক পরিচয়ের মাধ্যমে শুরু হোক নতুন পথচলা।",fee:"100",days:"30"};
 let settings={...defaults};let hiddenProfiles=[];
-const people=[
-{id:1,name:"রাকিব হাসান",gender:"পাত্র",age:28,district:"ঢাকা",education:"স্নাতক",icon:"👨🏻"},
-{id:2,name:"নুসরাত জাহান",gender:"পাত্রী",age:25,district:"চট্টগ্রাম",education:"বিএসসি",icon:"👩🏻"},
-{id:3,name:"মেহেদী হাসান",gender:"পাত্র",age:30,district:"রাজশাহী",education:"স্নাতকোত্তর",icon:"👨🏽"},
-{id:4,name:"তানজিলা আক্তার",gender:"পাত্রী",age:24,district:"খুলনা",education:"স্নাতক",icon:"👩🏽"}
-];
+const people=[  ];
 let favorites=JSON.parse(localStorage.getItem("ppt_favs")||"[]");
 function applySettings(){for(const k of ["brandTitle","tagline","heroTitle","heroText"])document.getElementById(k).textContent=settings[k];}
 function renderSettings(){let labels={brandTitle:"অ্যাপের নাম",tagline:"স্লোগান",heroTitle:"হোম পেজের শিরোনাম",heroText:"হোম পেজের লেখা",fee:"প্রোফাইল দেখার ফি (টাকা)",days:"প্রবেশাধিকারের মেয়াদ (দিন)"};document.getElementById("settings").innerHTML=Object.keys(labels).map(k=>`<div class="row"><div style="flex:1"><b>${labels[k]}</b><div class="muted">${settings[k]}</div></div><button class="edit" aria-label="${labels[k]} পরিবর্তন" onclick="editSetting('${k}')">✏️</button></div>`).join("");}
