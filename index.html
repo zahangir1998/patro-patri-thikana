@@ -479,17 +479,19 @@ async function renderAdminProfiles() {
     return;
   }
 
-  c.innerHTML = data.length
+    c.innerHTML = data.length
     ? data.map(p => `
       <div class="row">
         <span>
-          <b>${escapeHTML(p.name)}</b>
+          <b>${escapeHTML(p.name || "")}</b>
           <div class="muted">${escapeHTML(p.district || "")}</div>
           <div class="muted">অবস্থা: ${escapeHTML(p.status || "অপেক্ষমাণ")}</div>
         </span>
         <div style="display:flex;gap:5px;flex-wrap:wrap">
           <button type="button" class="edit" data-approve="${escapeHTML(p.id)}">অনুমোদন</button>
           <button type="button" class="edit" data-reject="${escapeHTML(p.id)}">প্রত্যাখ্যান</button>
+          <button type="button" class="edit" data-edit-profile="${escapeHTML(p.id)}">সম্পাদনা</button>
+          <button type="button" class="edit" data-delete-profile="${escapeHTML(p.id)}">মুছে ফেলুন</button>
         </div>
       </div>
     `).join("")
