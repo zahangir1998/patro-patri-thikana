@@ -775,6 +775,13 @@ async function editProfile(id) {
 await renderProfiles();
 }
 document.addEventListener("click", async e => {
+  const editButton = e.target.closest("[data-edit-profile]");
+
+  if (editButton) {
+    await editProfile(editButton.dataset.editProfile);
+    return;
+  }
+
   const b = e.target.closest("[data-approve], [data-reject]");
   if (!b) return;
 
