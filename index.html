@@ -759,6 +759,35 @@ async function editProfile(id) {
   await renderAdminProfiles();
   await renderProfiles();
 }
+ async function deleteProfile(id) {
+  if (!adminAllowed()) {
+    alert("শুধু অ্যাডমিন এই কাজ করতে পারবেন।");
+    return;
+  }
+
+  const confirmed = confirm(
+    "আপনি কি নিশ্চিতভাবে এই প্রোফাইলটি মুছে ফেলতে চান? এই কাজ ফিরিয়ে আনা যাবে না।"
+  );
+
+  if (!confirmed) return;
+
+  const { error } = await supabaseClient
+    .from("profiles")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    alert("প্রোফাইল মুছে ফেলা যায়নি: " + error.message);
+    return;
+  }
+
+  alert("প্রোফাইল মুছে ফেলা হয়েছে।");
+  await renderAdminProfiles();
+  await renderProfiles();
+}
+
+
+**এখন শুধু কোডটি বসিয়ে সেভ করুন।** তারপর আমাকে বলুন **“সেভ হয়েছে”**। এরপর মুছে ফেলার বোতাম চালু করব।
  async function updateProfileStatus(id, status) {
   const { error } = await supabaseClient
     .from("profiles")
