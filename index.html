@@ -649,6 +649,21 @@ loadAdminSession();
 applySettings();
 renderSettings();
 renderProfiles();
+
+ async function updateProfileStatus(id, status) {
+  const { error } = await supabaseClient
+    .from("profiles")
+    .update({ status })
+    .eq("id", id);
+
+  if (error) {
+    alert("পরিবর্তন করা যায়নি: " + error.message);
+    return;
+  }
+
+  alert(status === "approved" ? "প্রোফাইল অনুমোদিত হয়েছে।" : "প্রোফাইল প্রত্যাখ্যান করা হয়েছে।");
+  await renderProfiles();}
+
 </script>
 </body>
 </html>
