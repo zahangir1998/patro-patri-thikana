@@ -463,21 +463,37 @@ document.getElementById("favList").innerHTML = list.length
 : "এখনো কোনো প্রোফাইল পছন্দ করা হয়নি।";
 }
 
-function renderAdminProfiles() {
-const c = document.getElementById("adminProfiles");
-if (!c) return;
+async function renderAdminProfiles() {
+  const c = document.getElementById("adminProfiles");
+  if (!c || !adminAllowed()) return;
 
-c.innerHTML = people.length
-? people.map(p => `
-<div class="row">
-<span>
-<b>${escapeHTML(p.name)}</b>
-<div class="muted">${escapeHTML(p.district || "")}</div>
-</span>
-<button type="button" class="edit" data-hide="${escapeHTML(p.id)}">লুকান</button>
-</div>
-`).join("")
-: "দেখানোর মতো কোনো প্রোফাইল নেই।";
+  c.textContent = "প্রোফাইল লোড হচ্ছে...";
+
+  const { data, error } = await supabaseClient
+    .from("profiles")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    c.textContent = "প্রোফাইল লোড হয়নি: " + error.message;
+    return;
+  }
+
+  c.innerHTML = data.length
+    ? data.map(p => `
+      <div class="row">
+        <span>
+          <b>${escapeHTML(p.name)}</b>
+          <div class="muted">${escapeHTML(p.district || "")}</div>
+          <div class="muted">অবস্থা: ${escapeHTML(p.status || "অপেক্ষমাণ")}</div>
+        </span>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          <button type="button" class="edit" data-approve="${escapeHTML(p.id)}">অনুমোদন</button>
+          <button type="button" class="edit" data-reject="${escapeHTML(p.id)}">প্রত্যাখ্যান</button>
+        </div>
+      </div>
+    `).join("")
+    : "কোনো প্রোফাইল নেই।";
 }
 
 document.addEventListener("click", e => {
