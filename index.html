@@ -294,22 +294,6 @@ if (page === "admin") button.textContent = t.admin;
 });
 }
 
-  const t = translations[currentLanguage];
-
-  document.getElementById("brandTitle").textContent = t.brand;
-  document.getElementById("tagline").textContent = t.tagline;
-
-  document.querySelectorAll("#tabs [data-page]").forEach(button => {
-    const page = button.dataset.page;
-
-    if (page === "home") button.textContent = t.home;
-    if (page === "search") button.textContent = t.search;
-    if (page === "favorites") button.textContent = t.favorites;
-    if (page === "messages") button.textContent = t.messages;
-    if (page === "profile") button.textContent = t.profile;
-    if (page === "admin") button.textContent = t.admin;
-  });
-}
 const supabaseClient = window.supabase.createClient(
 "https://ekrablggrintqifpsdou.supabase.co",
 "sb_publishable_n7RIZqEDvlyMxng5l8H6aA_cDNXvka4"
