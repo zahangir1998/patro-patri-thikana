@@ -804,6 +804,13 @@ async function editProfile(id) {
 await renderProfiles();
 }
 document.addEventListener("click", async e => {
+  const deleteButton = e.target.closest("[data-delete-profile]");
+
+  if (deleteButton) {
+    await deleteProfile(deleteButton.dataset.deleteProfile);
+    return;
+  }
+
   const editButton = e.target.closest("[data-edit-profile]");
 
   if (editButton) {
