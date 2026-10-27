@@ -784,10 +784,8 @@ async function editProfile(id) {
   alert("প্রোফাইল মুছে ফেলা হয়েছে।");
   await renderAdminProfiles();
   await renderProfiles();
-}
+ }
 
-
-**এখন শুধু কোডটি বসিয়ে সেভ করুন।** তারপর আমাকে বলুন **“সেভ হয়েছে”**। এরপর মুছে ফেলার বোতাম চালু করব।
  async function updateProfileStatus(id, status) {
   const { error } = await supabaseClient
     .from("profiles")
