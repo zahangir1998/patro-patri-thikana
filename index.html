@@ -663,7 +663,15 @@ renderProfiles();
 
   alert(status === "approved" ? "প্রোফাইল অনুমোদিত হয়েছে।" : "প্রোফাইল প্রত্যাখ্যান করা হয়েছে।");
   await renderProfiles();}
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-approve], [data-reject]");
+  if (!b) return;
 
+  const id = b.dataset.approve || b.dataset.reject;
+  const status = b.dataset.approve ? "approved" : "rejected";
+
+  await updateProfileStatus(id, status);
+});
 </script>
 </body>
 </html>
