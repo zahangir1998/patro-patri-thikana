@@ -668,7 +668,97 @@ loadAdminSession();
 applySettings();
 renderSettings();
 renderProfiles();
+async function editProfile(id) {
+  if (!adminAllowed()) {
+    alert("শুধু অ্যাডমিন এই কাজ করতে পারবেন।");
+    return;
+  }
 
+  const { data: p, error: loadError } = await supabaseClient
+    .from("profiles")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (loadError || !p) {
+    alert("প্রোফাইলের তথ্য আনা যায়নি: " + (loadError?.message || ""));
+    return;
+  }
+
+  const fields = [
+    ["name", "নাম", p.name, true],
+    ["age", "বয়স", p.age, true],
+    ["gender", "পরিচয় (পাত্র/পাত্রী)", p.gender, true],
+    ["district", "জেলা", p.district, true],
+    ["phone", "মোবাইল নম্বর", p.phone, true],
+    ["education", "শিক্ষাগত যোগ্যতা", p.education, false],
+    ["occupation", "পেশা", p.occupation, false],
+    ["height", "উচ্চতা", p.height, false],
+    ["religion", "ধর্ম", p.religion, false],
+    ["marital_status", "বৈবাহিক অবস্থা", p.marital_status, false],
+    ["bio", "নিজের সম্পর্কে", p.bio, false]
+  ];
+
+  const changes = {};
+
+  for (const [key, label, oldValue, required] of fields) {
+    const value = prompt(
+      label + " পরিবর্তন করুন:",
+      oldValue == null ? "" : String(oldValue)
+    );
+
+    if (value === null) {
+      alert("সম্পাদনা বাতিল করা হয়েছে।");
+      return;
+    }
+
+    const cleaned = value.trim();
+
+    if (required && !cleaned) {
+      alert(label + " খালি রাখা যাবে না।");
+      return;
+    }
+
+    if (key === "age") {
+      const age = Number(cleaned);
+
+      if (!Number.isInteger(age) || age < 18 || age > 100) {
+        alert("বয়স ১৮ থেকে ১০০-এর মধ্যে পূর্ণসংখ্যা হতে হবে।");
+        return;
+      }
+
+      changes[key] = age;
+    } else if (key === "gender") {
+      if (!["পাত্র", "পাত্রী"].includes(cleaned)) {
+        alert("পরিচয় অবশ্যই পাত্র অথবা পাত্রী হতে হবে।");
+        return;
+      }
+
+      changes[key] = cleaned;
+    } else {
+      changes[key] = cleaned || null;
+    }
+  }
+
+  if (!confirm("এই প্রোফাইলের সব পরিবর্তন সেভ করবেন?")) {
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("profiles")
+    .update(changes)
+    .eq("id", id);
+
+  if (error) {
+    alert("পরিবর্তন সেভ হয়নি: " + error.message);
+    return;
+  }
+
+  alert("প্রোফাইলের তথ্য পরিবর্তন করা হয়েছে।");
+
+  await renderAdminProfiles();
+  await renderProfiles();
+}
  async function updateProfileStatus(id, status) {
   const { error } = await supabaseClient
     .from("profiles")
