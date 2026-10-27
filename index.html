@@ -679,7 +679,9 @@ renderProfiles();
   }
 
   alert(status === "approved" ? "প্রোফাইল অনুমোদিত হয়েছে।" : "প্রোফাইল প্রত্যাখ্যান করা হয়েছে।");
-  await renderProfiles();}
+  await renderAdminProfiles();
+await renderProfiles();
+}
 document.addEventListener("click", async e => {
   const b = e.target.closest("[data-approve], [data-reject]");
   if (!b) return;
