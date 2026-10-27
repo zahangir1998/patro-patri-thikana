@@ -522,6 +522,7 @@ b.textContent = "জমা হচ্ছে...";
 
 try {
 const {error} = await supabaseClient.from("profiles").insert([{
+ status: "pending",
 name,
 age,
 gender,
