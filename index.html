@@ -243,7 +243,55 @@ English
 
 <script>
 "use strict";
+let currentLanguage = "bn";
 
+function toggleLanguage() {
+  currentLanguage = currentLanguage === "bn" ? "en" : "bn";
+
+  document.documentElement.lang = currentLanguage;
+
+  document.getElementById("languageButton").textContent =
+    currentLanguage === "bn" ? "English" : "বাংলা";
+
+  const translations = {
+    bn: {
+      brand: "♡ পাত্র-পাত্রী ঠিকানা",
+      tagline: "সঠিক পরিচয়ে, সুন্দর জীবনের শুরু",
+      home: "🏠 হোম",
+      search: "🔎 পাত্র-পাত্রী খুঁজুন",
+      favorites: "♡ পছন্দ",
+      messages: "✉ বার্তা",
+      profile: "👤 প্রোফাইল / রেজিস্ট্রেশন",
+      admin: "⚙ অ্যাডমিন"
+    },
+    en: {
+      brand: "♡ Patro-Patri Thikana",
+      tagline: "A beautiful beginning with the right match",
+      home: "🏠 Home",
+      search: "🔎 Find a Match",
+      favorites: "♡ Favorites",
+      messages: "✉ Messages",
+      profile: "👤 Profile / Registration",
+      admin: "⚙ Admin"
+    }
+  };
+
+  const t = translations[currentLanguage];
+
+  document.getElementById("brandTitle").textContent = t.brand;
+  document.getElementById("tagline").textContent = t.tagline;
+
+  document.querySelectorAll("#tabs [data-page]").forEach(button => {
+    const page = button.dataset.page;
+
+    if (page === "home") button.textContent = t.home;
+    if (page === "search") button.textContent = t.search;
+    if (page === "favorites") button.textContent = t.favorites;
+    if (page === "messages") button.textContent = t.messages;
+    if (page === "profile") button.textContent = t.profile;
+    if (page === "admin") button.textContent = t.admin;
+  });
+}
 const supabaseClient = window.supabase.createClient(
 "https://ekrablggrintqifpsdou.supabase.co",
 "sb_publishable_n7RIZqEDvlyMxng5l8H6aA_cDNXvka4"
