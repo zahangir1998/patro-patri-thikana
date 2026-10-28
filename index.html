@@ -552,8 +552,7 @@ document.getElementById("favList").innerHTML = list.length
 </div>
 `).join("")
 : "এখনো কোনো প্রোফাইল পছন্দ করা হয়নি।";
-}
-async function renderAdminPayments() {
+}async function renderAdminPayments() {
   const box = document.getElementById("adminPayments");
   if (!box || !adminAllowed()) return;
 
@@ -573,10 +572,19 @@ async function renderAdminPayments() {
     ? data.map(p => `
       <div class="row">
         <div>
-          <b>${escapeHTML(p.payment_method)}</b> — ${escapeHTML(p.transaction_id)}
+          <b>${escapeHTML(p.payment_method)}</b>
+          <div>TrxID: ${escapeHTML(p.transaction_id)}</div>
           <div>টাকা: ${p.amount}</div>
           <div>অবস্থা: ${escapeHTML(p.payment_status)}</div>
         </div>
+        ${p.payment_status === "pending" ? `
+          <div>
+            <button type="button" class="primary"
+              data-approve-payment="${p.id}">অনুমোদন</button>
+            <button type="button"
+              data-reject-payment="${p.id}">প্রত্যাখ্যান</button>
+          </div>
+        ` : ""}
       </div>
     `).join("")
     : "কোনো পেমেন্ট জমা নেই।";
