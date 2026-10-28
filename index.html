@@ -466,7 +466,7 @@ String(p.district || "").toLowerCase().includes(d)
 
 c.innerHTML = people.length
 ? people.map(p => `
-<div class="profile">
+<div class="profile" data-profile="${escapeHTML(p.id)}">
 <div class="avatar">
 ${p.photo_url
 ? `<img src="${escapeHTML(p.photo_url)}" alt="প্রোফাইল ছবি">`
