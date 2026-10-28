@@ -617,7 +617,7 @@ await renderProfiles();
 
 } catch (e) {
 console.error(e);
-alert("তথ্য জমা হয়নি। ইন্টারনেট, Supabase-এর অনুমতি ও ডেটাবেস কলাম পরীক্ষা করতে হবে।");
+alert("তথ্য জমা হয়নি: " + (e.message || String(e)));
 
 } finally {
 b.disabled = false;
