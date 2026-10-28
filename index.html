@@ -910,5 +910,27 @@ document.addEventListener("click", async e => {
   await updateProfileStatus(id, status);
 });
 </script>
+ <section id="payment" class="page hidden">
+  <div class="panel">
+    <h2>মোবাইল নম্বর দেখার অ্যাক্সেস</h2>
+    <p>ফি: ১০০ টাকা | মেয়াদ: ৩০ দিন</p>
+    <p>নগদ/রকেট পার্সোনাল নম্বর:</p>
+    <h3>01811764518</h3>
+
+    <label>পেমেন্ট মাধ্যম</label>
+    <select id="paymentMethod">
+      <option value="Nagad">নগদ</option>
+      <option value="Rocket">রকেট</option>
+    </select>
+
+    <label>ট্রানজেকশন আইডি</label>
+    <input id="transactionId" type="text"
+           placeholder="TrxID লিখুন">
+
+    <button type="button" class="primary"
+            id="submitPayment">পেমেন্ট জমা দিন</button>
+    <p id="paymentMessage"></p>
+  </div>
+</section>
 </body>
 </html>
