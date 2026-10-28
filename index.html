@@ -932,5 +932,37 @@ document.addEventListener("click", async e => {
     <p id="paymentMessage"></p>
   </div>
 </section>
+ <script>
+document.getElementById("submitPayment").addEventListener("click", async function () {
+  const message = document.getElementById("paymentMessage");
+  const method = document.getElementById("paymentMethod").value;
+  const trx = document.getElementById("transactionId").value.trim();
+
+  if (!trx) {
+    message.textContent = "ট্রানজেকশন আইডি লিখুন।";
+    return;
+  }
+
+  const { data: { user } } = await supabaseClient.auth.getUser();
+
+  if (!user) {
+    message.textContent = "আগে লগইন করুন।";
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("payment_requests")
+    .insert({
+      user_id: user.id,
+      payment_method: method,
+      amount: 100,
+      transaction_id: trx
+    });
+
+  message.textContent = error
+    ? "জমা হয়নি: " + error.message
+    : "পেমেন্টের তথ্য জমা হয়েছে। যাচাইয়ের অপেক্ষায় থাকুন।";
+});
+</script>
 </body>
 </html>
