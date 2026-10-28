@@ -509,6 +509,22 @@ document.addEventListener("click", function(e) {
     "\nপেশা: " + (p.occupation || "")
   );
 });
+ document.addEventListener("click", function(e) {
+  const card = e.target.closest("[data-profile]");
+  if (!card || e.target.closest("[data-fav]")) return;
+
+  const p = people.find(x => String(x.id) === card.dataset.profile);
+  if (!p) return;
+
+  alert(
+    "নাম: " + (p.name || "") +
+    "\nবয়স: " + (p.age || "") +
+    "\nলিঙ্গ: " + (p.gender || "") +
+    "\nজেলা: " + (p.district || "") +
+    "\nশিক্ষাগত যোগ্যতা: " + (p.education || "") +
+    "\nপেশা: " + (p.occupation || "")
+  );
+});
 function toggleFav(id) {
 id = String(id);
 favorites = favorites.includes(id)
