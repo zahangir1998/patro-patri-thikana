@@ -552,7 +552,34 @@ document.getElementById("favList").innerHTML = list.length
 `).join("")
 : "এখনো কোনো প্রোফাইল পছন্দ করা হয়নি।";
 }
+async function renderAdminPayments() {
+  const box = document.getElementById("adminPayments");
+  if (!box || !adminAllowed()) return;
 
+  box.textContent = "পেমেন্ট লোড হচ্ছে...";
+
+  const { data, error } = await supabaseClient
+    .from("payment_requests")
+    .select("*")
+    .order("submitted_at", { ascending: false });
+
+  if (error) {
+    box.textContent = "সমস্যা: " + error.message;
+    return;
+  }
+
+  box.innerHTML = data.length
+    ? data.map(p => `
+      <div class="row">
+        <div>
+          <b>${escapeHTML(p.payment_method)}</b> — ${escapeHTML(p.transaction_id)}
+          <div>টাকা: ${p.amount}</div>
+          <div>অবস্থা: ${escapeHTML(p.payment_status)}</div>
+        </div>
+      </div>
+    `).join("")
+    : "কোনো পেমেন্ট জমা নেই।";
+}
 async function renderAdminProfiles() {
   const c = document.getElementById("adminProfiles");
   if (!c || !adminAllowed()) return;
