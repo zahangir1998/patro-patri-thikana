@@ -1023,7 +1023,37 @@ document.addEventListener("click", async e => {
   await renderAdminPayments();
 }
 
+document.addEventListener("click", async function (event) {
+  const approveButton = event.target.closest("[data-approve-payment]");
+  const rejectButton = event.target.closest("[data-reject-payment]");
 
+  if (approveButton) {
+    approveButton.disabled = true;
+    try {
+      await reviewPayment(
+        approveButton.dataset.approvePayment,
+        "approved"
+      );
+    } catch (error) {
+      alert("সমস্যা: " + error.message);
+    } finally {
+      await renderAdminPayments();
+    }
+  } else if (rejectButton) {
+    rejectButton.disabled = true;
+    try {
+      await reviewPayment(
+        rejectButton.dataset.rejectPayment,
+        "rejected"
+      );
+    } catch (error) {
+      alert("সমস্যা: " + error.message);
+    } finally {
+      await renderAdminPayments();
+    }
+  }
+});
+</script>
 </script>
  <section id="payment" class="page hidden">
   <div class="panel">
