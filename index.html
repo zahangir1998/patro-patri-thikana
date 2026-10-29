@@ -125,6 +125,18 @@ English
 <p class="muted">নিচের তথ্য পূরণ করে রেজিস্ট্রেশন করুন। নাম, বয়স, পরিচয়, জেলা ও মোবাইল নম্বর আবশ্যক।</p>
 
 <form id="registerForm">
+ <div class="field">
+  <label for="regEmail">ইমেইল *</label>
+  <input id="regEmail" type="email" required
+         autocomplete="email" placeholder="আপনার ইমেইল">
+</div>
+
+<div class="field">
+  <label for="regPassword">পাসওয়ার্ড *</label>
+  <input id="regPassword" type="password" required
+         minlength="6" autocomplete="new-password"
+         placeholder="কমপক্ষে ৬ অক্ষর">
+</div>
 <div class="field">
 <label for="regName">নাম *</label>
 <input id="regName" required maxlength="100" placeholder="আপনার নাম">
