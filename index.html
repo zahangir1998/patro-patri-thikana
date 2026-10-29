@@ -951,6 +951,89 @@ document.addEventListener("click", async e => {
 
   await updateProfileStatus(id, status);
 });
+ async function reviewPayment(id, status) {
+  if (!adminAllowed()) {
+    alert("অ্যাডমিন অনুমতি নেই।");
+    return;
+  }
+
+  const message = status === "approved"
+    ? "পেমেন্ট অনুমোদন করবেন?"
+    : "পেমেন্ট প্রত্যাখ্যান করবেন?";
+
+  if (!confirm(message)) return;
+
+  const { data: payment, error: findError } = await supabaseClient
+    .from("payment_requests")
+    .select("user_id, amount, transaction_id")
+    .eq("id", id)
+    .single();
+
+  if (findError || !payment) {
+    alert("পেমেন্ট পাওয়া যায়নি: " +
+      (findError?.message || "অজানা সমস্যা"));
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("payment_requests")
+    .update({
+      payment_status: status,
+      reviewed_at: new Date().toISOString()
+    })
+    .eq("id", id)
+    .eq("payment_status", "pending");
+
+  if (error) {
+    alert("পেমেন্ট আপডেট হয়নি: " + error.message);
+    return;
+  }
+
+  if (status === "approved") {
+    const now = new Date();
+    const expiry = new Date(now);
+    expiry.setDate(expiry.getDate() + 30);
+
+    const { error: accessError } = await supabaseClient
+      .from("contact_access")
+      .insert({
+        user_id: payment.user_id,
+        starts_at: now.toISOString(),
+        expires_at: expiry.toISOString(),
+        payment_status: "approved",
+        payment_reference: payment.transaction_id
+      });
+
+    if (accessError) {
+      alert(
+        "পেমেন্ট অনুমোদিত হয়েছে, কিন্তু অ্যাক্সেস দেওয়া যায়নি: " +
+        accessError.message
+      );
+      await renderAdminPayments();
+      return;
+    }
+  }
+
+  alert(
+    status === "approved"
+      ? "পেমেন্ট অনুমোদিত হয়েছে।"
+      : "পেমেন্ট প্রত্যাখ্যান করা হয়েছে।"
+  );
+
+  await renderAdminPayments();
+}
+
+document.addEventListener("click", async function (event) {
+  const approveButton = event.target.closest("[data-approve-payment]");
+  const rejectButton = event.target.closest("[data-reject-payment]");
+
+  if (approveButton) {
+    approveButton.disabled = true;
+    try {
+      await reviewPayment(
+        approveButton.dataset.approvePayment,
+        "approved"
+     
 </script>
  <section id="payment" class="page hidden">
   <div class="panel">
