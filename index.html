@@ -885,6 +885,7 @@ async function editProfile(id) {
   await renderAdminProfiles();
   await renderProfiles();
 }
+ 
  async function deleteProfile(id) {
   if (!adminAllowed()) {
     alert("শুধু অ্যাডমিন এই কাজ করতে পারবেন।");
