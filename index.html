@@ -709,62 +709,85 @@ document.getElementById("userLoginForm").addEventListener("submit", async (e) =>
 });
  
 async function registerProfile(event) {
-event.preventDefault();
+  event.preventDefault();
 
-const b = document.getElementById("registerButton");
-const name = document.getElementById("regName").value.trim();
-const age = Number(document.getElementById("regAge").value);
-const gender = document.getElementById("regGender").value;
-const district = document.getElementById("regDistrict").value.trim();
-const phone = document.getElementById("regPhone").value.trim();
-const education = document.getElementById("regEducation").value.trim();
-const occupation = document.getElementById("regOccupation").value.trim();
-const height = document.getElementById("regHeight").value.trim();
-const religion = document.getElementById("regReligion").value.trim();
-const marital_status = document.getElementById("regMarital").value;
-const bio = document.getElementById("regBio").value.trim();
+  const b = document.getElementById("registerButton");
+  const email = document.getElementById("regEmail").value.trim();
+  const password = document.getElementById("regPassword").value;
 
-if (!name || age < 18 || age > 100 || !gender || !district || !phone) {
-alert("নাম, ১৮–১০০ বছরের মধ্যে বয়স, পরিচয়, জেলা ও মোবাইল নম্বর দিন।");
-return;
+  const name = document.getElementById("regName").value.trim();
+  const age = Number(document.getElementById("regAge").value);
+  const gender = document.getElementById("regGender").value;
+  const district = document.getElementById("regDistrict").value.trim();
+  const phone = document.getElementById("regPhone").value.trim();
+  const education = document.getElementById("regEducation").value.trim();
+  const occupation = document.getElementById("regOccupation").value.trim();
+  const height = document.getElementById("regHeight").value.trim();
+  const religion = document.getElementById("regReligion").value.trim();
+  const marital_status = document.getElementById("regMarital").value;
+  const bio = document.getElementById("regBio").value.trim();
+
+  if (!email || password.length < 6) {
+    alert("সঠিক ইমেইল ও কমপক্ষে ৬ অক্ষরের পাসওয়ার্ড দিন।");
+    return;
+  }
+
+  if (!name || age < 18 || age > 100 || !gender || !district || !phone) {
+    alert("নাম, ১৮–১০০ বছরের মধ্যে বয়স, পরিচয়, জেলা ও মোবাইল নম্বর দিন।");
+    return;
+  }
+
+  b.disabled = true;
+  b.textContent = "জমা হচ্ছে...";
+
+  try {
+    const { data: authData, error: authError } =
+      await supabaseClient.auth.signUp({
+        email,
+        password
+      });
+
+    if (authError) throw authError;
+    if (!authData.user) throw new Error("অ্যাকাউন্ট তৈরি হয়নি।");
+
+    const { error } = await supabaseClient.from("profiles").insert([{
+      user_id: authData.user.id,
+      status: "pending",
+      name,
+      age,
+      gender,
+      district,
+      phone,
+      education: education || null,
+      occupation: occupation || null,
+      height: height || null,
+      religion: religion || null,
+      marital_status: marital_status || null,
+      bio: bio || null
+    }]);
+
+    if (error) throw error;
+
+    document.getElementById("registerForm").reset();
+
+    if (authData.session) {
+      alert("রেজিস্ট্রেশন সফল হয়েছে।");
+      document.getElementById("tabs").classList.remove("hidden");
+      showPage("home");
+    } else {
+      alert("অ্যাকাউন্ট তৈরি হয়েছে। ইমেইলে পাঠানো লিংক দিয়ে অ্যাকাউন্ট নিশ্চিত করে লগইন করুন।");
+      showPage("login");
+    }
+
+  } catch (e) {
+    console.error(e);
+    alert("রেজিস্ট্রেশন সম্পন্ন হয়নি: " + (e.message || String(e)));
+
+  } finally {
+    b.disabled = false;
+    b.textContent = "রেজিস্ট্রেশন করুন / তথ্য জমা দিন";
+  }
 }
-
-b.disabled = true;
-b.textContent = "জমা হচ্ছে...";
-
-try {
-const {error} = await supabaseClient.from("profiles").insert([{
- status: "pending",
-name,
-age,
-gender,
-district,
-phone,
-education:education || null,
-occupation:occupation || null,
-height:height || null,
-religion:religion || null,
-marital_status:marital_status || null,
-bio:bio || null
-}]);
-
-if (error) throw error;
-
-alert("রেজিস্ট্রেশন সফল হয়েছে।");
-document.getElementById("registerForm").reset();
-showPage("search");
-await renderProfiles();
-
-} catch (e) {
-console.error(e);
-alert("তথ্য জমা হয়নি: " + (e.message || String(e)));
-
-} finally {
-b.disabled = false;
-b.textContent = "রেজিস্ট্রেশন করুন / তথ্য জমা দিন";
-}
-}
-
 let currentAdminSession = null;
 
 function adminAllowed() {
