@@ -484,56 +484,68 @@ document.getElementById("resetSettings").addEventListener("click", resetSettings
 document.getElementById("searchButton").addEventListener("click", renderProfiles);
 
 async function renderProfiles() {
-const c = document.getElementById("profiles");
-c.textContent = "প্রোফাইল লোড হচ্ছে...";
+  const c = document.getElementById("profiles");
+  c.textContent = "প্রোফাইল লোড হচ্ছে...";
 
-try {
-const g = document.getElementById("gender").value;
-const a = Number(document.getElementById("age").value) || 100;
-const d = document.getElementById("district").value.trim().toLowerCase();
+  try {
+    const { data: { session }, error: sessionError } =
+      await supabaseClient.auth.getSession();
 
-const {data, error} = await supabaseClient
-.from("public_profiles")
-.select("id,name,age,gender,district,education,occupation,photo_url,created_at")
-.order("created_at", {ascending:false});
+    if (sessionError) throw sessionError;
 
-if (error) throw error;
+    if (!session) {
+      c.textContent = "প্রোফাইল দেখতে আগে লগইন করুন।";
+      document.getElementById("tabs").classList.add("hidden");
+      showPage("welcome");
+      return;
+    }
 
-people = (data || []).filter(p =>
-!hiddenProfiles.includes(String(p.id)) &&
-(g === "সব" || p.gender === g) &&
-(!p.age || Number(p.age) <= a) &&
-String(p.district || "").toLowerCase().includes(d)
-);
+    const g = document.getElementById("gender").value;
+    const a = Number(document.getElementById("age").value) || 100;
+    const d = document.getElementById("district").value.trim().toLowerCase();
 
-c.innerHTML = people.length
-? people.map(p => `
-<div class="profile" data-profile="${escapeHTML(p.id)}">
-<div class="avatar">
-${p.photo_url
-? `<img src="${escapeHTML(p.photo_url)}" alt="প্রোফাইল ছবি">`
-: "👤"}
-</div>
-<div style="flex:1;min-width:0">
-<b>${escapeHTML(p.name)}</b>
-<div class="muted">${escapeHTML(p.gender)} • ${escapeHTML(p.age || "")} বছর</div>
-<div class="muted">${escapeHTML(p.education || "")}</div>
-<div class="muted">📍 ${escapeHTML(p.district || "")}</div>
-</div>
-<button type="button" class="edit" data-fav="${escapeHTML(p.id)}">
-${favorites.includes(String(p.id)) ? "♥" : "♡"}
-</button>
-</div>
-`).join("")
-: "কোনো প্রোফাইল পাওয়া যায়নি।";
+    const { data, error } = await supabaseClient
+      .from("public_profiles")
+      .select("id,name,age,gender,district,education,occupation,photo_url,created_at")
+      .order("created_at", { ascending: false });
 
-renderFavorites();
-renderAdminProfiles();
+    if (error) throw error;
 
-} catch (e) {
-console.error(e);
-c.textContent = "প্রোফাইল লোড হয়নি। ইন্টারনেট ও Supabase অনুমতি পরীক্ষা করুন।";
-}
+    people = (data || []).filter(p =>
+      !hiddenProfiles.includes(String(p.id)) &&
+      (g === "সব" || p.gender === g) &&
+      (!p.age || Number(p.age) <= a) &&
+      String(p.district || "").toLowerCase().includes(d)
+    );
+
+    c.innerHTML = people.length
+      ? people.map(p => `
+        <div class="profile" data-profile="${escapeHTML(p.id)}">
+          <div class="avatar">
+            ${p.photo_url
+              ? `<img src="${escapeHTML(p.photo_url)}" alt="প্রোফাইল ছবি">`
+              : "👤"}
+          </div>
+          <div style="flex:1;min-width:0">
+            <b>${escapeHTML(p.name)}</b>
+            <div class="muted">${escapeHTML(p.gender)} • ${escapeHTML(p.age || "")} বছর</div>
+            <div class="muted">${escapeHTML(p.education || "")}</div>
+            <div class="muted">📍 ${escapeHTML(p.district || "")}</div>
+          </div>
+          <button type="button" class="edit" data-fav="${escapeHTML(p.id)}">
+            ${favorites.includes(String(p.id)) ? "♥" : "♡"}
+          </button>
+        </div>
+      `).join("")
+      : "কোনো প্রোফাইল পাওয়া যায়নি।";
+
+    renderFavorites();
+    renderAdminProfiles();
+
+  } catch (e) {
+    console.error(e);
+    c.textContent = "প্রোফাইল লোড হয়নি। ইন্টারনেট ও Supabase অনুমতি পরীক্ষা করুন।";
+  }
 }
 document.addEventListener("click", function(e) {
   const card = e.target.closest("[data-profile]");
