@@ -688,7 +688,19 @@ renderProfiles();
 });
 
 document.getElementById("registerForm").addEventListener("submit", registerProfile);
-document.getElementById("userLoginForm").addEventListener("submit", async (e) => {
+document.getElementById("logoutButton").addEventListener("click", async () => {
+  const { error } = await supabaseClient.auth.signOut();
+
+  if (error) {
+    alert("লগআউট হয়নি: " + error.message);
+    return;
+  }
+
+  document.getElementById("tabs").classList.add("hidden");
+  showPage("welcome");
+  alert("লগআউট সফল হয়েছে।");
+});
+ document.getElementById("userLoginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const email = document.getElementById("userLoginEmail").value.trim();
