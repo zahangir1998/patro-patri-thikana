@@ -675,7 +675,27 @@ renderProfiles();
 });
 
 document.getElementById("registerForm").addEventListener("submit", registerProfile);
+document.getElementById("userLoginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
+  const email = document.getElementById("userLoginEmail").value.trim();
+  const password = document.getElementById("userLoginPassword").value;
+  const msg = document.getElementById("userLoginMessage");
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    msg.textContent = error.message;
+    return;
+  }
+
+  document.getElementById("tabs").classList.remove("hidden");
+  showPage("home");
+});
+ 
 async function registerProfile(event) {
 event.preventDefault();
 
