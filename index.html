@@ -755,7 +755,11 @@ async function registerProfile(event) {
     return;
   }
 
-  b.disabled = true;
+  if (photoFile && photoFile.size > 1024 * 1024) {
+  alert("ছবির সাইজ ১ MB-এর বেশি হতে পারবে না।");
+  return;
+}
+ b.disabled = true;
   b.textContent = "জমা হচ্ছে...";
 
   try {
