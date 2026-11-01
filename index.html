@@ -743,8 +743,9 @@ async function registerProfile(event) {
   const religion = document.getElementById("regReligion").value.trim();
   const marital_status = document.getElementById("regMarital").value;
   const bio = document.getElementById("regBio").value.trim();
-
-  if (!email || password.length < 6) {
+  const photoFile = document.getElementById("regPhoto").files[0];
+  
+ if (!email || password.length < 6) {
     alert("সঠিক ইমেইল ও কমপক্ষে ৬ অক্ষরের পাসওয়ার্ড দিন।");
     return;
   }
