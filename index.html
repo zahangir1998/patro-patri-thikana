@@ -771,7 +771,28 @@ async function registerProfile(event) {
 
     if (authError) throw authError;
     if (!authData.user) throw new Error("অ্যাকাউন্ট তৈরি হয়নি।");
+let photoPath = null;
 
+if (photoFile) {
+  if (!authData.session) {
+    throw new Error("ছবি আপলোড করতে আগে ইমেইল নিশ্চিত করে লগইন করতে হবে।");
+  }
+
+  const ext = photoFile.name.split(".").pop().toLowerCase();
+  const filePath = authData.user.id + "/" + Date.now() + "." + ext;
+
+  const { error: uploadError } = await supabaseClient.storage
+    .from("profile-photos")
+    .upload(filePath, photoFile, {
+      contentType: photoFile.type,
+      upsert: false
+    });
+
+  if (uploadError) throw uploadError;
+
+  photoPath = filePath;
+}
+   
     const { error } = await supabaseClient.from("profiles").insert([{
       user_id: authData.user.id,
       status: "pending",
