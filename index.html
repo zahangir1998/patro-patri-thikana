@@ -515,8 +515,22 @@ async function renderProfiles() {
       .order("created_at", { ascending: false });
 
     if (error) throw error;
+    const rowsWithPhoto = await Promise.all(
+  (data || []).map(async (p) => {
+    if (!p.photo_url) return p;
 
-    people = (data || []).filter(p =>
+    const { data: signedData, error: signedError } =
+      await supabaseClient.storage
+        .from("profile-photos")
+        .createSignedUrl(p.photo_url, 3600);
+
+    return {
+      ...p,
+      photo_url: signedError ? null : signedData.signedUrl
+    };
+  })
+);
+   people = (data || []).filter(p =>
       !hiddenProfiles.includes(String(p.id)) &&
       (g === "সব" || p.gender === g) &&
       (!p.age || Number(p.age) <= a) &&
