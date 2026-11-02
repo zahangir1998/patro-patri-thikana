@@ -895,14 +895,14 @@ try {
 const {data, error} = await supabaseClient.auth.getSession();
 if (error) throw error;
 
-currentAdminSession = data.session;
-document.getElementById("tabs").classList.toggle("hidden", !data.session);
-if (data.session) {
-  showPage("home");
-} else {
-  showPage("welcome");
+if (!data.session) {
+  return;
 }
- refreshAdminState();
+
+currentAdminSession = data.session;
+document.getElementById("tabs").classList.remove("hidden");
+showPage("home");
+refreshAdminState();
 
 } catch (e) {
 document.getElementById("adminAuthMessage").textContent =
