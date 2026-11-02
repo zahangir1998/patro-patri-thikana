@@ -531,11 +531,9 @@ async function renderProfiles() {
     if (sessionError) throw sessionError;
 
     if (!session) {
-      c.textContent = "প্রোফাইল দেখতে আগে লগইন করুন।";
-      document.getElementById("tabs").classList.add("hidden");
-      showPage("welcome");
-      return;
-    }
+  c.textContent = "প্রোফাইল দেখতে আগে লগইন করুন।";
+  return;
+}
 
     const g = document.getElementById("gender").value;
     const a = Number(document.getElementById("age").value) || 100;
