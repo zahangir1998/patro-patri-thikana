@@ -530,7 +530,7 @@ async function renderProfiles() {
     };
   })
 );
-   people = (data || []).filter(p =>
+   people = rowsWithPhoto.filter
       !hiddenProfiles.includes(String(p.id)) &&
       (g === "সব" || p.gender === g) &&
       (!p.age || Number(p.age) <= a) &&
