@@ -740,11 +740,10 @@ document.getElementById("logoutButton").addEventListener("click", async () => {
 });
  
 async function registerProfile(event) {
+async function registerProfile(event) {
   event.preventDefault();
 
   const b = document.getElementById("registerButton");
-  const email = document.getElementById("regEmail").value.trim();
-  const password = document.getElementById("regPassword").value;
 
   const name = document.getElementById("regName").value.trim();
   const age = Number(document.getElementById("regAge").value);
@@ -758,11 +757,6 @@ async function registerProfile(event) {
   const marital_status = document.getElementById("regMarital").value;
   const bio = document.getElementById("regBio").value.trim();
   const photoFile = document.getElementById("regPhoto").files[0];
-  
- if (!email || password.length < 6) {
-    alert("সঠিক ইমেইল ও কমপক্ষে ৬ অক্ষরের পাসওয়ার্ড দিন।");
-    return;
-  }
 
   if (!name || age < 18 || age > 100 || !gender || !district || !phone) {
     alert("নাম, ১৮–১০০ বছরের মধ্যে বয়স, পরিচয়, জেলা ও মোবাইল নম্বর দিন।");
@@ -770,45 +764,44 @@ async function registerProfile(event) {
   }
 
   if (photoFile && photoFile.size > 1024 * 1024) {
-  alert("ছবির সাইজ ১ MB-এর বেশি হতে পারবে না।");
-  return;
-}
- b.disabled = true;
+    alert("ছবির সাইজ ১ MB-এর বেশি হতে পারবে না।");
+    return;
+  }
+
+  b.disabled = true;
   b.textContent = "জমা হচ্ছে...";
 
   try {
-    const { data: authData, error: authError } =
-      await supabaseClient.auth.signUp({
-        email,
-        password
-      });
+    const { data: sessionData, error: sessionError } =
+      await supabaseClient.auth.getSession();
 
-    if (authError) throw authError;
-    if (!authData.user) throw new Error("অ্যাকাউন্ট তৈরি হয়নি।");
-let photoPath = null;
+    if (sessionError) throw sessionError;
 
-if (photoFile) {
-  if (!authData.session) {
-    throw new Error("ছবি আপলোড করতে আগে ইমেইল নিশ্চিত করে লগইন করতে হবে।");
-  }
+    if (!sessionData.session) {
+      alert("আগে আপনার অ্যাকাউন্টে লগইন করুন।");
+      showPage("login");
+      return;
+    }
 
-  const ext = photoFile.name.split(".").pop().toLowerCase();
-  const filePath = authData.user.id + "/" + Date.now() + "." + ext;
+    const user = sessionData.session.user;
+    let photoPath = null;
 
-  const { error: uploadError } = await supabaseClient.storage
-    .from("profile-photos")
-    .upload(filePath, photoFile, {
-      contentType: photoFile.type,
-      upsert: false
-    });
+    if (photoFile) {
+      const ext = photoFile.name.split(".").pop().toLowerCase();
+      photoPath = user.id + "/" + Date.now() + "." + ext;
 
-  if (uploadError) throw uploadError;
+      const { error: uploadError } = await supabaseClient.storage
+        .from("profile-photos")
+        .upload(photoPath, photoFile, {
+          contentType: photoFile.type,
+          upsert: false
+        });
 
-  photoPath = filePath;
-}
-   
+      if (uploadError) throw uploadError;
+    }
+
     const { error } = await supabaseClient.from("profiles").insert([{
-      user_id: authData.user.id,
+      user_id: user.id,
       status: "pending",
       name,
       age,
@@ -828,18 +821,12 @@ if (photoFile) {
 
     document.getElementById("registerForm").reset();
 
-    if (authData.session) {
-      alert("রেজিস্ট্রেশন সফল হয়েছে।");
-      document.getElementById("tabs").classList.remove("hidden");
-      showPage("home");
-    } else {
-      alert("অ্যাকাউন্ট তৈরি হয়েছে। ইমেইলে পাঠানো লিংক দিয়ে অ্যাকাউন্ট নিশ্চিত করে লগইন করুন।");
-      showPage("login");
-    }
+    alert("নতুন বায়োডাটা জমা হয়েছে। অনুমোদনের পর দেখা যাবে।");
+    showPage("home");
 
   } catch (e) {
     console.error(e);
-    alert("রেজিস্ট্রেশন সম্পন্ন হয়নি: " + (e.message || String(e)));
+    alert("তথ্য জমা হয়নি: " + (e.message || String(e)));
 
   } finally {
     b.disabled = false;
