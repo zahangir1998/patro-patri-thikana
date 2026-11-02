@@ -600,7 +600,7 @@ async function renderProfiles() {
 }
  document.addEventListener("click", function(e) {
   if (e.target.matches(".avatar img")) {
-    e.stopPropagation();
+    e.stopImmediatePropagation();
     document.getElementById("photoModalImage").src = e.target.src;
     document.getElementById("photoModal").classList.add("show");
   }
