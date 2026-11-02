@@ -769,7 +769,8 @@ document.getElementById("logoutButton").addEventListener("click", async () => {
   }
 
   document.getElementById("tabs").classList.remove("hidden");
-  showPage("home");
+showPage("home");
+await renderProfiles();
 });
  
 async function registerProfile(event) {
