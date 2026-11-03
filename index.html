@@ -504,11 +504,15 @@ refreshAdminState();
 if (adminAllowed()) {
 renderSettings();
 renderAdminProfiles();
- renderAdminPayments();
+renderAdminPayments();
 }
 }
 
 if (id === "favorites") renderFavorites();
+
+if (id === "profile") {
+loadMyAccess();
+}
 
 window.scrollTo(0, 0);
 }
