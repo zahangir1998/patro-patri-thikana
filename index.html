@@ -804,7 +804,7 @@ async function loadMyAccess() {
     return;
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from("contact_access")
     .select("starts_at, expires_at, payment_status")
     .eq("user_id", user.id)
