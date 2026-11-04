@@ -146,10 +146,32 @@ English
 </section>
 
 <section id="messages" class="page hidden">
-<div class="panel">
-<h2>বার্তা</h2>
-<p>বার্তা পাঠানোর সুবিধা পরবর্তী ধাপে তৈরি করতে হবে।</p>
-</div>
+  <div class="panel">
+    <h2>✉ আমার বার্তা</h2>
+    <p id="messageStatus" class="muted">বার্তা লোড হচ্ছে...</p>
+    <div id="messageInbox"></div>
+  </div>
+
+  <div class="panel hidden" id="messageConversation">
+    <h3 id="messageConversationTitle">কথোপকথন</h3>
+    <div id="messageList"
+         style="max-height:350px;overflow-y:auto;padding:10px 0">
+    </div>
+
+    <form id="messageForm">
+      <div class="field">
+        <textarea id="messageText"
+          maxlength="2000"
+          required
+          placeholder="আপনার মেসেজ লিখুন..."></textarea>
+      </div>
+      <button type="submit" class="primary" id="sendMessageButton">
+        মেসেজ পাঠান
+      </button>
+    </form>
+
+    <p id="messageFormStatus" class="muted"></p>
+  </div>
 </section>
 
  <section id="login" class="page hidden">
