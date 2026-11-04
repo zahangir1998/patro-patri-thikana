@@ -865,7 +865,193 @@ async function loadMyAccess() {
   expiryEl.textContent = "মেয়াদ শেষ: " +
     expiry.toLocaleString("bn-BD");
 } 
-async function registerProfile(event) {
+let activeMessageProfileId = null;
+let activeMessageProfileName = "";
+let activeMessageLastId = null;
+
+async function loadMessageInbox() {
+  const status = document.getElementById("messageStatus");
+  const inbox = document.getElementById("messageInbox");
+
+  status.textContent = "বার্তা লোড হচ্ছে...";
+  inbox.innerHTML = "";
+
+  const { data: authData } = await supabaseClient.auth.getUser();
+  const user = authData?.user;
+
+  if (!user) {
+    status.textContent = "বার্তা দেখতে লগইন করুন।";
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("messages")
+    .select("id,profile_id,sender_id,receiver_id,message_text,created_at,is_read")
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    status.textContent = "বার্তা লোড করা যায়নি: " + error.message;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    status.textContent = "এখনো কোনো বার্তা নেই।";
+    return;
+  }
+
+  const groups = {};
+
+  data.forEach(m => {
+    const key = m.profile_id;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(m);
+  });
+
+  status.textContent = "আপনার কথোপকথন";
+
+  Object.entries(groups).forEach(([profileId, messages]) => {
+    const last = messages[messages.length - 1];
+    const unread = messages.some(m =>
+      m.receiver_id === user.id && !m.is_read
+    );
+
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = "message-item";
+    item.style.cssText =
+      "display:block;width:100%;text-align:left;padding:12px;margin:8px 0;border:1px solid #ddd;border-radius:8px;background:white;color:#222;";
+
+    item.innerHTML = `
+      <strong>কথোপকথন #${profileId}</strong>
+      ${unread ? '<span style="color:red"> ● নতুন বার্তা</span>' : ""}
+      <br>
+      <span>${escapeHTML(last.message_text)}</span>
+      <br>
+      <small>${new Date(last.created_at).toLocaleString("bn-BD")}</small>
+    `;
+
+    item.addEventListener("click", () => {
+      openMessageConversation(Number(profileId), "কথোপকথন #" + profileId);
+    });
+
+    inbox.appendChild(item);
+  });
+}
+
+async function openMessageConversation(profileId, profileName) {
+  activeMessageProfileId = profileId;
+  activeMessageProfileName = profileName;
+
+  document.getElementById("messageConversation").classList.remove("hidden");
+  document.getElementById("messageConversationTitle").textContent = profileName;
+
+  const list = document.getElementById("messageList");
+  const status = document.getElementById("messageFormStatus");
+
+  list.innerHTML = "লোড হচ্ছে...";
+  status.textContent = "";
+
+  const { data: authData } = await supabaseClient.auth.getUser();
+  const user = authData?.user;
+
+  if (!user) {
+    list.textContent = "লগইন করুন।";
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("messages")
+    .select("*")
+    .eq("profile_id", profileId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    list.textContent = error.message;
+    return;
+  }
+
+  list.innerHTML = "";
+
+  if (!data || data.length === 0) {
+    list.textContent = "এখনো কোনো বার্তা নেই।";
+    activeMessageLastId = null;
+    return;
+  }
+
+  activeMessageLastId = data[data.length - 1].id;
+
+  for (const m of data) {
+    if (m.receiver_id === user.id && !m.is_read) {
+      await supabaseClient.rpc("mark_message_read", {
+        p_message_id: m.id
+      });
+    }
+
+    const bubble = document.createElement("div");
+    bubble.style.cssText =
+      "padding:10px;margin:8px 0;border-radius:10px;max-width:85%;" +
+      (m.sender_id === user.id
+        ? "margin-left:auto;background:#fce4ec;"
+        : "margin-right:auto;background:#eee;");
+
+    bubble.innerHTML = `
+      <div>${escapeHTML(m.message_text)}</div>
+      <small>${new Date(m.created_at).toLocaleString("bn-BD")}</small>
+    `;
+
+    list.appendChild(bubble);
+  }
+
+  list.scrollTop = list.scrollHeight;
+
+  await loadMessageInbox();
+}
+
+document.getElementById("messageForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const input = document.getElementById("messageText");
+  const button = document.getElementById("sendMessageButton");
+  const status = document.getElementById("messageFormStatus");
+  const message = input.value.trim();
+
+  if (!message || !activeMessageProfileId) return;
+
+  button.disabled = true;
+  status.textContent = "পাঠানো হচ্ছে...";
+
+  try {
+    let result;
+
+    if (activeMessageLastId) {
+      result = await supabaseClient.rpc("reply_to_message", {
+        p_message_id: activeMessageLastId,
+        p_message_text: message
+      });
+    } else {
+      result = await supabaseClient.rpc("send_profile_message", {
+        p_profile_id: activeMessageProfileId,
+        p_message_text: message
+      });
+    }
+
+    if (result.error) throw result.error;
+
+    input.value = "";
+    status.textContent = "বার্তা পাঠানো হয়েছে।";
+
+    await openMessageConversation(
+      activeMessageProfileId,
+      activeMessageProfileName
+    );
+
+  } catch (error) {
+    status.textContent = "বার্তা পাঠানো যায়নি: " + error.message;
+  } finally {
+    button.disabled = false;
+  }
+});
+ async function registerProfile(event) {
   event.preventDefault();
 
   const b = document.getElementById("registerButton");
