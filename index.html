@@ -620,6 +620,10 @@ async function renderProfiles() {
           <button type="button" class="edit" data-fav="${escapeHTML(p.id)}">
             ${favorites.includes(String(p.id)) ? "♥" : "♡"}
           </button>
+          <button type="button" class="edit"
+  data-message-profile="${escapeHTML(p.id)}">
+  ✉
+</button>
         </div>
       `).join("")
       : "কোনো প্রোফাইল পাওয়া যায়নি।";
