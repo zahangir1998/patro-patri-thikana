@@ -657,8 +657,7 @@ document.getElementById("photoModal").addEventListener("click", function(e) {
 });
 document.addEventListener("click", function(e) {
   const card = e.target.closest("[data-profile]");
-  if (!card || e.target.closest("[data-fav]")) return;
-
+  if (!card || e.target.closest("[data-fav], [data-message-profile]")) return;
   const p = people.find(x => String(x.id) === card.dataset.profile);
   if (!p) return;
 
