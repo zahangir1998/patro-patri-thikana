@@ -670,7 +670,1543 @@ document.addEventListener("click", function(e) {
     "\nপেশা: " + (p.occupation || "")
   );
 });
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>পাত্র-পাত্রী ঠিকানা</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--primary:#a30d43;--secondary:#f8dbe5;--background:#fff8fa;--text:#28151c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--background);color:var(--text);font-family:system-ui,"Noto Sans Bengali",sans-serif}
+header{background:var(--primary);color:white;padding:14px 16px;position:sticky;top:0;z-index:5}
+.brand{font-size:20px;font-weight:800}
+header small{display:block;margin-top:5px}
+main{max-width:960px;margin:auto;padding:16px}
+.tabs{display:flex;gap:8px;overflow:auto;padding:12px 0}
+button{cursor:pointer;font:inherit;border:0;border-radius:10px;padding:10px 14px}
+.tabs button{background:var(--secondary);white-space:nowrap}
+.tabs button.active,.primary{background:var(--primary);color:white}
+.panel{background:white;border:1px solid #f0dfe5;border-radius:16px;padding:16px;margin:14px 0}
+.hero{background:linear-gradient(135deg,#fff0f5,#f7d4e0);border-radius:20px;padding:22px;display:flex;justify-content:space-between;gap:15px;align-items:center}
+.hero h1{color:#7f0a35;font-size:26px}
+.couple{font-size:55px}
+.profile{border:1px solid #eedbe2;border-radius:14px;padding:12px;display:flex;gap:12px;align-items:center;margin:10px 0;min-width:0}
+.avatar{width:60px;height:60px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;background:#f7dce6;font-size:28px;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.muted{color:#79666e;font-size:13px}
+.searchrow{display:flex;gap:8px;flex-wrap:wrap}
+input,select,textarea{font:inherit;border:1px solid #decbd2;border-radius:10px;padding:11px;min-width:0;max-width:100%;width:100%;background:white;color:#28151c}
+.searchrow input,.searchrow select{flex:1;width:auto}
+.field{display:grid;gap:6px;margin:12px 0}
+.field label{font-weight:700;font-size:14px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid #f0e1e6}
+.edit{background:#fff0f5;color:var(--primary)}
+.notice{background:#fff4d8;color:#674c00;padding:12px;border-radius:12px;font-size:13px;line-height:1.6}
+.hidden{display:none!important}
+footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
+@media(max-width:560px){
+ main{padding:12px}
+ .hero{padding:16px}
+ .hero h1{font-size:22px}
+ .couple{font-size:42px}
+}
+ /* প্রোফাইল ছবি বড় করে দেখার ব্যবস্থা */
+.photo-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0,0,0,.92);
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.photo-modal.show {
+  display: flex;
+}
+
+.photo-modal img {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.photo-modal button {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 32px;
+  color: white;
+  background: none;
+  border: none;
+}
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+<div class="brand" id="brandTitle">♡ পাত্র-পাত্রী ঠিকানা</div>
+<small id="tagline">সঠিক পরিচয়ে, সুন্দর জীবনের শুরু</small>
+<button type="button" id="languageButton"
+onclick="toggleLanguage()">
+English
+</button>
+</header>
+
+<main>
+<nav class="tabs hidden" id="tabs" aria-label="প্রধান মেনু">
+<button type="button" class="active" data-page="home">🏠 হোম</button>
+<button type="button" data-page="search">🔎 পাত্র-পাত্রী খুঁজুন</button>
+<button type="button" data-page="favorites">♡ পছন্দ</button>
+<button type="button" data-page="messages">✉ বার্তা</button>
+<button type="button" data-page="profile">👤 প্রোফাইল / রেজিস্ট্রেশন</button>
+<button type="button" data-page="admin">⚙ অ্যাডমিন</button>
+<button type="button" data-open-page="payment">💳 পেমেন্ট</button>
+<button type="button" id="logoutButton">🚪 লগআউট</button>
+</nav>
+
+<section id="home" class="page hidden">
+<div class="hero">
+<div>
+<h1 id="heroTitle">জীবনসঙ্গী খুঁজুন সহজে</h1>
+<p id="heroText">আপনার পছন্দ ও প্রয়োজন অনুযায়ী পাত্র-পাত্রী খুঁজুন।</p>
+<button type="button" class="primary" data-open-page="search">পাত্র-পাত্রী খুঁজুন →</button>
+<button type="button" class="primary" data-open-page="profile">👤 রেজিস্ট্রেশন করুন</button>
+</div>
+<div class="couple">💞</div>
+</div>
+
+<div class="panel">
+<h2>কীভাবে ব্যবহার করবেন?</h2>
+<p>🧾 প্রোফাইল তৈরি করুন</p>
+<p>🔎 বয়স ও জেলা দিয়ে খুঁজুন</p>
+<p>🤝 সম্মতি নিয়ে যোগাযোগ করুন</p>
+</div>
+
+<div class="notice">
+প্রোফাইলের তথ্য সংশ্লিষ্ট ব্যক্তির সম্মতি নিয়ে যোগ করুন। সদস্যদের ব্যক্তিগত তথ্যের গোপনীয়তা রক্ষা করুন।
+</div>
+</section>
+
+<section id="search" class="page hidden">
+<div class="panel">
+<h2>পাত্র-পাত্রী খুঁজুন</h2>
+<div class="searchrow">
+<select id="gender">
+<option value="সব">সব প্রোফাইল</option>
+<option value="পাত্র">পাত্র</option>
+<option value="পাত্রী">পাত্রী</option>
+</select>
+<input id="age" type="number" min="18" placeholder="সর্বোচ্চ বয়স">
+<input id="district" placeholder="জেলা লিখুন">
+<button type="button" class="primary" id="searchButton">খুঁজুন</button>
+</div>
+</div>
+<div id="profiles">প্রোফাইল লোড হচ্ছে...</div>
+</section>
+
+<section id="favorites" class="page hidden">
+<div class="panel">
+<h2>আমার পছন্দ</h2>
+<div id="favList">এখনো কোনো প্রোফাইল পছন্দ করা হয়নি।</div>
+</div>
+</section>
+
+<section id="messages" class="page hidden">
+  <div class="panel">
+    <h2>✉ আমার বার্তা</h2>
+    <p id="messageStatus" class="muted">বার্তা লোড হচ্ছে...</p>
+    <div id="messageInbox"></div>
+  </div>
+
+  <div class="panel hidden" id="messageConversation">
+    <h3 id="messageConversationTitle">কথোপকথন</h3>
+    <div id="messageList"
+         style="max-height:350px;overflow-y:auto;padding:10px 0">
+    </div>
+
+    <form id="messageForm">
+      <div class="field">
+        <textarea id="messageText"
+          maxlength="2000"
+          required
+          placeholder="আপনার মেসেজ লিখুন..."></textarea>
+      </div>
+      <button type="submit" class="primary" id="sendMessageButton">
+        মেসেজ পাঠান
+      </button>
+    </form>
+
+    <p id="messageFormStatus" class="muted"></p>
+  </div>
+</section>
+
+ <section id="login" class="page hidden">
+  <div class="panel">
+    <h2>সদস্য লগইন</h2>
+    <form id="userLoginForm">
+      <div class="field">
+        <label>ইমেইল</label>
+        <input id="userLoginEmail" type="email" required>
+      </div>
+      <div class="field">
+        <label>পাসওয়ার্ড</label>
+        <input id="userLoginPassword" type="password" required>
+      </div>
+      <button type="submit" class="primary">লগইন করুন</button>
+    </form>
+    <p id="userLoginMessage" class="muted"></p>
+  </div>
+</section>
+ <section id="welcome" class="page">
+  <div class="panel">
+    <h2>পাত্র-পাত্রী ঠিকানায় স্বাগতম</h2>
+    <button type="button" class="primary" data-open-page="login">লগইন</button>
+    <button type="button" class="primary" data-open-page="profile">রেজিস্ট্রেশন</button>
+  </div>
+</section>
+<section id="profile" class="page hidden">
+<div id="myAccessPanel" style="background:#fff5f8;padding:15px;margin:15px 0;border:1px solid #e5b5c7;border-radius:10px;">
+  <h3>আমার পেমেন্ট ও অনুমোদন</h3>
+  <p id="myAccessStatus">অনুমোদনের তথ্য লোড হচ্ছে...</p>
+  <p id="myAccessStart"></p>
+  <p id="myAccessExpiry"></p>
+</div>
+ <div class="panel">
+<h2>রেজিস্ট্রেশন</h2>
+<p class="muted">নিচের তথ্য পূরণ করে রেজিস্ট্রেশন করুন। নাম, বয়স, পরিচয়, জেলা ও মোবাইল নম্বর আবশ্যক।</p>
+
+<form id="registerForm">
+ <div class="field">
+  <label for="regEmail">ইমেইল *</label>
+  <input id="regEmail" type="email" required
+         autocomplete="email" placeholder="আপনার ইমেইল">
+</div>
+
+<div class="field">
+  <label for="regPassword">পাসওয়ার্ড *</label>
+  <input id="regPassword" type="password" required
+         minlength="6" autocomplete="new-password"
+         placeholder="কমপক্ষে ৬ অক্ষর">
+</div>
+<div class="field">
+<label for="regName">নাম *</label>
+<input id="regName" required maxlength="100" placeholder="আপনার নাম">
+</div>
+
+<div class="field">
+<label for="regAge">বয়স *</label>
+<input id="regAge" type="number" min="18" max="100" required placeholder="১৮ বা তার বেশি">
+</div>
+
+<div class="field">
+<label for="regGender">আপনি *</label>
+<select id="regGender" required>
+<option value="">নির্বাচন করুন</option>
+<option value="পাত্র">পাত্র</option>
+<option value="পাত্রী">পাত্রী</option>
+</select>
+</div>
+
+<div class="field">
+<label for="regDistrict">জেলা *</label>
+<input id="regDistrict" required maxlength="100" placeholder="আপনার জেলা">
+</div>
+
+<div class="field">
+<label for="regPhone">মোবাইল নম্বর *</label>
+<input id="regPhone" type="tel" required maxlength="30" placeholder="মোবাইল নম্বর">
+</div>
+
+<div class="field">
+<label for="regEducation">শিক্ষাগত যোগ্যতা</label>
+<input id="regEducation" maxlength="150" placeholder="শিক্ষাগত যোগ্যতা">
+</div>
+
+<div class="field">
+<label for="regOccupation">পেশা</label>
+<input id="regOccupation" maxlength="150" placeholder="আপনার পেশা">
+</div>
+
+<div class="field">
+<label for="regHeight">উচ্চতা</label>
+<input id="regHeight" maxlength="30" placeholder="যেমন: ৫ ফুট ৫ ইঞ্চি">
+</div>
+
+<div class="field">
+<label for="regReligion">ধর্ম</label>
+<input id="regReligion" maxlength="50" placeholder="ধর্ম">
+</div>
+
+<div class="field">
+<label for="regMarital">বৈবাহিক অবস্থা</label>
+<select id="regMarital">
+<option value="">নির্বাচন করুন</option>
+<option value="অবিবাহিত">অবিবাহিত</option>
+<option value="বিবাহিত">বিবাহিত</option>
+<option value="তালাকপ্রাপ্ত">তালাকপ্রাপ্ত</option>
+<option value="বিধবা/বিপত্নীক">বিধবা/বিপত্নীক</option>
+</select>
+</div>
+
+<div class="field">
+<label for="regBio">নিজের সম্পর্কে</label>
+<textarea id="regBio" maxlength="1000" placeholder="নিজের সম্পর্কে সংক্ষেপে লিখুন"></textarea>
+</div>
+<div class="field">
+  <label for="regPhoto">প্রোফাইল ছবি</label>
+  <input id="regPhoto" type="file" accept="image/*">
+</div>
+ 
+<button class="primary" id="registerButton" type="submit">রেজিস্ট্রেশন করুন / তথ্য জমা দিন</button>
+</form>
+</div>
+</section>
+
+<section id="admin" class="page hidden">
+<div class="panel" id="adminLoginPanel">
+<h2>অ্যাডমিন লগইন</h2>
+<p class="muted">Supabase Auth-এ তৈরি করা অ্যাডমিন ইমেইল ও পাসওয়ার্ড ব্যবহার করুন।</p>
+
+<form id="adminLoginForm">
+<div class="field">
+<label for="adminEmail">অ্যাডমিন ইমেইল</label>
+<input id="adminEmail" type="email" autocomplete="username" required>
+</div>
+<div class="field">
+<label for="adminPassword">পাসওয়ার্ড</label>
+<input id="adminPassword" type="password" autocomplete="current-password" required>
+</div>
+<button type="submit" class="primary" id="adminLoginButton">প্রবেশ করুন</button>
+</form>
+<p id="adminAuthMessage" class="muted" role="status"></p>
+</div>
+
+<div id="adminContent" class="hidden">
+<div class="panel">
+<p id="adminSignedIn" class="muted"></p>
+<button type="button" id="adminLogoutButton">লগআউট</button>
+</div>
+
+<div class="notice">
+গুরুত্বপূর্ণ: অ্যাডমিন অনুমতি ডেটাবেসের Row Level Security (RLS) নীতিতেও সেট করতে হবে। শুধু এই পেজে লগইন যথেষ্ট নয়।
+</div>
+
+<div class="panel">
+<h2>অ্যাপের লেখা</h2>
+<div id="settings"></div>
+<button type="button" class="primary" id="saveSettings">পরিবর্তন সেভ করুন</button>
+<button type="button" id="resetSettings">ডিফল্ট ফিরিয়ে আনুন</button>
+</div>
+
+<div class="panel">
+ <div class="panel">
+  <h2>পেমেন্ট যাচাই</h2>
+  <div id="adminPayments">পেমেন্টের তথ্য লোড হচ্ছে...</div>
+</div>
+<h2>প্রোফাইল ব্যবস্থাপনা</h2>
+<div id="adminProfiles"></div>
+</div>
+</div>
+</section>
+</main>
+
+<footer>পাত্র-পাত্রী ঠিকানা • প্রাথমিক সংস্করণ</footer>
+</div>
+<div id="photoModal" class="photo-modal">
+  <button type="button" id="closePhotoModal">×</button>
+  <img id="photoModalImage" src="" alt="বড় প্রোফাইল ছবি">
+</div>
+ 
+<script>
+"use strict";
+let currentLanguage = "bn";
+
+function toggleLanguage() {
+currentLanguage = currentLanguage === "bn" ? "en" : "bn";
+
+document.documentElement.lang = currentLanguage;
+
+document.getElementById("languageButton").textContent =
+currentLanguage === "bn" ? "English" : "বাংলা";
+
+const translations = {
+bn: {
+brand: "♡ পাত্র-পাত্রী ঠিকানা",
+tagline: "সঠিক পরিচয়ে, সুন্দর জীবনের শুরু",
+home: "🏠 হোম",
+search: "🔎 পাত্র-পাত্রী খুঁজুন",
+favorites: "♡ পছন্দ",
+messages: "✉ বার্তা",
+profile: "👤 প্রোফাইল / রেজিস্ট্রেশন",
+admin: "⚙ অ্যাডমিন"
+},
+en: {
+brand: "♡ Patro-Patri Thikana",
+tagline: "A beautiful beginning with the right match",
+home: "🏠 Home",
+search: "🔎 Find a Match",
+favorites: "♡ Favorites",
+messages: "✉ Messages",
+profile: "👤 Profile / Registration",
+admin: "⚙ Admin"
+}
+};
+
+const t = translations[currentLanguage];
+
+document.getElementById("brandTitle").textContent = t.brand;
+document.getElementById("tagline").textContent = t.tagline;
+
+document.querySelectorAll("#tabs [data-page]").forEach(button => {
+const page = button.dataset.page;
+
+if (page === "home") button.textContent = t.home;
+if (page === "search") button.textContent = t.search;
+if (page === "favorites") button.textContent = t.favorites;
+if (page === "messages") button.textContent = t.messages;
+if (page === "profile") button.textContent = t.profile;
+if (page === "admin") button.textContent = t.admin;
+
+});
+}
+
+const supabaseClient = window.supabase.createClient(
+"https://ekrablggrintqifpsdou.supabase.co",
+"sb_publishable_n7RIZqEDvlyMxng5l8H6aA_cDNXvka4"
+);
+
+// Supabase Dashboard > Authentication-এ অ্যাডমিন ইউজার তৈরি করুন।
+// এরপর নিচে সেই অ্যাডমিনের ইমেইল বসান।
+// ডেটাবেসে RLS নীতিও সঠিকভাবে সেট করতে হবে।
+const ADMIN_EMAIL = "zahidzahangir@gmail.com";
+
+const defaults = {
+brandTitle:"পাত্র-পাত্রী ঠিকানা",
+tagline:"সঠিক পরিচয়ে, সুন্দর জীবনের শুরু",
+heroTitle:"জীবনসঙ্গী খুঁজুন সহজে",
+heroText:"আপনার পছন্দ ও প্রয়োজন অনুযায়ী পাত্র-পাত্রী খুঁজুন।",
+fee:"100",
+days:"30"
+};
+
+let settings = {...defaults};
+let people = [];
+let hiddenProfiles = [];
+let favorites = [];
+
+try {
+settings = {
+...defaults,
+...JSON.parse(localStorage.getItem("ppt_settings") || "{}")
+};
+favorites = JSON.parse(localStorage.getItem("ppt_favs") || "[]").map(String);
+} catch (e) {
+settings = {...defaults};
+favorites = [];
+}
+
+function escapeHTML(v) {
+return String(v ?? "").replace(/[&<>"']/g, c => ({
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#39;"
+}[c]));
+}
+
+function applySettings() {
+["brandTitle","tagline","heroTitle","heroText"].forEach(k => {
+const el = document.getElementById(k);
+if (el) el.textContent = settings[k];
+});
+}
+
+function renderSettings() {
+const labels = {
+brandTitle:"অ্যাপের নাম",
+tagline:"স্লোগান",
+heroTitle:"হোম পেজের শিরোনাম",
+heroText:"হোম পেজের লেখা",
+fee:"প্রোফাইল দেখার ফি (টাকা)",
+days:"প্রবেশাধিকারের মেয়াদ (দিন)"
+};
+
+document.getElementById("settings").innerHTML =
+Object.keys(labels).map(k => `
+<div class="row">
+<div>
+<b>${escapeHTML(labels[k])}</b>
+<div class="muted">${escapeHTML(settings[k])}</div>
+</div>
+<button type="button" class="edit" data-edit-setting="${k}">✏️</button>
+</div>
+`).join("");
+}
+
+function editSetting(k) {
+const labels = {
+brandTitle:"অ্যাপের নাম",
+tagline:"স্লোগান",
+heroTitle:"হোম পেজের শিরোনাম",
+heroText:"হোম পেজের লেখা",
+fee:"ফি (টাকা)",
+days:"মেয়াদ (দিন)"
+};
+
+const v = prompt(labels[k] + " পরিবর্তন করুন:", settings[k]);
+
+if (v !== null && v.trim()) {
+settings[k] = v.trim();
+renderSettings();
+}
+}
+
+function saveSettings() {
+localStorage.setItem("ppt_settings", JSON.stringify(settings));
+applySettings();
+alert("এই ব্রাউজারে সেটিংস সেভ হয়েছে।");
+}
+
+function resetSettings() {
+settings = {...defaults};
+localStorage.removeItem("ppt_settings");
+applySettings();
+renderSettings();
+}
+
+function showPage(id) {
+const target = document.getElementById(id);
+if (!target || !target.classList.contains("page")) return;
+
+document.querySelectorAll(".page").forEach(p => {
+p.classList.toggle("hidden", p.id !== id);
+});
+
+document.querySelectorAll(".tabs [data-page]").forEach(b => {
+b.classList.toggle("active", b.dataset.page === id);
+});
+
+if (id === "admin") {
+refreshAdminState();
+if (adminAllowed()) {
+renderSettings();
+renderAdminProfiles();
+renderAdminPayments();
+}
+}
+
+if (id === "favorites") renderFavorites();
+if (id === "messages") loadMessageInbox();
+if (id === "profile") {
+loadMyAccess();
+}
+
+window.scrollTo(0, 0);
+}
+
+document.querySelectorAll(".tabs [data-page]").forEach(b => {
+b.addEventListener("click", () => showPage(b.dataset.page));
+});
+
+document.querySelectorAll("[data-open-page]").forEach(b => {
+b.addEventListener("click", () => showPage(b.dataset.openPage));
+});
+
+document.getElementById("settings").addEventListener("click", e => {
+const b = e.target.closest("[data-edit-setting]");
+if (b) editSetting(b.dataset.editSetting);
+});
+
+document.getElementById("saveSettings").addEventListener("click", saveSettings);
+document.getElementById("resetSettings").addEventListener("click", resetSettings);
+document.getElementById("searchButton").addEventListener("click", renderProfiles);
+
+async function renderProfiles() {
+  const c = document.getElementById("profiles");
+  c.textContent = "প্রোফাইল লোড হচ্ছে...";
+
+  try {
+    const { data: { session }, error: sessionError } =
+      await supabaseClient.auth.getSession();
+
+    if (sessionError) throw sessionError;
+
+    if (!session) {
+  c.textContent = "প্রোফাইল দেখতে আগে লগইন করুন।";
+  return;
+}
+
+    const g = document.getElementById("gender").value;
+    const a = Number(document.getElementById("age").value) || 100;
+    const d = document.getElementById("district").value.trim().toLowerCase();
+
+    const { data, error } = await supabaseClient
+      .from("public_profiles")
+      .select("id,name,age,gender,district,education,occupation,photo_url,created_at")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    const rowsWithPhoto = await Promise.all(
+  (data || []).map(async (p) => {
+    if (!p.photo_url) return p;
+
+    const { data: signedData, error: signedError } =
+      await supabaseClient.storage
+        .from("profile-photos")
+        .createSignedUrl(p.photo_url, 3600);
+
+    return {
+      ...p,
+      photo_url: signedError ? null : signedData.signedUrl
+    };
+  })
+);
+   people = rowsWithPhoto.filter(p =>
+      !hiddenProfiles.includes(String(p.id)) &&
+      (g === "সব" || p.gender === g) &&
+      (!p.age || Number(p.age) <= a) &&
+      String(p.district || "").toLowerCase().includes(d)
+    );
+
+    c.innerHTML = people.length
+      ? people.map(p => `
+        <div class="profile" data-profile="${escapeHTML(p.id)}">
+          <div class="avatar">
+            ${p.photo_url
+              ? `<img src="${escapeHTML(p.photo_url)}" alt="প্রোফাইল ছবি">`
+              : "👤"}
+          </div>
+          <div style="flex:1;min-width:0">
+            <b>${escapeHTML(p.name)}</b>
+            <div class="muted">${escapeHTML(p.gender)} • ${escapeHTML(p.age || "")} বছর</div>
+            <div class="muted">${escapeHTML(p.education || "")}</div>
+            <div class="muted">📍 ${escapeHTML(p.district || "")}</div>
+          </div>
+          <button type="button" class="edit" data-fav="${escapeHTML(p.id)}">
+            ${favorites.includes(String(p.id)) ? "♥" : "♡"}
+          </button>
+          <button type="button" class="edit"
+  data-message-profile="${escapeHTML(p.id)}">
+  ✉
+</button>
+        </div>
+      `).join("")
+      : "কোনো প্রোফাইল পাওয়া যায়নি।";
+
+    renderFavorites();
+    renderAdminProfiles();
+
+  } catch (e) {
+    console.error(e);
+    c.textContent = "প্রোফাইল লোড হয়নি। ইন্টারনেট ও Supabase অনুমতি পরীক্ষা করুন।";
+  }
+}
+ document.addEventListener("click", function(e) {
+  if (e.target.matches(".avatar img")) {
+    e.stopImmediatePropagation();
+    document.getElementById("photoModalImage").src = e.target.src;
+    document.getElementById("photoModal").classList.add("show");
+  }
+});
+
+document.getElementById("closePhotoModal").addEventListener("click", function() {
+  document.getElementById("photoModal").classList.remove("show");
+  document.getElementById("photoModalImage").src = "";
+});
+
+document.getElementById("photoModal").addEventListener("click", function(e) {
+  if (e.target.id === "photoModal") {
+    this.classList.remove("show");
+    document.getElementById("photoModalImage").src = "";
+  }
+});
+document.addEventListener("click", function(e) {
+  const card = e.target.closest("[data-profile]");
+  if (!card || e.target.closest("[data-fav], [data-message-profile]")) return;
+  const p = people.find(x => String(x.id) === card.dataset.profile);
+  if (!p) return;
+
+  alert(
+    "নাম: " + (p.name || "") +
+    "\nবয়স: " + (p.age || "") +
+    "\nলিঙ্গ: " + (p.gender || "") +
+    "\nজেলা: " + (p.district || "") +
+    "\nশিক্ষাগত যোগ্যতা: " + (p.education || "") +
+    "\nপেশা: " + (p.occupation || "")
+  );
+});
 function toggleFav(id) {
+id = String(id);
+favorites = favorites.includes(id)
+? favorites.filter(x => x !== id)
+: [...favorites, id];
+
+localStorage.setItem("ppt_favs", JSON.stringify(favorites));
+renderProfiles();
+}
+
+function renderFavorites() {
+const list = people.filter(p => favorites.includes(String(p.id)));
+
+document.getElementById("favList").innerHTML = list.length
+? list.map(p => `
+<div class="row">
+<span>${escapeHTML(p.name)} — ${escapeHTML(p.district || "")}</span>
+<button type="button" class="edit" data-unfav="${escapeHTML(p.id)}">♥ সরান</button>
+</div>
+`).join("")
+: "এখনো কোনো প্রোফাইল পছন্দ করা হয়নি।";
+}async function renderAdminPayments() {
+  const box = document.getElementById("adminPayments");
+  if (!box || !adminAllowed()) return;
+
+  box.textContent = "পেমেন্ট লোড হচ্ছে...";
+
+  const { data, error } = await supabaseClient
+    .from("payment_requests")
+    .select("*")
+    .order("submitted_at", { ascending: false });
+
+  if (error) {
+    box.textContent = "সমস্যা: " + error.message;
+    return;
+  }
+
+  box.innerHTML = data.length
+    ? data.map(p => `
+      <div class="row">
+        <div>
+          <b>${escapeHTML(p.payment_method)}</b>
+          <div>TrxID: ${escapeHTML(p.transaction_id)}</div>
+          <div>টাকা: ${p.amount}</div>
+          <div>অবস্থা: ${escapeHTML(p.payment_status)}</div>
+        </div>
+        ${p.payment_status === "pending" ? `
+          <div>
+            <button type="button" class="primary"
+              data-approve-payment="${p.id}">অনুমোদন</button>
+            <button type="button"
+              data-reject-payment="${p.id}">প্রত্যাখ্যান</button>
+          </div>
+        ` : ""}
+      </div>
+    `).join("")
+    : "কোনো পেমেন্ট জমা নেই।";
+}
+async function renderAdminProfiles() {
+  const c = document.getElementById("adminProfiles");
+  if (!c || !adminAllowed()) return;
+
+  c.textContent = "প্রোফাইল লোড হচ্ছে...";
+
+  const { data, error } = await supabaseClient
+    .from("profiles")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    c.textContent = "প্রোফাইল লোড হয়নি: " + error.message;
+    return;
+  }
+
+    c.innerHTML = data.length
+    ? data.map(p => `
+      <div class="row">
+        <span>
+          <b>${escapeHTML(p.name || "")}</b>
+          <div class="muted">${escapeHTML(p.district || "")}</div>
+          <div class="muted">অবস্থা: ${escapeHTML(p.status || "অপেক্ষমাণ")}</div>
+        </span>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          <button type="button" class="edit" data-approve="${escapeHTML(p.id)}">অনুমোদন</button>
+          <button type="button" class="edit" data-reject="${escapeHTML(p.id)}">প্রত্যাখ্যান</button>
+          <button type="button" class="edit" data-edit-profile="${escapeHTML(p.id)}">সম্পাদনা</button>
+          <button type="button" class="edit" data-delete-profile="${escapeHTML(p.id)}">মুছে ফেলুন</button>
+        </div>
+      </div>
+    `).join("")
+    : "কোনো প্রোফাইল নেই।";
+}
+
+document.addEventListener("click", e => {
+const fav = e.target.closest("[data-fav]");
+if (fav) toggleFav(fav.dataset.fav);
+
+const unfav = e.target.closest("[data-unfav]");
+if (unfav) toggleFav(unfav.dataset.unfav);
+
+const hide = e.target.closest("[data-hide]");
+if (hide) {
+hiddenProfiles.push(String(hide.dataset.hide));
+renderProfiles();
+}
+});
+
+document.getElementById("registerForm").addEventListener("submit", registerProfile);
+document.getElementById("logoutButton").addEventListener("click", async () => {
+  const { error } = await supabaseClient.auth.signOut();
+
+  if (error) {
+    alert("লগআউট হয়নি: " + error.message);
+    return;
+  }
+
+  document.getElementById("tabs").classList.add("hidden");
+  showPage("welcome");
+  alert("লগআউট সফল হয়েছে।");
+});
+ document.getElementById("userLoginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const email = document.getElementById("userLoginEmail").value.trim();
+  const password = document.getElementById("userLoginPassword").value;
+  const msg = document.getElementById("userLoginMessage");
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    msg.textContent = error.message;
+    return;
+  }
+
+  document.getElementById("tabs").classList.remove("hidden");
+showPage("home");
+await renderProfiles();
+});
+ 
+async function loadMyAccess() {
+  const statusEl = document.getElementById("myAccessStatus");
+  const startEl = document.getElementById("myAccessStart");
+  const expiryEl = document.getElementById("myAccessExpiry");
+
+  if (!statusEl) return;
+
+  statusEl.textContent = "তথ্য লোড হচ্ছে...";
+  startEl.textContent = "";
+  expiryEl.textContent = "";
+
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) {
+    statusEl.textContent = "অনুমোদনের তথ্য দেখতে লগইন করুন।";
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("contact_access")
+    .select("starts_at, expires_at, payment_status")
+    .eq("user_id", user.id)
+    .order("expires_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    statusEl.textContent = "তথ্য লোড করা যায়নি।";
+    console.error(error);
+    return;
+  }
+
+  if (!data) {
+    statusEl.textContent = "আপনার কোনো অনুমোদিত পেমেন্ট নেই।";
+    return;
+  }
+
+  const now = new Date();
+  const expiry = new Date(data.expires_at);
+
+  if (data.payment_status !== "approved") {
+    statusEl.textContent = "অনুমোদন পাওয়া যায়নি।";
+    return;
+  }
+
+  if (expiry > now) {
+    statusEl.textContent = "অবস্থা: অনুমোদন সক্রিয়";
+  } else {
+    statusEl.textContent = "অবস্থা: অনুমোদনের মেয়াদ শেষ";
+  }
+
+  startEl.textContent = "শুরুর তারিখ: " +
+    new Date(data.starts_at).toLocaleString("bn-BD");
+
+  expiryEl.textContent = "মেয়াদ শেষ: " +
+    expiry.toLocaleString("bn-BD");
+} 
+let activeMessageProfileId = null;
+let activeMessageProfileName = "";
+let activeMessageLastId = null;
+
+async function loadMessageInbox() {
+  const status = document.getElementById("messageStatus");
+  const inbox = document.getElementById("messageInbox");
+
+  status.textContent = "বার্তা লোড হচ্ছে...";
+  inbox.innerHTML = "";
+
+  const { data: authData } = await supabaseClient.auth.getUser();
+  const user = authData?.user;
+
+  if (!user) {
+    status.textContent = "বার্তা দেখতে লগইন করুন।";
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("messages")
+    .select("id,profile_id,sender_id,receiver_id,message_text,created_at,is_read")
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    status.textContent = "বার্তা লোড করা যায়নি: " + error.message;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    status.textContent = "এখনো কোনো বার্তা নেই।";
+    return;
+  }
+
+  const groups = {};
+
+  data.forEach(m => {
+    const key = m.profile_id;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(m);
+  });
+
+  status.textContent = "আপনার কথোপকথন";
+
+  Object.entries(groups).forEach(([profileId, messages]) => {
+    const last = messages[messages.length - 1];
+    const unread = messages.some(m =>
+      m.receiver_id === user.id && !m.is_read
+    );
+
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = "message-item";
+    item.style.cssText =
+      "display:block;width:100%;text-align:left;padding:12px;margin:8px 0;border:1px solid #ddd;border-radius:8px;background:white;color:#222;";
+
+    item.innerHTML = `
+      <strong>কথোপকথন #${profileId}</strong>
+      ${unread ? '<span style="color:red"> ● নতুন বার্তা</span>' : ""}
+      <br>
+      <span>${escapeHTML(last.message_text)}</span>
+      <br>
+      <small>${new Date(last.created_at).toLocaleString("bn-BD")}</small>
+    `;
+
+    item.addEventListener("click", () => {
+      openMessageConversation(Number(profileId), "কথোপকথন #" + profileId);
+    });
+
+    inbox.appendChild(item);
+  });
+}
+
+async function openMessageConversation(profileId, profileName) {
+  activeMessageProfileId = profileId;
+  activeMessageProfileName = profileName;
+
+  document.getElementById("messageConversation").classList.remove("hidden");
+  document.getElementById("messageConversationTitle").textContent = profileName;
+
+  const list = document.getElementById("messageList");
+  const status = document.getElementById("messageFormStatus");
+
+  list.innerHTML = "লোড হচ্ছে...";
+  status.textContent = "";
+
+  const { data: authData } = await supabaseClient.auth.getUser();
+  const user = authData?.user;
+
+  if (!user) {
+    list.textContent = "লগইন করুন।";
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("messages")
+    .select("*")
+    .eq("profile_id", profileId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    list.textContent = error.message;
+    return;
+  }
+
+  list.innerHTML = "";
+
+  if (!data || data.length === 0) {
+    list.textContent = "এখনো কোনো বার্তা নেই।";
+    activeMessageLastId = null;
+    return;
+  }
+
+  activeMessageLastId = data[data.length - 1].id;
+
+  for (const m of data) {
+    if (m.receiver_id === user.id && !m.is_read) {
+      await supabaseClient.rpc("mark_message_read", {
+        p_message_id: m.id
+      });
+    }
+
+    const bubble = document.createElement("div");
+    bubble.style.cssText =
+      "padding:10px;margin:8px 0;border-radius:10px;max-width:85%;" +
+      (m.sender_id === user.id
+        ? "margin-left:auto;background:#fce4ec;"
+        : "margin-right:auto;background:#eee;");
+
+    bubble.innerHTML = `
+      <div>${escapeHTML(m.message_text)}</div>
+      <small>${new Date(m.created_at).toLocaleString("bn-BD")}</small>
+    `;
+
+    list.appendChild(bubble);
+  }
+
+  list.scrollTop = list.scrollHeight;
+
+  await loadMessageInbox();
+}
+
+document.getElementById("messageForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const input = document.getElementById("messageText");
+  const button = document.getElementById("sendMessageButton");
+  const status = document.getElementById("messageFormStatus");
+  const message = input.value.trim();
+
+  if (!message || !activeMessageProfileId) return;
+
+  button.disabled = true;
+  status.textContent = "পাঠানো হচ্ছে...";
+
+  try {
+    let result;
+
+    if (activeMessageLastId) {
+      result = await supabaseClient.rpc("reply_to_message", {
+        p_message_id: activeMessageLastId,
+        p_message_text: message
+      });
+    } else {
+      result = await supabaseClient.rpc("send_profile_message", {
+        p_profile_id: activeMessageProfileId,
+        p_message_text: message
+      });
+    }
+
+    if (result.error) throw result.error;
+
+    input.value = "";
+    status.textContent = "বার্তা পাঠানো হয়েছে।";
+
+    await openMessageConversation(
+      activeMessageProfileId,
+      activeMessageProfileName
+    );
+
+  } catch (error) {
+    status.textContent = "বার্তা পাঠানো যায়নি: " + error.message;
+  } finally {
+    button.disabled = false;
+  }
+});
+ async function registerProfile(event) {
+  event.preventDefault();
+
+  const b = document.getElementById("registerButton");
+
+  const name = document.getElementById("regName").value.trim();
+  const age = Number(document.getElementById("regAge").value);
+  const gender = document.getElementById("regGender").value;
+  const district = document.getElementById("regDistrict").value.trim();
+  const phone = document.getElementById("regPhone").value.trim();
+  const education = document.getElementById("regEducation").value.trim();
+  const occupation = document.getElementById("regOccupation").value.trim();
+  const height = document.getElementById("regHeight").value.trim();
+  const religion = document.getElementById("regReligion").value.trim();
+  const marital_status = document.getElementById("regMarital").value;
+  const bio = document.getElementById("regBio").value.trim();
+  const photoFile = document.getElementById("regPhoto").files[0];
+
+  if (!name || age < 18 || age > 100 || !gender || !district || !phone) {
+    alert("নাম, ১৮–১০০ বছরের মধ্যে বয়স, পরিচয়, জেলা ও মোবাইল নম্বর দিন।");
+    return;
+  }
+
+  if (photoFile && photoFile.size > 1024 * 1024) {
+    alert("ছবির সাইজ ১ MB-এর বেশি হতে পারবে না।");
+    return;
+  }
+
+  b.disabled = true;
+  b.textContent = "জমা হচ্ছে...";
+
+  try {
+    const { data: sessionData, error: sessionError } =
+      await supabaseClient.auth.getSession();
+
+    if (sessionError) throw sessionError;
+
+    if (!sessionData.session) {
+      alert("আগে আপনার অ্যাকাউন্টে লগইন করুন।");
+      showPage("login");
+      return;
+    }
+
+    const user = sessionData.session.user;
+    let photoPath = null;
+
+    if (photoFile) {
+      const ext = photoFile.name.split(".").pop().toLowerCase();
+      photoPath = user.id + "/" + Date.now() + "." + ext;
+
+      const { error: uploadError } = await supabaseClient.storage
+        .from("profile-photos")
+        .upload(photoPath, photoFile, {
+          contentType: photoFile.type,
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+    }
+
+    const { error } = await supabaseClient.from("profiles").insert([{
+      user_id: user.id,
+      status: "pending",
+      name,
+      age,
+      gender,
+      district,
+      phone,
+      education: education || null,
+      occupation: occupation || null,
+      height: height || null,
+      religion: religion || null,
+      marital_status: marital_status || null,
+      bio: bio || null,
+      photo_url: photoPath
+    }]);
+
+    if (error) throw error;
+
+    document.getElementById("registerForm").reset();
+
+    alert("নতুন বায়োডাটা জমা হয়েছে। অনুমোদনের পর দেখা যাবে।");
+    showPage("home");
+
+  } catch (e) {
+    console.error(e);
+    alert("তথ্য জমা হয়নি: " + (e.message || String(e)));
+
+  } finally {
+    b.disabled = false;
+    b.textContent = "রেজিস্ট্রেশন করুন / তথ্য জমা দিন";
+  }
+}
+let currentAdminSession = null;
+
+function adminAllowed() {
+return !!(
+currentAdminSession &&
+currentAdminSession.user &&
+currentAdminSession.user.email &&
+currentAdminSession.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() &&
+ADMIN_EMAIL !== "CHANGE-THIS-TO-YOUR-ADMIN-EMAIL"
+);
+}
+
+function refreshAdminState() {
+const ok = adminAllowed();
+
+document.getElementById("adminLoginPanel").classList.toggle("hidden", ok);
+document.getElementById("adminContent").classList.toggle("hidden", !ok);
+
+if (ok) {
+document.getElementById("adminSignedIn").textContent =
+"লগইন: " + currentAdminSession.user.email;
+}
+}
+
+async function loadAdminSession() {
+try {
+const {data, error} = await supabaseClient.auth.getSession();
+if (error) throw error;
+
+if (!data.session) {
+  return;
+}
+
+currentAdminSession = data.session;
+document.getElementById("tabs").classList.remove("hidden");
+showPage("home");
+refreshAdminState();
+
+} catch (e) {
+document.getElementById("adminAuthMessage").textContent =
+"লগইন অবস্থা যাচাই করা যায়নি। Supabase সেটিংস পরীক্ষা করুন।";
+}
+}
+
+document.getElementById("adminLoginForm").addEventListener("submit", async e => {
+e.preventDefault();
+
+const msg = document.getElementById("adminAuthMessage");
+const btn = document.getElementById("adminLoginButton");
+
+if (ADMIN_EMAIL === "CHANGE-THIS-TO-YOUR-ADMIN-EMAIL") {
+msg.textContent = "আগে কোডে ADMIN_EMAIL-এ আপনার Supabase অ্যাডমিন ইমেইল বসান।";
+return;
+}
+
+btn.disabled = true;
+msg.textContent = "যাচাই হচ্ছে...";
+
+try {
+const {data, error} = await supabaseClient.auth.signInWithPassword({
+email:document.getElementById("adminEmail").value.trim(),
+password:document.getElementById("adminPassword").value
+});
+
+if (error) throw error;
+
+currentAdminSession = data.session;
+
+if (!adminAllowed()) {
+await supabaseClient.auth.signOut();
+currentAdminSession = null;
+throw new Error("এই ইমেইল অ্যাডমিন হিসেবে অনুমোদিত নয়।");
+}
+
+msg.textContent = "লগইন সফল।";
+refreshAdminState();
+renderSettings();
+renderAdminProfiles();
+
+} catch (err) {
+msg.textContent = err.message || "লগইন হয়নি। ইমেইল ও পাসওয়ার্ড পরীক্ষা করুন।";
+
+} finally {
+btn.disabled = false;
+}
+});
+
+document.getElementById("adminLogoutButton").addEventListener("click", async () => {
+await supabaseClient.auth.signOut();
+currentAdminSession = null;
+refreshAdminState();
+document.getElementById("adminAuthMessage").textContent = "লগআউট হয়েছে।";
+});
+
+supabaseClient.auth.onAuthStateChange((_event, session) => {
+currentAdminSession = session;
+refreshAdminState();
+});
+
+loadAdminSession();
+applySettings();
+renderSettings();
+renderProfiles();
+async function editProfile(id) {
+  if (!adminAllowed()) {
+    alert("শুধু অ্যাডমিন এই কাজ করতে পারবেন।");
+    return;
+  }
+
+  const { data: p, error: loadError } = await supabaseClient
+    .from("profiles")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (loadError || !p) {
+    alert("প্রোফাইলের তথ্য আনা যায়নি: " + (loadError?.message || ""));
+    return;
+  }
+
+  const fields = [
+    ["name", "নাম", p.name, true],
+    ["age", "বয়স", p.age, true],
+    ["gender", "পরিচয় (পাত্র/পাত্রী)", p.gender, true],
+    ["district", "জেলা", p.district, true],
+    ["phone", "মোবাইল নম্বর", p.phone, true],
+    ["education", "শিক্ষাগত যোগ্যতা", p.education, false],
+    ["occupation", "পেশা", p.occupation, false],
+    ["height", "উচ্চতা", p.height, false],
+    ["religion", "ধর্ম", p.religion, false],
+    ["marital_status", "বৈবাহিক অবস্থা", p.marital_status, false],
+    ["bio", "নিজের সম্পর্কে", p.bio, false]
+  ];
+
+  const changes = {};
+
+  for (const [key, label, oldValue, required] of fields) {
+    const value = prompt(
+      label + " পরিবর্তন করুন:",
+      oldValue == null ? "" : String(oldValue)
+    );
+
+    if (value === null) {
+      alert("সম্পাদনা বাতিল করা হয়েছে।");
+      return;
+    }
+
+    const cleaned = value.trim();
+
+    if (required && !cleaned) {
+      alert(label + " খালি রাখা যাবে না।");
+      return;
+    }
+
+    if (key === "age") {
+      const age = Number(cleaned);
+
+      if (!Number.isInteger(age) || age < 18 || age > 100) {
+        alert("বয়স ১৮ থেকে ১০০-এর মধ্যে পূর্ণসংখ্যা হতে হবে।");
+        return;
+      }
+
+      changes[key] = age;
+    } else if (key === "gender") {
+      if (!["পাত্র", "পাত্রী"].includes(cleaned)) {
+        alert("পরিচয় অবশ্যই পাত্র অথবা পাত্রী হতে হবে।");
+        return;
+      }
+
+      changes[key] = cleaned;
+    } else {
+      changes[key] = cleaned || null;
+    }
+  }
+
+  if (!confirm("এই প্রোফাইলের সব পরিবর্তন সেভ করবেন?")) {
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("profiles")
+    .update(changes)
+    .eq("id", id);
+
+  if (error) {
+    alert("পরিবর্তন সেভ হয়নি: " + error.message);
+    return;
+  }
+
+  alert("প্রোফাইলের তথ্য পরিবর্তন করা হয়েছে।");
+
+  await renderAdminProfiles();
+  await renderProfiles();
+}
+ 
+ async function deleteProfile(id) {
+  if (!adminAllowed()) {
+    alert("শুধু অ্যাডমিন এই কাজ করতে পারবেন।");
+    return;
+  }
+
+  const confirmed = confirm(
+    "আপনি কি নিশ্চিতভাবে এই প্রোফাইলটি মুছে ফেলতে চান? এই কাজ ফিরিয়ে আনা যাবে না।"
+  );
+
+  if (!confirmed) return;
+
+  const { error } = await supabaseClient
+    .from("profiles")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    alert("প্রোফাইল মুছে ফেলা যায়নি: " + error.message);
+    return;
+  }
+
+  alert("প্রোফাইল মুছে ফেলা হয়েছে।");
+  await renderAdminProfiles();
+  await renderProfiles();
+ }
+
+ async function updateProfileStatus(id, status) {
+  const { error } = await supabaseClient
+    .from("profiles")
+    .update({ status })
+    .eq("id", id);
+
+  if (error) {
+    alert("পরিবর্তন করা যায়নি: " + error.message);
+    return;
+  }
+
+  alert(status === "approved" ? "প্রোফাইল অনুমোদিত হয়েছে।" : "প্রোফাইল প্রত্যাখ্যান করা হয়েছে।");
+  await renderAdminProfiles();
+await renderProfiles();
+}
+document.addEventListener("click", async e => {
+  const deleteButton = e.target.closest("[data-delete-profile]");
+
+  if (deleteButton) {
+    await deleteProfile(deleteButton.dataset.deleteProfile);
+    return;
+  }
+
+  const editButton = e.target.closest("[data-edit-profile]");
+
+  if (editButton) {
+    await editProfile(editButton.dataset.editProfile);
+    return;
+  }
+
+  const b = e.target.closest("[data-approve], [data-reject]");
+  if (!b) return;
+
+  const id = b.dataset.approve || b.dataset.reject;
+  const status = b.dataset.approve ? "approved" : "rejected";
+
+  await updateProfileStatus(id, status);
+});
+ async function reviewPayment(id, status) {
+  if (!adminAllowed()) {
+    alert("অ্যাডমিন অনুমতি নেই।");
+    return;
+  }
+
+  const message = status === "approved"
+    ? "পেমেন্ট অনুমোদন করবেন?"
+    : "পেমেন্ট প্রত্যাখ্যান করবেন?";
+
+  if (!confirm(message)) return;
+
+  try {
+    const { data, error } = await supabaseClient.rpc(
+      "admin_review_payment",
+      {
+        p_payment_id: Number(id),
+        p_status: status
+      }
+    );
+
+    if (error) throw error;
+
+    alert(
+      status === "approved"
+        ? "পেমেন্ট অনুমোদিত হয়েছে। ৩০ দিনের প্রবেশাধিকার চালু হয়েছে।"
+        : "পেমেন্ট প্রত্যাখ্যান করা হয়েছে।"
+    );
+
+    await renderAdminPayments();
+
+  } catch (error) {
+    console.error(error);
+    alert("পেমেন্ট প্রক্রিয়া সম্পন্ন হয়নি: " + error.message);
+  }
+}
+
+document.addEventListener("click", async function (event) {
+  const approveButton = event.target.closest("[data-approve-payment]");
+  const rejectButton = event.target.closest("[data-reject-payment]");
+
+  if (approveButton) {
+    approveButton.disabled = true;
+    try {
+      await reviewPayment(
+        approveButton.dataset.approvePayment,
+        "approved"
+      );
+    } catch (error) {
+      alert("সমস্যা: " + error.message);
+    } finally {
+      await renderAdminPayments();
+    }
+  } else if (rejectButton) {
+    rejectButton.disabled = true;
+    try {
+      await reviewPayment(
+        rejectButton.dataset.rejectPayment,
+        "rejected"
+      );
+    } catch (error) {
+      alert("সমস্যা: " + error.message);
+    } finally {
+      await renderAdminPayments();
+    }
+  }
+});
+</script>
+</script>
+ <section id="payment" class="page hidden">
+  <div class="panel">
+    <h2>মোবাইল নম্বর দেখার অ্যাক্সেস</h2>
+    <p>ফি: ১০০ টাকা | মেয়াদ: ৩০ দিন</p>
+    <p>নগদ/রকেট পার্সোনাল নম্বর:</p>
+    <h3>01811764518</h3>
+
+    <label>পেমেন্ট মাধ্যম</label>
+    <select id="paymentMethod">
+      <option value="Nagad">নগদ</option>
+      <option value="Rocket">রকেট</option>
+    </select>
+
+    <label>ট্রানজেকশন আইডি</label>
+    <input id="transactionId" type="text"
+           placeholder="TrxID লিখুন">
+
+    <button type="button" class="primary"
+            id="submitPayment">পেমেন্ট জমা দিন</button>
+    <p id="paymentMessage"></p>
+  </div>
+</section>
+ <script>
+document.getElementById("submitPayment").addEventListener("click", async function () {
+  const message = document.getElementById("paymentMessage");
+  const method = document.getElementById("paymentMethod").value;
+  const trx = document.getElementById("transactionId").value.trim();
+
+  if (!trx) {
+    message.textContent = "ট্রানজেকশন আইডি লিখুন।";
+    return;
+  }
+
+  const { data: { user } } = await supabaseClient.auth.getUser();
+
+  if (!user) {
+    message.textContent = "আগে লগইন করুন।";
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("payment_requests")
+    .insert({
+      user_id: user.id,
+      payment_method: method,
+      amount: 100,
+      transaction_id: trx
+    });
+
+  message.textContent = error
+    ? "জমা হয়নি: " + error.message
+    : "পেমেন্টের তথ্য জমা হয়েছে। যাচাইয়ের অপেক্ষায় থাকুন।";
+});
+</script>
+
+</div>
+</body>
+</html>
+ function toggleFav(id) {
 id = String(id);
 favorites = favorites.includes(id)
 ? favorites.filter(x => x !== id)
