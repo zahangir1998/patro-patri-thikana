@@ -13,10 +13,13 @@ header{background:var(--primary);color:white;padding:14px 16px;position:sticky;t
 .brand{font-size:20px;font-weight:800}
 header small{display:block;margin-top:5px}
 main{max-width:960px;margin:auto;padding:16px}
-.tabs{display:flex;gap:8px;overflow:auto;padding:12px 0}
+
+/* ৮টি বাটন দুই লাইনে সুন্দরভাবে সাজানোর জন্য ফ্লেক্স ও র‍্যাপ স্টাইল */
+.tabs{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;padding:10px 0}
 button{cursor:pointer;font:inherit;border:0;border-radius:10px;padding:10px 14px}
-.tabs button{background:var(--secondary);white-space:nowrap}
+.tabs button{background:var(--secondary);white-space:normal;flex:1 1 calc(25% - 6px);min-width:70px;text-align:center;font-size:12px;padding:8px 4px}
 .tabs button.active,.primary{background:var(--primary);color:white}
+
 .panel{background:white;border:1px solid #f0dfe5;border-radius:16px;padding:16px;margin:14px 0}
 .hero{background:linear-gradient(135deg,#fff0f5,#f7d4e0);border-radius:20px;padding:22px;display:flex;justify-content:space-between;gap:15px;align-items:center}
 .hero h1{color:#7f0a35;font-size:26px}
@@ -685,7 +688,7 @@ async function renderAdminProfiles() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    c.textContent = "প্রোফাইল লোড হয়নি: " + error.message;
+    c.textContent = "প্রোফাইল লোড হয়নি: " + error.message;
     return;
   }
 
@@ -727,7 +730,7 @@ document.getElementById("registerForm").addEventListener("submit", registerProfi
 document.getElementById("logoutButton").addEventListener("click", async () => {
   const { error } = await supabaseClient.auth.signOut();
   if (error) {
-    alert("লগআউট হয়নি: " + error.message);
+    alert("লগআউট হয়নি: " + error.message);
     return;
   }
   document.getElementById("tabs").classList.add("hidden");
@@ -1217,7 +1220,7 @@ document.addEventListener("click", async function (event) {
   const rejectBtn = event.target.closest("[data-reject-payment]");
 
   if (approveBtn) {
-    approve.disabled = true;
+    approveBtn.disabled = true;
     await reviewPayment(approveBtn.dataset.approvePayment, "approved");
   } else if (rejectBtn) {
     rejectBtn.disabled = true;
