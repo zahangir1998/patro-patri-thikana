@@ -42,7 +42,6 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <div id="app">
 <header>
   <div class="brand-container">
-    <!-- লোগোতে ক্লিক করলে পেজ রিলোড বা হোম পেজে যাওয়ার জন্য <a> ট্যাগ যুক্ত করা হয়েছে -->
     <a href="#" onclick="window.location.reload(); return false;" style="text-decoration: none; cursor: pointer; display: flex; align-items: center; color: inherit;">
       <div class="app-logo">💍</div>
       <div>
@@ -242,6 +241,18 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 
 <script>
 "use strict";
+
+// Helper function to escape HTML special chars to prevent script errors
+function escapeHTML(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 const supabaseClient = window.supabase.createClient(
   "https://ekrablggrintqifpsdou.supabase.co",
   "sb_publishable_n7RIZqEDvlyMxng5l8H6aA_cDNXvka4"
@@ -275,7 +286,7 @@ const translations = {
     brandTitle: "♡ Patro-Patri Thikana",
     tagline: "A beautiful beginning with the right match",
     tabHome: "🏠 Home", tabSearch: "🔎 Search Match", tabFav: "♡ Favorites", tabMsg: "✉ Messages",
-    tabProfile: "👤 Registration", tabAdmin: "⚙ Admin", tabPay: "💳 Payment", logoutButton: "🚪 Logout",
+    tabProfile: "👤 Registration", tabAdmin: "⚙ Admin", tabPay: "💳 Payment", logoutButton: "Logout",
     welTitle: "Welcome to Patro-Patri Thikana", welLoginBtn: "Login", welRegBtn: "Register",
     loginTitle: "Member Login", lblLoginEmail: "Email", lblLoginPass: "Password", loginSubmitBtn: "Login",
     heroTitle: "Find Life Partner Easily", heroText: "Find matches according to your preference and needs.",
@@ -301,6 +312,21 @@ function toggleLanguage() {
   }
 }
 
+function renderFavorites() {
+  const c = document.getElementById("favList");
+  if (!c) return;
+  c.innerHTML = favorites.length ? favorites.map(p => `
+    <div class="profile">
+      <div><b>${escapeHTML(p.name)}</b></div>
+    </div>
+  `).join("") : (currentLang === "bn" ? "এখনো কোনো প্রোফাইল পছন্দ করা হয়নি।" : "No favorites added yet.");
+}
+
+function loadMessageInbox() {
+  const c = document.getElementById("messageStatus");
+  if (c) c.textContent = currentLang === "bn" ? "কোনো নতুন বার্তা নেই।" : "No new messages.";
+}
+
 function showPage(id) {
   const target = document.getElementById(id);
   if (!target) return;
@@ -309,6 +335,7 @@ function showPage(id) {
   if (id === "admin") { refreshAdminState(); if (adminAllowed()) renderAdminProfiles(); }
   if (id === "favorites") renderFavorites();
   if (id === "messages") loadMessageInbox();
+  if (id === "search") renderProfiles();
   window.scrollTo(0, 0);
 }
 
@@ -318,9 +345,11 @@ document.getElementById("searchButton").addEventListener("click", renderProfiles
 
 async function renderProfiles() {
   const c = document.getElementById("profiles");
+  if (!c) return;
   c.textContent = currentLang === "bn" ? "লোড হচ্ছে..." : "Loading...";
   try {
-    const { data } = await supabaseClient.from("public_profiles").select("id,name,age,gender,district,education,occupation,created_at").order("created_at", { ascending: false });
+    const { data, error } = await supabaseClient.from("public_profiles").select("id,name,age,gender,district,education,occupation,created_at").order("created_at", { ascending: false });
+    if (error) throw error;
     people = data || [];
     c.innerHTML = people.length ? people.map(p => `
       <div class="profile">
@@ -331,7 +360,7 @@ async function renderProfiles() {
       </div>
     `).join("") : (currentLang === "bn" ? "কোনো প্রোফাইল পাওয়া যায়নি।" : "No profiles found.");
   } catch (e) {
-    c.textContent = currentLang === "bn" ? "লোডিং এ সমস্যা হয়েছে।" : "Error loading profiles.";
+    c.textContent = currentLang === "bn" ? "লোডিং এ সমস্যা হয়েছে বা নেটওয়ার্ক সংযোগ চেক করুন।" : "Error loading profiles.";
   }
 }
 
@@ -349,6 +378,7 @@ document.getElementById("userLoginForm").addEventListener("submit", async (e) =>
 
 document.getElementById("logoutButton").addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
+  currentAdminSession = null;
   document.getElementById("tabs").classList.add("hidden");
   showPage("welcome");
 });
@@ -385,24 +415,30 @@ document.getElementById("adminLoginForm").addEventListener("submit", async e => 
 
 async function renderAdminProfiles() {
   const c = document.getElementById("adminProfiles");
-  if (!adminAllowed()) return;
-  const { data } = await supabaseClient.from("profiles").select("*");
-  c.innerHTML = data?.length ? data.map(p => `
-    <div class="row">
-      <span><b>${escapeHTML(p.name)}</b> (${escapeHTML(p.district)})</span>
-      <button type="button" class="edit" onclick="deleteProfile('${p.id}')">${currentLang === "bn" ? "মুছে ফেলুন" : "Delete"}</button>
-    </div>
-  `).join("") : (currentLang === "bn" ? "কোনো প্রোফাইল নেই।" : "No profiles.");
+  if (!c || !adminAllowed()) return;
+  c.textContent = currentLang === "bn" ? "লোড হচ্ছে..." : "Loading...";
+  try {
+    const { data, error } = await supabaseClient.from("public_profiles").select("*");
+    if (error) throw error;
+    c.innerHTML = data?.length ? data.map(p => `
+      <div class="row">
+        <span><b>${escapeHTML(p.name)}</b> (${escapeHTML(p.district)})</span>
+        <button type="button" class="edit" onclick="deleteProfile('${p.id}')">${currentLang === "bn" ? "মুছে ফেলুন" : "Delete"}</button>
+      </div>
+    `).join("") : (currentLang === "bn" ? "কোনো প্রোফাইল নেই।" : "No profiles.");
+  } catch(e) {
+    c.textContent = currentLang === "bn" ? "প্রোফাইল লোড করা যাচ্ছে না।" : "Failed to load profiles.";
+  }
 }
 
 async function deleteProfile(id) {
   if (!confirm(currentLang === "bn" ? "মুছে ফেলতে চান?" : "Are you sure?")) return;
-  await supabaseClient.from("profiles").delete().eq("id", id);
+  await supabaseClient.from("public_profiles").delete().eq("id", id);
   renderAdminProfiles();
 }
 
 supabaseClient.auth.getSession().then(({ data }) => {
-  if (data.session) {
+  if (data?.session) {
     currentAdminSession = data.session;
     document.getElementById("tabs").classList.remove("hidden");
   }
