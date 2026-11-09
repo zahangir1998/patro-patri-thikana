@@ -60,15 +60,15 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <button type="button" data-page="messages" id="tabMsg">✉ বার্তা</button>
 <button type="button" data-page="profile" id="tabProfile">👤 প্রোফাইল তৈরি</button>
 <button type="button" data-page="admin" id="tabAdmin">⚙ অ্যাডমিন</button>
-<button type="button" data-open-page="payment" id="tabPay">💳 পেমেন্ট</button>
+<button type="button" onclick="showPage('payment')" id="tabPay">💳 পেমেন্ট</button>
 <button type="button" id="logoutButton">🚪 লগআউট</button>
 </nav>
 
 <section id="welcome" class="page">
   <div class="panel">
     <h2 id="welTitle">পাত্র-পাত্রী ঠিকানায় স্বাগতম</h2>
-    <button type="button" class="primary" data-open-page="login" id="welLoginBtn">লগইন</button>
-    <button type="button" class="primary" data-open-page="profile" id="welRegBtn">প্রোফাইল তৈরি</button>
+    <p class="muted">পরিষেবাটি ব্যবহার করতে প্রথমে লগইন করুন অথবা অ্যাকাউন্ট তৈরি করুন।</p>
+    <button type="button" class="primary" onclick="showPage('login')" id="welLoginBtn">লগইন</button>
   </div>
 </section>
 
@@ -95,8 +95,8 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <div>
 <h1 id="heroTitle">জীবনসঙ্গী খুঁজুন সহজে</h1>
 <p id="heroText">আপনার পছন্দ ও প্রয়োজন অনুযায়ী পাত্র-পাত্রী খুঁজুন।</p>
-<button type="button" class="primary" data-open-page="search" id="heroSearchBtn">পাত্র-পাত্রী খুঁজুন →</button>
-<button type="button" class="primary" data-open-page="profile" id="heroRegBtn">👤 প্রোফাইল তৈরি করুন</button>
+<button type="button" class="primary" onclick="showPage('search')" id="heroSearchBtn">পাত্র-পাত্রী খুঁজুন →</button>
+<button type="button" class="primary" onclick="showPage('profile')" id="heroRegBtn">👤 প্রোফাইল তৈরি করুন</button>
 </div>
 <div class="couple">💞</div>
 </div>
@@ -163,6 +163,14 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <div class="field">
 <label id="lblRegDist">জেলা *</label>
 <input id="regDistrict" required maxlength="100" placeholder="জেলা">
+</div>
+<div class="field">
+<label id="lblRegEdu">শিক্ষাগত যোগ্যতা</label>
+<input id="regEdu" placeholder="যেমন: এসএসসি, এইচএসসি, বিএসসি, এমবিএ ইত্যাদি">
+</div>
+<div class="field">
+<label id="lblRegJob">পেশা / জব (যদি করেন)</label>
+<input id="regJob" placeholder="যেমন: সরকারি চাকরি, প্রাইভেট চাকরি, ব্যবসা, গৃহিণী ইত্যাদি">
 </div>
 <div class="field">
 <label id="lblRegPhone">মোবাইল নম্বর / WhatsApp নম্বর *</label>
@@ -255,14 +263,14 @@ const translations = {
     docTitle: "পাত্র-পাত্রী ঠিকানা", brandTitle: "♡ পাত্র-পাত্রী ঠিকানা", tagline: "সঠিক পরিচয়ে, সুন্দর জীবনের শুরু",
     tabHome: "🏠 হোম", tabSearch: "🔎 পাত্র-পাত্রী খুঁজুন", tabFav: "♡ পছন্দ", tabMsg: "✉ বার্তা",
     tabProfile: "👤 প্রোফাইল তৈরি", tabAdmin: "⚙ অ্যাডমিন", tabPay: "💳 পেমেন্ট", logoutButton: "🚪 লগআউট",
-    welTitle: "পাত্র-পাত্রী ঠিকানায় স্বাগতম", welLoginBtn: "লগইন", welRegBtn: "প্রোফাইল তৈরি",
+    welTitle: "পাত্র-পাত্রী ঠিকানায় স্বাগতম", welLoginBtn: "লগইন",
     loginTitle: "সদস্য লগইন", lblLoginEmail: "ইমেইল", lblLoginPass: "পাসওয়ার্ড", loginSubmitBtn: "লগইন করুন",
     heroTitle: "জীবনসঙ্গী খুঁজুন সহজে", heroText: "আপনার পছন্দ ও প্রয়োজন অনুযায়ী পাত্র-পাত্রী খুঁজুন।",
     heroSearchBtn: "পাত্র-পাত্রী খুঁজুন →", heroRegBtn: "👤 প্রোফাইল তৈরি করুন",
     howTitle: "কীভাবে ব্যবহার করবেন?", how1: "🧾 প্রোফাইল তৈরি করুন", how2: "🔎 বয়স ও জেলা দিয়ে খুঁজুন", how3: "💳 পেমেন্ট করে ভিডিও কল ও নম্বর আনলক করুন",
     searchPageTitle: "পাত্র-পাত্রী খুঁজুন", optAll: "সব প্রোফাইল", optMale: "পাত্র", optFemale: "পাত্রী", searchButton: "খুঁজুন",
     favPageTitle: "আমার পছন্দ", msgPageTitle: "✉ আমার বার্তা", regPageTitle: "পরিবারের সদস্যের প্রোফাইল তৈরি",
-    lblRegName: "নাম *", lblRegAge: "বয়স *", lblRegGender: "পাত্র নাকি পাত্রী *", optSelect: "নির্বাচন করুন", optG1: "পাত্র", optG2: "পাত্রী", lblRegDist: "জেলা *", lblRegPhone: "মোবাইল নম্বর / WhatsApp নম্বর *", registerButton: "প্রোফাইল জমা দিন",
+    lblRegName: "নাম *", lblRegAge: "বয়স *", lblRegGender: "পাত্র নাকি পাত্রী *", optSelect: "নির্বাচন করুন", optG1: "পাত্র", optG2: "পাত্রী", lblRegDist: "জেলা *", lblRegEdu: "শিক্ষাগত যোগ্যতা", lblRegJob: "পেশা / জব (যদি করেন)", lblRegPhone: "মোবাইল নম্বর / WhatsApp নম্বর *", registerButton: "প্রোফাইল জমা দিন",
     payTitle: "ভিডিও কল ও মোবাইল নম্বর আনলক পেমেন্ট", paySub: "ফি: ১০০ টাকা | নগদ/বিকাশ/রকেট নম্বর: 01811764518", lblTrx: "আপনার ট্রানজেকশন আইডি (TrxID)", submitPaymentBtn: "পেমেন্ট জমা দিন",
     adminTitle: "অ্যাডমিন লগইন", lblAdminEmail: "ইমেইল", lblAdminPass: "পাসওয়ার্ড", adminLoginBtn: "প্রবেশ করুন", adminMgtTitle: "👥 প্রোফাইল ব্যবস্থাপনা (অনুমোদন, এডিট ও ডিলিট)", footerText: "পাত্র-পাত্রী ঠিকানা"
   },
@@ -270,14 +278,14 @@ const translations = {
     docTitle: "Patro-Patri Thikana", brandTitle: "♡ Patro-Patri Thikana", tagline: "A beautiful beginning with the right match",
     tabHome: "🏠 Home", tabSearch: "🔎 Search Match", tabFav: "♡ Favorites", tabMsg: "✉ Messages",
     tabProfile: "👤 Create Profile", tabAdmin: "⚙ Admin", tabPay: "💳 Payment", logoutButton: "🚪 Logout",
-    welTitle: "Welcome to Patro-Patri Thikana", welLoginBtn: "Login", welRegBtn: "Create Profile",
+    welTitle: "Welcome to Patro-Patri Thikana", welLoginBtn: "Login",
     loginTitle: "Member Login", lblLoginEmail: "Email", lblLoginPass: "Password", loginSubmitBtn: "Login",
     heroTitle: "Find Life Partner Easily", heroText: "Find matches according to your preference and needs.",
     heroSearchBtn: "Search Match →", heroRegBtn: "👤 Create Profile",
     howTitle: "How to use?", how1: "🧾 Create Profile", how2: "🔎 Search by Age & District", how3: "💳 Pay to Unlock Video Call & Phone",
     searchPageTitle: "Find Match", optAll: "All Profiles", optMale: "Groom", optFemale: "Bride", searchButton: "Search",
     favPageTitle: "My Favorites", msgPageTitle: "✉ My Messages", regPageTitle: "Create Family Profile",
-    lblRegName: "Name *", lblRegAge: "Age *", lblRegGender: "Gender *", optSelect: "Select", optG1: "Groom", optG2: "Bride", lblRegDist: "District *", lblRegPhone: "Mobile / WhatsApp Number *", registerButton: "Submit Profile",
+    lblRegName: "Name *", lblRegAge: "Age *", lblRegGender: "Gender *", optSelect: "Select", optG1: "Groom", optG2: "Bride", lblRegDist: "District *", lblRegEdu: "Education", lblRegJob: "Occupation / Job", lblRegPhone: "Mobile / WhatsApp Number *", registerButton: "Submit Profile",
     payTitle: "Unlock Video Call & Phone Access", paySub: "Fee: 100 BDT | bKash/Nagad: 01811764518", lblTrx: "Transaction ID (TrxID)", submitPaymentBtn: "Submit Payment",
     adminTitle: "Admin Login", lblAdminEmail: "Email", lblAdminPass: "Password", adminLoginBtn: "Login", adminMgtTitle: "👥 Profile Management", footerText: "Patro-Patri Thikana"
   }
@@ -304,7 +312,6 @@ function showPage(id) {
 }
 
 document.querySelectorAll(".tabs [data-page]").forEach(b => b.addEventListener("click", () => showPage(b.dataset.page)));
-document.querySelectorAll("[data-open-page]").forEach(b => b.addEventListener("click", () => showPage(b.dataset.openPage)));
 document.getElementById("searchButton").addEventListener("click", renderProfiles);
 
 async function checkUserPaymentStatus() {
@@ -325,237 +332,4 @@ async function renderProfiles() {
   if (!c) return;
   c.textContent = currentLang === "bn" ? "লোড হচ্ছে..." : "Loading...";
   try {
-    const { data, error } = await supabaseClient.from("public_profiles").select("*").order("created_at", { ascending: false });
-    if (error) throw error;
-    people = data || [];
-    
-    c.innerHTML = people.length ? people.map(p => {
-      let actionArea = "";
-      if (userHasPaid || adminAllowed()) {
-        const phoneNum = p.phone || "01811764518";
-        actionArea = `
-          <div style="margin-top:8px; background:#e8f5e9; padding:10px; border-radius:8px;">
-            <small>📱 মোবাইল/WhatsApp: <b>${escapeHTML(phoneNum)}</b></small><br>
-            <a href="https://wa.me/${phoneNum}?text=سلام،%20আপনার%20পাত্র-পাত্রী%20প্রোফাইলটি%20সম্পর্কে%20কথা বলতে%20চাই।" target="_blank" class="video-btn">📹 সরাসরি ভিডিও কল করুন (WhatsApp)</a>
-          </div>
-        `;
-      } else {
-        actionArea = `
-          <div style="margin-top:8px;">
-            <button type="button" class="edit" onclick="showPage('payment')">${currentLang === "bn" ? "🔒 পেমেন্ট করে ভিডিও কল ও নম্বর দেখুন (১০০ টাকা)" : "🔒 Pay to Unlock Video Call & Phone"}</button>
-          </div>
-        `;
-      }
-
-      return `
-        <div class="profile">
-          <div class="profile-header">
-            <div>
-              <b>${escapeHTML(p.name)}</b>
-              <div class="muted">${escapeHTML(p.gender)} • ${escapeHTML(p.age || "")} ${currentLang === "bn" ? "বছর" : "yrs"} • 📍 ${escapeHTML(p.district || "")}</div>
-            </div>
-          </div>
-          ${actionArea}
-        </div>
-      `;
-    }).join("") : (currentLang === "bn" ? "কোনো প্রোফাইল পাওয়া যায়নি।" : "No profiles found.");
-  } catch (e) {
-    c.textContent = currentLang === "bn" ? "প্রোফাইল লোড করা যাচ্ছে না।" : "Error loading profiles.";
-  }
-}
-
-document.getElementById("registerForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const msgEl = document.getElementById("regMessage");
-  msgEl.textContent = "প্রোফাইল জমা দেওয়া হচ্ছে...";
-  try {
-    const { error: profileError } = await supabaseClient.from("profiles").insert([{
-      name: document.getElementById("regName").value.trim(),
-      age: parseInt(document.getElementById("regAge").value),
-      gender: document.getElementById("regGender").value,
-      district: document.getElementById("regDistrict").value.trim(),
-      phone: document.getElementById("regPhone").value.trim(),
-      status: "pending"
-    }]);
-    if (profileError) throw profileError;
-
-    msgEl.textContent = "প্রোফাইল সফলভাবে জমা হয়েছে! অ্যাডমিন অনুমোদন করার পর এটি সাইটে দেখাবে।";
-    document.getElementById("registerForm").reset();
-  } catch (err) {
-    msgEl.textContent = "সমস্যা হয়েছে: " + err.message;
-  }
-});
-
-document.getElementById("userLoginForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email: document.getElementById("userLoginEmail").value.trim(),
-    password: document.getElementById("userLoginPassword").value
-  });
-  if (error) { document.getElementById("userLoginMessage").textContent = error.message; return; }
-  currentAdminSession = data.session;
-  document.getElementById("tabs").classList.remove("hidden");
-  showPage("home");
-});
-
-document.getElementById("submitPaymentBtn").addEventListener("click", async () => {
-  const trx = document.getElementById("transactionId").value.trim();
-  const msg = document.getElementById("paymentMessage");
-  if (!trx) { msg.textContent = "অনুগ্রহ করে TrxID লিখুন।"; return; }
-  msg.textContent = "পেমেন্ট জমা দেওয়া হচ্ছে...";
-  try {
-    const { error } = await supabaseClient.from("payments").insert([{ transaction_id: trx, status: "pending" }]);
-    if (error) throw error;
-    msg.style.color = "green";
-    msg.textContent = "পেমেন্ট সফলভাবে জমা হয়েছে! অ্যাডমিন যাচাই করার পর ভিডিও কল ও নম্বর আনলক হয়ে যাবে।";
-    document.getElementById("transactionId").value = "";
-  } catch (err) {
-    msg.style.color = "red";
-    msg.textContent = "জমাদানে সমস্যা হয়েছে (অথবা এই TrxID আগেই ব্যবহার করা হয়েছে)।";
-  }
-});
-
-document.getElementById("logoutButton").addEventListener("click", async () => {
-  await supabaseClient.auth.signOut();
-  currentAdminSession = null;
-  document.getElementById("tabs").classList.add("hidden");
-  showPage("welcome");
-});
-
-function adminAllowed() {
-  return currentAdminSession?.user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-}
-
-function refreshAdminState() {
-  const ok = adminAllowed();
-  document.getElementById("adminLoginPanel").classList.toggle("hidden", ok);
-  document.getElementById("adminContent").classList.toggle("hidden", !ok);
-  if (ok) document.getElementById("adminSignedIn").textContent = "লগইনকৃত অ্যাডমিন: " + currentAdminSession.user.email;
-}
-
-document.getElementById("adminLoginForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  try {
-    const { data, error } = await supabaseClient.auth.signInWithPassword({
-      email: document.getElementById("adminEmail").value.trim(),
-      password: document.getElementById("adminPassword").value
-    });
-    if (error) throw error;
-    currentAdminSession = data.session;
-    if (!adminAllowed()) { await supabaseClient.auth.signOut(); throw new Error("অনুমোদিত অ্যাডমিন নন।"); }
-    document.getElementById("tabs").classList.remove("hidden");
-    refreshAdminState();
-    renderAdminProfiles();
-    renderAdminPayments();
-  } catch (err) {
-    document.getElementById("adminAuthMessage").textContent = err.message;
-  }
-});
-
-document.getElementById("adminLogoutButton")?.addEventListener("click", async () => {
-  await supabaseClient.auth.signOut();
-  currentAdminSession = null;
-  refreshAdminState();
-});
-
-async function renderAdminProfiles() {
-  const c = document.getElementById("adminProfiles");
-  if (!adminAllowed()) return;
-  c.textContent = "লোড হচ্ছে...";
-  try {
-    const { data, error } = await supabaseClient.from("profiles").select("*").order("created_at", { ascending: false });
-    if (error) throw error;
-    c.innerHTML = data?.length ? data.map(p => `
-      <div class="row">
-        <div style="flex: 1; min-width: 200px;">
-          <b>${escapeHTML(p.name)}</b> (${escapeHTML(p.gender)}, ${escapeHTML(p.age)} বছর, ${escapeHTML(p.district)})<br>
-          <small class="muted">📱 মোবাইল/WhatsApp: <b>${escapeHTML(p.phone || "দেওয়া নেই")}</b></small><br>
-          <span>স্ট্যাটাস: <b class="${p.status === 'approved' ? 'badge' : p.status === 'rejected' ? 'badge-rejected' : 'badge-pending'}">${p.status || 'pending'}</b></span>
-        </div>
-        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-          ${p.status !== 'approved' ? `<button type="button" class="success-btn" onclick="updateProfileStatus('${p.id}', 'approved')">অনুমোদন</button>` : ''}
-          ${p.status !== 'rejected' ? `<button type="button" class="danger" onclick="updateProfileStatus('${p.id}', 'rejected')">প্রত্যাখ্যান</button>` : ''}
-          <button type="button" class="edit" onclick="editProfilePrompt('${p.id}', '${escapeHTML(p.name)}', '${escapeHTML(p.district)}', '${escapeHTML(p.phone)}')">এডিট</button>
-          <button type="button" class="danger" onclick="deleteProfile('${p.id}')">মুছে ফেলুন</button>
-        </div>
-      </div>
-    `).join("") : "কোনো ইউজার প্রোফাইল পাওয়া যায়নি।";
-  } catch (e) {
-    c.textContent = "প্রোফাইল লোড করা যায়নি।";
-  }
-}
-
-async function updateProfileStatus(id, newStatus) {
-  try {
-    const { error } = await supabaseClient.from("profiles").update({ status: newStatus }).eq("id", id);
-    if (error) throw error;
-    renderAdminProfiles();
-  } catch (err) {
-    alert("স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে: " + err.message);
-  }
-}
-
-async function editProfilePrompt(id, oldName, oldDistrict, oldPhone) {
-  const newName = prompt("নতুন নাম লিখুন:", oldName);
-  if (newName === null) return;
-  const newDistrict = prompt("নতুন জেলা লিখুন:", oldDistrict);
-  if (newDistrict === null) return;
-  const newPhone = prompt("নতুন মোবাইল নম্বর লিখুন:", oldPhone);
-  if (newPhone === null) return;
-
-  try {
-    const { error } = await supabaseClient.from("profiles").update({
-      name: newName.trim(),
-      district: newDistrict.trim(),
-      phone: newPhone.trim()
-    }).eq("id", id);
-
-    if (error) throw error;
-    alert("প্রোফাইল সফলভাবে আপডেট করা হয়েছে!");
-    renderAdminProfiles();
-  } catch (err) {
-    alert("আপডেট করতে সমস্যা হয়েছে: " + err.message);
-  }
-}
-
-async function renderAdminPayments() {
-  const c = document.getElementById("adminPayments");
-  if (!adminAllowed()) return;
-  c.textContent = "লোড হচ্ছে...";
-  try {
-    const { data, error } = await supabaseClient.from("payments").select("*").order("created_at", { ascending: false });
-    if (error) throw error;
-    c.innerHTML = data?.length ? data.map(pay => `
-      <div class="row">
-        <div>
-          <b>TrxID: ${escapeHTML(pay.transaction_id)}</b>
-          <span class="badge ${pay.status === 'pending' ? 'badge-pending' : ''}">${pay.status}</span>
-        </div>
-        ${pay.status === 'pending' ? `<button type="button" class="primary" onclick="approvePayment('${pay.id}')">Approve</button>` : '<span>✓ অনুমোদিত</span>'}
-      </div>
-    `).join("") : "কোনো পেমেন্ট রিকোয়েস্ট নেই।";
-  } catch (e) {
-    c.textContent = "পেমেন্ট লোড করা যায়নি।";
-  }
-}
-
-async function approvePayment(payId) {
-  await supabaseClient.from("payments").update({ status: "approved" }).eq("id", payId);
-  renderAdminPayments();
-}
-
-async function deleteProfile(id) {
-  if (!confirm("আপনি কি নিশ্চিত এই প্রোফাইলটি চিরতরে মুছে ফেলতে চান?")) return;
-  await supabaseClient.from("profiles").delete().eq("id", id);
-  renderAdminProfiles();
-}
-
-supabaseClient.auth.getSession().then(({ data }) => {
-  if (data && data.session) {
-    currentAdminSession = data.session;
-    if (adminAllowed()) document.getElementById("tabs").classList.remove("hidden");
-  }
-});
-</script>
-</body>
-</html>
+    const { data, error } = await supabaseClient.
