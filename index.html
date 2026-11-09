@@ -248,10 +248,10 @@ function escapeHTML(str) {
     .replace(/'/g, "&#039;");
 }
 
-// ফোন নম্বরকে আন্তর্জাতিক ৮৮ কান্ট্রি কোড ফর্মেটে রূপান্তর করার হেলপার ফাংশন
+// WhatsApp এর জন্য নম্বর ফরম্যাট করার ফাংশন (যেমন: 018... থেকে 88018... করা)
 function formatWhatsAppNumber(phone) {
   if (!phone) return "8801811764518";
-  let clean = phone.replace(/[^0-9]/g, ""); // শুধু সংখ্যা ফিল্টার করা
+  let clean = phone.replace(/[^0-9]/g, "");
   if (clean.startsWith("880")) return clean;
   if (clean.startsWith("0")) return "88" + clean;
   return "880" + clean;
@@ -353,7 +353,7 @@ async function renderProfiles() {
         actionArea = `
           <div style="margin-top:8px; background:#e8f5e9; padding:10px; border-radius:8px;">
             <small>📱 মোবাইল/WhatsApp: <b>${escapeHTML(rawPhone)}</b></small><br>
-            <a href="https://wa.me/${waNumber}?text=السلام%20عليكم،%20আপনার%20পাত্র-পাত্রী%20প্রোফাইলটি%20সম্পর্কে%20কথা%20বলতে%20চাই।" target="_blank" class="video-btn">📹 সরাসরি ভিডিও কল করুন (WhatsApp)</a>
+            <a href="https://wa.me/${waNumber}?text=আসসালামু%20আলাইকুম,%20আপনার%20পাত্র-পাত্রী%20প্রোফাইলটি%20সম্পর্কে%20কথা%20বলতে%20চাই।" target="_blank" class="video-btn">📹 সরাসরি ভিডিও কল করুন (WhatsApp)</a>
           </div>
         `;
       } else {
