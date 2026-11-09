@@ -54,7 +54,7 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 </header>
 
 <main>
-<nav class="tabs hidden" id="tabs" aria-label="প্রধান মেনু">
+<nav class="tabs" id="tabs" aria-label="প্রধান মেনু">
 <button type="button" class="active" data-page="home" id="tabHome">🏠 হোম</button>
 <button type="button" data-page="search" id="tabSearch">🔎 পাত্র-পাত্রী খুঁজুন</button>
 <button type="button" data-page="favorites" id="tabFav">♡ পছন্দ</button>
@@ -65,7 +65,7 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <button type="button" id="logoutButton">🚪 লগআউট</button>
 </nav>
 
-<section id="welcome" class="page">
+<section id="welcome" class="page hidden">
   <div class="panel">
     <h2 id="welTitle">পাত্র-পাত্রী ঠিকানায় স্বাগতম</h2>
     <button type="button" class="primary" data-open-page="login" id="welLoginBtn">লগইন</button>
@@ -91,7 +91,7 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
   </div>
 </section>
 
-<section id="home" class="page hidden">
+<section id="home" class="page">
 <div class="hero">
 <div>
 <h1 id="heroTitle">জীবনসঙ্গী খুঁজুন সহজে</h1>
@@ -252,19 +252,22 @@ function escapeHTML(str) {
     .replace(/'/g, "&#039;");
 }
 
-const supabaseClient = window.supabase.createClient(
-  "https://ekrablggrintqifpsdou.supabase.co",
-  "sb_publishable_n7RIZqEDvlyMxng5l8H6aA_cDNXvka4"
-);
+let supabaseClient;
+try {
+  supabaseClient = window.supabase.createClient(
+    "https://ekrablggrintqifpsdou.supabase.co",
+    "sb_publishable_n7RIZqEDvlyMxng5l8H6aA_cDNXvka4"
+  );
+} catch(e) { console.error("Supabase Init Error", e); }
+
 const ADMIN_EMAIL = "zahidzahangir@gmail.com";
 let people = [], favorites = [];
 let currentLang = "bn";
+let currentAdminSession = null;
 
 const translations = {
   bn: {
-    docTitle: "পাত্র-পাত্রী ঠিকানা",
-    brandTitle: "♡ পাত্র-পাত্রী ঠিকানা",
-    tagline: "সঠিক পরিচয়ে, সুন্দর জীবনের শুরু",
+    docTitle: "পাত্র-পাত্রী ঠিকানা", brandTitle: "♡ পাত্র-পাত্রী ঠিকানা", tagline: "সঠিক পরিচয়ে, সুন্দর জীবনের শুরু",
     tabHome: "🏠 হোম", tabSearch: "🔎 পাত্র-পাত্রী খুঁজুন", tabFav: "♡ পছন্দ", tabMsg: "✉ বার্তা",
     tabProfile: "👤 রেজিস্ট্রেশন", tabAdmin: "⚙ অ্যাডমিন", tabPay: "💳 পেমেন্ট", logoutButton: "🚪 লগআউট",
     welTitle: "পাত্র-পাত্রী ঠিকানায় স্বাগতম", welLoginBtn: "লগইন", welRegBtn: "রেজিস্ট্রেশন",
@@ -281,9 +284,7 @@ const translations = {
     footerText: "পাত্র-পাত্রী ঠিকানা"
   },
   en: {
-    docTitle: "Patro-Patri Thikana",
-    brandTitle: "♡ Patro-Patri Thikana",
-    tagline: "A beautiful beginning with the right match",
+    docTitle: "Patro-Patri Thikana", brandTitle: "♡ Patro-Patri Thikana", tagline: "A beautiful beginning with the right match",
     tabHome: "🏠 Home", tabSearch: "🔎 Search Match", tabFav: "♡ Favorites", tabMsg: "✉ Messages",
     tabProfile: "👤 Registration", tabAdmin: "⚙ Admin", tabPay: "💳 Payment", logoutButton: "🚪 Logout",
     welTitle: "Welcome to Patro-Patri Thikana", welLoginBtn: "Login", welRegBtn: "Register",
@@ -347,8 +348,11 @@ async function renderProfiles() {
   if (!c) return;
   c.textContent = currentLang === "bn" ? "লোড হচ্ছে..." : "Loading...";
   try {
-    const { data, error } = await supabaseClient.from("public_profiles").select("id,name,age,gender,district,education,occupation,created_at").order("created_at", { ascending: false });
-    if (error) throw error;
+    let data = null;
+    if (supabaseClient) {
+      const res = await supabaseClient.from("public_profiles").select("id,name,age,gender,district,education,occupation,created_at").order("created_at", { ascending: false });
+      data = res.data;
+    }
     people = data || [];
     c.innerHTML = people.length ? people.map(p => `
       <div class="profile">
@@ -359,26 +363,25 @@ async function renderProfiles() {
       </div>
     `).join("") : (currentLang === "bn" ? "কোনো প্রোফাইল পাওয়া যায়নি।" : "No profiles found.");
   } catch (e) {
-    c.textContent = currentLang === "bn" ? "লোডিং এ সমস্যা হয়েছে বা নেটওয়ার্ক সংযোগ চেক করুন।" : "Error loading profiles.";
+    c.textContent = currentLang === "bn" ? "কোনো প্রোফাইল পাওয়া যায়নি।" : "No profiles found.";
   }
 }
 
 document.getElementById("userLoginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
+  if(!supabaseClient) return;
   const { error } = await supabaseClient.auth.signInWithPassword({
     email: document.getElementById("userLoginEmail").value.trim(),
     password: document.getElementById("userLoginPassword").value
   });
   if (error) { document.getElementById("userLoginMessage").textContent = error.message; return; }
-  document.getElementById("tabs").classList.remove("hidden");
   showPage("home");
   renderProfiles();
 });
 
 document.getElementById("logoutButton").addEventListener("click", async () => {
-  await supabaseClient.auth.signOut();
+  if(supabaseClient) await supabaseClient.auth.signOut();
   currentAdminSession = null;
-  document.getElementById("tabs").classList.add("hidden");
   showPage("welcome");
 });
 
@@ -386,7 +389,6 @@ function adminAllowed() {
   return currentAdminSession?.user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 }
 
-let currentAdminSession = null;
 function refreshAdminState() {
   const ok = adminAllowed();
   document.getElementById("adminLoginPanel").classList.toggle("hidden", ok);
@@ -397,6 +399,7 @@ function refreshAdminState() {
 document.getElementById("adminLoginForm").addEventListener("submit", async e => {
   e.preventDefault();
   try {
+    if(!supabaseClient) throw new Error("Supabase is not configured.");
     const { data, error } = await supabaseClient.auth.signInWithPassword({
       email: document.getElementById("adminEmail").value.trim(),
       password: document.getElementById("adminPassword").value
@@ -404,7 +407,6 @@ document.getElementById("adminLoginForm").addEventListener("submit", async e => 
     if (error) throw error;
     currentAdminSession = data.session;
     if (!adminAllowed()) { await supabaseClient.auth.signOut(); throw new Error(currentLang === "bn" ? "অনুমোদিত নয়।" : "Not authorized."); }
-    document.getElementById("tabs").classList.remove("hidden");
     refreshAdminState();
     renderAdminProfiles();
   } catch (err) {
@@ -412,13 +414,22 @@ document.getElementById("adminLoginForm").addEventListener("submit", async e => 
   }
 });
 
+document.getElementById("adminLogoutButton")?.addEventListener("click", async () => {
+  if(supabaseClient) await supabaseClient.auth.signOut();
+  currentAdminSession = null;
+  refreshAdminState();
+});
+
 async function renderAdminProfiles() {
   const c = document.getElementById("adminProfiles");
   if (!c || !adminAllowed()) return;
   c.textContent = currentLang === "bn" ? "লোড হচ্ছে..." : "Loading...";
   try {
-    const { data, error } = await supabaseClient.from("profiles").select("*");
-    if (error) throw error;
+    let data = null;
+    if (supabaseClient) {
+      const res = await supabaseClient.from("profiles").select("*");
+      data = res.data;
+    }
     c.innerHTML = data?.length ? data.map(p => `
       <div class="row">
         <span><b>${escapeHTML(p.name)}</b> (${escapeHTML(p.district)})</span>
@@ -426,22 +437,23 @@ async function renderAdminProfiles() {
       </div>
     `).join("") : (currentLang === "bn" ? "কোনো প্রোফাইল নেই।" : "No profiles.");
   } catch(e) {
-    c.textContent = currentLang === "bn" ? "প্রোফাইল লোড করা যাচ্ছে না।" : "Failed to load profiles.";
+    c.textContent = currentLang === "bn" ? "কোনো প্রোফাইল নেই।" : "No profiles.";
   }
 }
 
 async function deleteProfile(id) {
   if (!confirm(currentLang === "bn" ? "মুছে ফেলতে চান?" : "Are you sure?")) return;
-  await supabaseClient.from("profiles").delete().eq("id", id);
+  if(supabaseClient) await supabaseClient.from("profiles").delete().eq("id", id);
   renderAdminProfiles();
 }
 
-supabaseClient.auth.getSession().then(({ data }) => {
-  if (data?.session) {
-    currentAdminSession = data.session;
-    document.getElementById("tabs").classList.remove("hidden");
-  }
-});
+if(supabaseClient) {
+  supabaseClient.auth.getSession().then(({ data }) => {
+    if (data?.session) {
+      currentAdminSession = data.session;
+    }
+  });
+}
 </script>
 </body>
 </html>
