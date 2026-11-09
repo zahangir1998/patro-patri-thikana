@@ -242,7 +242,6 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <script>
 "use strict";
 
-// Helper function to escape HTML special chars to prevent script errors
 function escapeHTML(str) {
   if (!str) return "";
   return String(str)
@@ -286,7 +285,7 @@ const translations = {
     brandTitle: "♡ Patro-Patri Thikana",
     tagline: "A beautiful beginning with the right match",
     tabHome: "🏠 Home", tabSearch: "🔎 Search Match", tabFav: "♡ Favorites", tabMsg: "✉ Messages",
-    tabProfile: "👤 Registration", tabAdmin: "⚙ Admin", tabPay: "💳 Payment", logoutButton: "Logout",
+    tabProfile: "👤 Registration", tabAdmin: "⚙ Admin", tabPay: "💳 Payment", logoutButton: "🚪 Logout",
     welTitle: "Welcome to Patro-Patri Thikana", welLoginBtn: "Login", welRegBtn: "Register",
     loginTitle: "Member Login", lblLoginEmail: "Email", lblLoginPass: "Password", loginSubmitBtn: "Login",
     heroTitle: "Find Life Partner Easily", heroText: "Find matches according to your preference and needs.",
@@ -418,7 +417,7 @@ async function renderAdminProfiles() {
   if (!c || !adminAllowed()) return;
   c.textContent = currentLang === "bn" ? "লোড হচ্ছে..." : "Loading...";
   try {
-    const { data, error } = await supabaseClient.from("public_profiles").select("*");
+    const { data, error } = await supabaseClient.from("profiles").select("*");
     if (error) throw error;
     c.innerHTML = data?.length ? data.map(p => `
       <div class="row">
@@ -433,7 +432,7 @@ async function renderAdminProfiles() {
 
 async function deleteProfile(id) {
   if (!confirm(currentLang === "bn" ? "মুছে ফেলতে চান?" : "Are you sure?")) return;
-  await supabaseClient.from("public_profiles").delete().eq("id", id);
+  await supabaseClient.from("profiles").delete().eq("id", id);
   renderAdminProfiles();
 }
 
