@@ -10,7 +10,7 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--background);color:var(--text);font-family:system-ui,"Noto Sans Bengali",sans-serif}
 header{background:var(--primary);color:white;padding:14px 16px;position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center}
-.brand{font-size:20px;font-weight:800}
+.brand{font-size:20px;font-weight:800;cursor:pointer}
 header small{display:block;margin-top:2px}
 #languageButton{background:white;color:var(--primary);font-weight:bold;padding:6px 12px;border-radius:8px}
 main{max-width:960px;margin:auto;padding:16px}
@@ -38,7 +38,7 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <body>
 <div id="app">
 <header>
-  <div>
+  <div onclick="window.location.reload();" style="cursor:pointer;">
     <div class="brand" id="brandTitle">♡ পাত্র-পাত্রী ঠিকানা</div>
     <small id="tagline">সঠিক পরিচয়ে, সুন্দর জীবনের শুরু</small>
   </div>
@@ -185,6 +185,7 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 </div>
 <button class="primary" id="registerButton" type="submit">রেজিস্ট্রেশন করুন</button>
 </form>
+<p id="regMessage" class="muted" style="margin-top:10px;"></p>
 </div>
 </section>
 
@@ -233,6 +234,32 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 
 <script>
 "use strict";
+
+function escapeHTML(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function renderFavorites() {
+  const c = document.getElementById("favList");
+  if (!c) return;
+  c.innerHTML = favorites.length ? favorites.map(p => `
+    <div class="profile">
+      <div><b>${escapeHTML(p.name)}</b></div>
+    </div>
+  `).join("") : (currentLang === "bn" ? "এখনো কোনো প্রোফাইল পছন্দ করা হয়নি।" : "No favorites added yet.");
+}
+
+function loadMessageInbox() {
+  const c = document.getElementById("messageStatus");
+  if (c) c.textContent = currentLang === "bn" ? "কোনো নতুন বার্তা নেই।" : "No new messages.";
+}
+
 const supabaseClient = window.supabase.createClient(
   "https://ekrablggrintqifpsdou.supabase.co",
   "sb_publishable_n7RIZqEDvlyMxng5l8H6aA_cDNXvka4"
@@ -240,6 +267,7 @@ const supabaseClient = window.supabase.createClient(
 const ADMIN_EMAIL = "zahidzahangir@gmail.com";
 let people = [], favorites = [];
 let currentLang = "bn";
+let currentAdminSession = null;
 
 const translations = {
   bn: {
@@ -300,6 +328,7 @@ function showPage(id) {
   if (id === "admin") { refreshAdminState(); if (adminAllowed()) renderAdminProfiles(); }
   if (id === "favorites") renderFavorites();
   if (id === "messages") loadMessageInbox();
+  if (id === "search") renderProfiles();
   window.scrollTo(0, 0);
 }
 
@@ -309,10 +338,29 @@ document.getElementById("searchButton").addEventListener("click", renderProfiles
 
 async function renderProfiles() {
   const c = document.getElementById("profiles");
+  if (!c) return;
   c.textContent = currentLang === "bn" ? "লোড হচ্ছে..." : "Loading...";
   try {
-    const { data } = await supabaseClient.from("public_profiles").select("id,name,age,gender,district,education,occupation,created_at").order("created_at", { ascending: false });
+    const genderVal = document.getElementById("gender").value;
+    const ageVal = document.getElementById("age").value;
+    const distVal = document.getElementById("district").value.trim().toLowerCase();
+
+    let query = supabaseClient.from("public_profiles").select("*").order("created_at", { ascending: false });
+    if (genderVal && genderVal !== "সব") {
+      query = query.eq("gender", genderVal);
+    }
+    if (ageVal) {
+      query = query.lte("age", parseInt(ageVal));
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+
     people = data || [];
+    if (distVal) {
+      people = people.filter(p => p.district && p.district.toLowerCase().includes(distVal));
+    }
+
     c.innerHTML = people.length ? people.map(p => `
       <div class="profile">
         <div>
@@ -322,17 +370,58 @@ async function renderProfiles() {
       </div>
     `).join("") : (currentLang === "bn" ? "কোনো প্রোফাইল পাওয়া যায়নি।" : "No profiles found.");
   } catch (e) {
-    c.textContent = currentLang === "bn" ? "লোডিং এ সমস্যা হয়েছে।" : "Error loading profiles.";
+    c.textContent = currentLang === "bn" ? "কোনো প্রোফাইল পাওয়া যায়নি বা লোডিং এ সমস্যা হয়েছে।" : "Error loading profiles.";
   }
 }
 
+document.getElementById("registerForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const msgEl = document.getElementById("regMessage");
+  msgEl.textContent = currentLang === "bn" ? "প্রোফাইল সংরক্ষণ করা হচ্ছে..." : "Saving profile...";
+  
+  const email = document.getElementById("regEmail").value.trim();
+  const password = document.getElementById("regPassword").value;
+  const name = document.getElementById("regName").value.trim();
+  const age = parseInt(document.getElementById("regAge").value);
+  const gender = document.getElementById("regGender").value;
+  const district = document.getElementById("regDistrict").value.trim();
+  const phone = document.getElementById("regPhone").value.trim();
+
+  try {
+    const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+      email: email,
+      password: password
+    });
+    if (authError) throw authError;
+
+    const user = authData.user;
+    if (user) {
+      const { error: profileError } = await supabaseClient.from("profiles").insert([{
+        id: user.id,
+        name: name,
+        age: age,
+        gender: gender,
+        district: district,
+        phone: phone
+      }]);
+      if (profileError) throw profileError;
+    }
+
+    msgEl.textContent = currentLang === "bn" ? "রেজিস্ট্রেশন সফল হয়েছে! এখন লগইন করুন।" : "Registration successful! Please login.";
+    document.getElementById("registerForm").reset();
+  } catch (err) {
+    msgEl.textContent = err.message || (currentLang === "bn" ? "রেজিস্ট্রেশনে সমস্যা হয়েছে।" : "Registration error.");
+  }
+});
+
 document.getElementById("userLoginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const { error } = await supabaseClient.auth.signInWithPassword({
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
     email: document.getElementById("userLoginEmail").value.trim(),
     password: document.getElementById("userLoginPassword").value
   });
   if (error) { document.getElementById("userLoginMessage").textContent = error.message; return; }
+  currentAdminSession = data.session;
   document.getElementById("tabs").classList.remove("hidden");
   showPage("home");
   renderProfiles();
@@ -340,6 +429,7 @@ document.getElementById("userLoginForm").addEventListener("submit", async (e) =>
 
 document.getElementById("logoutButton").addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
+  currentAdminSession = null;
   document.getElementById("tabs").classList.add("hidden");
   showPage("welcome");
 });
@@ -348,7 +438,6 @@ function adminAllowed() {
   return currentAdminSession?.user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 }
 
-let currentAdminSession = null;
 function refreshAdminState() {
   const ok = adminAllowed();
   document.getElementById("adminLoginPanel").classList.toggle("hidden", ok);
@@ -374,16 +463,28 @@ document.getElementById("adminLoginForm").addEventListener("submit", async e => 
   }
 });
 
+document.getElementById("adminLogoutButton")?.addEventListener("click", async () => {
+  await supabaseClient.auth.signOut();
+  currentAdminSession = null;
+  refreshAdminState();
+});
+
 async function renderAdminProfiles() {
   const c = document.getElementById("adminProfiles");
   if (!adminAllowed()) return;
-  const { data } = await supabaseClient.from("profiles").select("*");
-  c.innerHTML = data?.length ? data.map(p => `
-    <div class="row">
-      <span><b>${escapeHTML(p.name)}</b> (${escapeHTML(p.district)})</span>
-      <button type="button" class="edit" onclick="deleteProfile('${p.id}')">${currentLang === "bn" ? "মুছে ফেলুন" : "Delete"}</button>
-    </div>
-  `).join("") : (currentLang === "bn" ? "কোনো প্রোফাইল নেই।" : "No profiles.");
+  c.textContent = currentLang === "bn" ? "লোড হচ্ছে..." : "Loading...";
+  try {
+    const { data, error } = await supabaseClient.from("profiles").select("*");
+    if (error) throw error;
+    c.innerHTML = data?.length ? data.map(p => `
+      <div class="row">
+        <span><b>${escapeHTML(p.name)}</b> (${escapeHTML(p.district)})</span>
+        <button type="button" class="edit" onclick="deleteProfile('${p.id}')">${currentLang === "bn" ? "মুছে ফেলুন" : "Delete"}</button>
+      </div>
+    `).join("") : (currentLang === "bn" ? "কোনো প্রোফাইল নেই।" : "No profiles.");
+  } catch (e) {
+    c.textContent = currentLang === "bn" ? "প্রোফাইল লোড করা যাচ্ছে না।" : "Failed to load profiles.";
+  }
 }
 
 async function deleteProfile(id) {
@@ -393,7 +494,7 @@ async function deleteProfile(id) {
 }
 
 supabaseClient.auth.getSession().then(({ data }) => {
-  if (data.session) {
+  if (data && data.session) {
     currentAdminSession = data.session;
     document.getElementById("tabs").classList.remove("hidden");
   }
