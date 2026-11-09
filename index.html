@@ -9,10 +9,7 @@
 :root{--primary:#a30d43;--secondary:#f8dbe5;--background:#fff8fa;--text:#28151c}
 *{box-sizing:border-box}
 body{margin:0;background:var(--background);color:var(--text);font-family:system-ui,"Noto Sans Bengali",sans-serif}
-header{background:var(--primary);color:white;padding:12px 16px;position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center}
-.brand-container{display:flex;align-items:center;gap:12px}
-.app-logo{background:white;color:var(--primary);width:45px;height:45px;border-radius:50%;display:grid;place-items:center;font-size:24px;overflow:hidden;box-shadow:0 2px 5px rgba(0,0,0,0.2);flex-shrink:0}
-.app-logo img{width:100%;height:100%;object-fit:cover}
+header{background:var(--primary);color:white;padding:14px 16px;position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center}
 .brand{font-size:20px;font-weight:800}
 header small{display:block;margin-top:2px}
 #languageButton{background:white;color:var(--primary);font-weight:bold;padding:6px 12px;border-radius:8px}
@@ -41,20 +38,15 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <body>
 <div id="app">
 <header>
-  <div class="brand-container">
-    <a href="#" onclick="window.location.reload(); return false;" style="text-decoration: none; cursor: pointer; display: flex; align-items: center; color: inherit;">
-      <div class="app-logo">💍</div>
-      <div>
-        <div class="brand" id="brandTitle">♡ পাত্র-পাত্রী ঠিকানা</div>
-        <small id="tagline">সঠিক পরিচয়ে, সুন্দর জীবনের শুরু</small>
-      </div>
-    </a>
+  <div>
+    <div class="brand" id="brandTitle">♡ পাত্র-পাত্রী ঠিকানা</div>
+    <small id="tagline">সঠিক পরিচয়ে, সুন্দর জীবনের শুরু</small>
   </div>
   <button type="button" id="languageButton" onclick="toggleLanguage()">English</button>
 </header>
 
 <main>
-<nav class="tabs" id="tabs" aria-label="প্রধান মেনু">
+<nav class="tabs hidden" id="tabs" aria-label="প্রধান মেনু">
 <button type="button" class="active" data-page="home" id="tabHome">🏠 হোম</button>
 <button type="button" data-page="search" id="tabSearch">🔎 পাত্র-পাত্রী খুঁজুন</button>
 <button type="button" data-page="favorites" id="tabFav">♡ পছন্দ</button>
@@ -65,7 +57,7 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <button type="button" id="logoutButton">🚪 লগআউট</button>
 </nav>
 
-<section id="welcome" class="page hidden">
+<section id="welcome" class="page">
   <div class="panel">
     <h2 id="welTitle">পাত্র-পাত্রী ঠিকানায় স্বাগতম</h2>
     <button type="button" class="primary" data-open-page="login" id="welLoginBtn">লগইন</button>
@@ -91,7 +83,7 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
   </div>
 </section>
 
-<section id="home" class="page">
+<section id="home" class="page hidden">
 <div class="hero">
 <div>
 <h1 id="heroTitle">জীবনসঙ্গী খুঁজুন সহজে</h1>
@@ -242,6 +234,7 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <script>
 "use strict";
 
+// Helper function added to prevent missing function reference errors
 function escapeHTML(str) {
   if (!str) return "";
   return String(str)
@@ -252,22 +245,22 @@ function escapeHTML(str) {
     .replace(/'/g, "&#039;");
 }
 
-let supabaseClient;
-try {
-  supabaseClient = window.supabase.createClient(
-    "https://ekrablggrintqifpsdou.supabase.co",
-    "sb_publishable_n7RIZqEDvlyMxng5l8H6aA_cDNXvka4"
-  );
-} catch(e) { console.error("Supabase Init Error", e); }
+function renderFavorites() {}
+function loadMessageInbox() {}
 
+const supabaseClient = window.supabase.createClient(
+  "https://ekrablggrintqifpsdou.supabase.co",
+  "sb_publishable_n7RIZqEDvlyMxng5l8H6aA_cDNXvka4"
+);
 const ADMIN_EMAIL = "zahidzahangir@gmail.com";
 let people = [], favorites = [];
 let currentLang = "bn";
-let currentAdminSession = null;
 
 const translations = {
   bn: {
-    docTitle: "পাত্র-পাত্রী ঠিকানা", brandTitle: "♡ পাত্র-পাত্রী ঠিকানা", tagline: "সঠিক পরিচয়ে, সুন্দর জীবনের শুরু",
+    docTitle: "পাত্র-পাত্রী ঠিকানা",
+    brandTitle: "♡ পাত্র-পাত্রী ঠিকানা",
+    tagline: "সঠিক পরিচয়ে, সুন্দর জীবনের শুরু",
     tabHome: "🏠 হোম", tabSearch: "🔎 পাত্র-পাত্রী খুঁজুন", tabFav: "♡ পছন্দ", tabMsg: "✉ বার্তা",
     tabProfile: "👤 রেজিস্ট্রেশন", tabAdmin: "⚙ অ্যাডমিন", tabPay: "💳 পেমেন্ট", logoutButton: "🚪 লগআউট",
     welTitle: "পাত্র-পাত্রী ঠিকানায় স্বাগতম", welLoginBtn: "লগইন", welRegBtn: "রেজিস্ট্রেশন",
@@ -284,7 +277,9 @@ const translations = {
     footerText: "পাত্র-পাত্রী ঠিকানা"
   },
   en: {
-    docTitle: "Patro-Patri Thikana", brandTitle: "♡ Patro-Patri Thikana", tagline: "A beautiful beginning with the right match",
+    docTitle: "Patro-Patri Thikana",
+    brandTitle: "♡ Patro-Patri Thikana",
+    tagline: "A beautiful beginning with the right match",
     tabHome: "🏠 Home", tabSearch: "🔎 Search Match", tabFav: "♡ Favorites", tabMsg: "✉ Messages",
     tabProfile: "👤 Registration", tabAdmin: "⚙ Admin", tabPay: "💳 Payment", logoutButton: "🚪 Logout",
     welTitle: "Welcome to Patro-Patri Thikana", welLoginBtn: "Login", welRegBtn: "Register",
@@ -312,21 +307,6 @@ function toggleLanguage() {
   }
 }
 
-function renderFavorites() {
-  const c = document.getElementById("favList");
-  if (!c) return;
-  c.innerHTML = favorites.length ? favorites.map(p => `
-    <div class="profile">
-      <div><b>${escapeHTML(p.name)}</b></div>
-    </div>
-  `).join("") : (currentLang === "bn" ? "এখনো কোনো প্রোফাইল পছন্দ করা হয়নি।" : "No favorites added yet.");
-}
-
-function loadMessageInbox() {
-  const c = document.getElementById("messageStatus");
-  if (c) c.textContent = currentLang === "bn" ? "কোনো নতুন বার্তা নেই।" : "No new messages.";
-}
-
 function showPage(id) {
   const target = document.getElementById(id);
   if (!target) return;
@@ -335,7 +315,6 @@ function showPage(id) {
   if (id === "admin") { refreshAdminState(); if (adminAllowed()) renderAdminProfiles(); }
   if (id === "favorites") renderFavorites();
   if (id === "messages") loadMessageInbox();
-  if (id === "search") renderProfiles();
   window.scrollTo(0, 0);
 }
 
@@ -345,14 +324,9 @@ document.getElementById("searchButton").addEventListener("click", renderProfiles
 
 async function renderProfiles() {
   const c = document.getElementById("profiles");
-  if (!c) return;
   c.textContent = currentLang === "bn" ? "লোড হচ্ছে..." : "Loading...";
   try {
-    let data = null;
-    if (supabaseClient) {
-      const res = await supabaseClient.from("public_profiles").select("id,name,age,gender,district,education,occupation,created_at").order("created_at", { ascending: false });
-      data = res.data;
-    }
+    const { data } = await supabaseClient.from("public_profiles").select("id,name,age,gender,district,education,occupation,created_at").order("created_at", { ascending: false });
     people = data || [];
     c.innerHTML = people.length ? people.map(p => `
       <div class="profile">
@@ -363,25 +337,25 @@ async function renderProfiles() {
       </div>
     `).join("") : (currentLang === "bn" ? "কোনো প্রোফাইল পাওয়া যায়নি।" : "No profiles found.");
   } catch (e) {
-    c.textContent = currentLang === "bn" ? "কোনো প্রোফাইল পাওয়া যায়নি।" : "No profiles found.";
+    c.textContent = currentLang === "bn" ? "লোডিং এ সমস্যা হয়েছে।" : "Error loading profiles.";
   }
 }
 
 document.getElementById("userLoginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  if(!supabaseClient) return;
   const { error } = await supabaseClient.auth.signInWithPassword({
     email: document.getElementById("userLoginEmail").value.trim(),
     password: document.getElementById("userLoginPassword").value
   });
   if (error) { document.getElementById("userLoginMessage").textContent = error.message; return; }
+  document.getElementById("tabs").classList.remove("hidden");
   showPage("home");
   renderProfiles();
 });
 
 document.getElementById("logoutButton").addEventListener("click", async () => {
-  if(supabaseClient) await supabaseClient.auth.signOut();
-  currentAdminSession = null;
+  await supabaseClient.auth.signOut();
+  document.getElementById("tabs").classList.add("hidden");
   showPage("welcome");
 });
 
@@ -389,6 +363,7 @@ function adminAllowed() {
   return currentAdminSession?.user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 }
 
+let currentAdminSession = null;
 function refreshAdminState() {
   const ok = adminAllowed();
   document.getElementById("adminLoginPanel").classList.toggle("hidden", ok);
@@ -399,14 +374,14 @@ function refreshAdminState() {
 document.getElementById("adminLoginForm").addEventListener("submit", async e => {
   e.preventDefault();
   try {
-    if(!supabaseClient) throw new Error("Supabase is not configured.");
     const { data, error } = await supabaseClient.auth.signInWithPassword({
       email: document.getElementById("adminEmail").value.trim(),
       password: document.getElementById("adminPassword").value
     });
     if (error) throw error;
     currentAdminSession = data.session;
-    if (!adminAllowed()) { await supabaseClient.auth.signOut(); throw new Error(currentLang === "bn" ? "অনুমোদিত নয়।" : "Not authorized."); }
+    if (!adminAllowed()) { await supabaseClient.auth.signOut(); throw new Error(currentLang === "bn" ? "অনুমোদিত নয় নয়।" : "Not authorized."); }
+    document.getElementById("tabs").classList.remove("hidden");
     refreshAdminState();
     renderAdminProfiles();
   } catch (err) {
@@ -414,46 +389,30 @@ document.getElementById("adminLoginForm").addEventListener("submit", async e => 
   }
 });
 
-document.getElementById("adminLogoutButton")?.addEventListener("click", async () => {
-  if(supabaseClient) await supabaseClient.auth.signOut();
-  currentAdminSession = null;
-  refreshAdminState();
-});
-
 async function renderAdminProfiles() {
   const c = document.getElementById("adminProfiles");
-  if (!c || !adminAllowed()) return;
-  c.textContent = currentLang === "bn" ? "লোড হচ্ছে..." : "Loading...";
-  try {
-    let data = null;
-    if (supabaseClient) {
-      const res = await supabaseClient.from("profiles").select("*");
-      data = res.data;
-    }
-    c.innerHTML = data?.length ? data.map(p => `
-      <div class="row">
-        <span><b>${escapeHTML(p.name)}</b> (${escapeHTML(p.district)})</span>
-        <button type="button" class="edit" onclick="deleteProfile('${p.id}')">${currentLang === "bn" ? "মুছে ফেলুন" : "Delete"}</button>
-      </div>
-    `).join("") : (currentLang === "bn" ? "কোনো প্রোফাইল নেই।" : "No profiles.");
-  } catch(e) {
-    c.textContent = currentLang === "bn" ? "কোনো প্রোফাইল নেই।" : "No profiles.";
-  }
+  if (!adminAllowed()) return;
+  const { data } = await supabaseClient.from("profiles").select("*");
+  c.innerHTML = data?.length ? data.map(p => `
+    <div class="row">
+      <span><b>${escapeHTML(p.name)}</b> (${escapeHTML(p.district)})</span>
+      <button type="button" class="edit" onclick="deleteProfile('${p.id}')">${currentLang === "bn" ? "মুছে ফেলুন" : "Delete"}</button>
+    </div>
+  `).join("") : (currentLang === "bn" ? "কোনো প্রোফাইল নেই।" : "No profiles.");
 }
 
 async function deleteProfile(id) {
   if (!confirm(currentLang === "bn" ? "মুছে ফেলতে চান?" : "Are you sure?")) return;
-  if(supabaseClient) await supabaseClient.from("profiles").delete().eq("id", id);
+  await supabaseClient.from("profiles").delete().eq("id", id);
   renderAdminProfiles();
 }
 
-if(supabaseClient) {
-  supabaseClient.auth.getSession().then(({ data }) => {
-    if (data?.session) {
-      currentAdminSession = data.session;
-    }
-  });
-}
+supabaseClient.auth.getSession().then(({ data }) => {
+  if (data.session) {
+    currentAdminSession = data.session;
+    document.getElementById("tabs").classList.remove("hidden");
+  }
+});
 </script>
 </body>
 </html>
