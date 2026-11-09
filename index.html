@@ -29,10 +29,13 @@ input,select,textarea{font:inherit;border:1px solid #decbd2;border-radius:10px;p
 .searchrow input,.searchrow select{flex:1;width:auto}
 .field{display:grid;gap:6px;margin:12px 0}
 .field label{font-weight:700;font-size:14px}
-.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid #f0e1e6}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid #f0e1e6;flex-wrap:wrap}
 .edit{background:#fff0f5;color:var(--primary)}
+.danger{background:#ffebee;color:#c62828}
+.success-btn{background:#e8f5e9;color:#2e7d32}
 .badge{background:#e8f5e9;color:#2e7d32;padding:4px 8px;border-radius:6px;font-size:12px;font-weight:bold}
 .badge-pending{background:#fff3e0;color:#ef6c00}
+.badge-rejected{background:#ffebee;color:#c62828}
 .hidden{display:none!important}
 footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 </style>
@@ -219,9 +222,9 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
   <div id="adminPayments">পেমেন্ট লিস্ট লোড হচ্ছে...</div>
 </div>
 
-<!-- অ্যাডমিন ইউজার অপশন -->
+<!-- অ্যাডমিন প্রোফাইল ব্যবস্থাপনা -->
 <div class="panel">
-  <h2 id="adminMgtTitle">👥 সব ইউজার ও প্রোফাইল ব্যবস্থাপনা</h2>
+  <h2 id="adminMgtTitle">👥 প্রোফাইল ব্যবস্থাপনা (অনুমোদন, এডিট ও ডিলিট)</h2>
   <div id="adminProfiles">প্রোফাইল তালিকা লোড হচ্ছে...</div>
 </div>
 </div>
@@ -248,7 +251,7 @@ const supabaseClient = window.supabase.createClient(
   "sb_publishable_n7RIZqEDvlyMxng5l8H6aA_cDNXvka4"
 );
 const ADMIN_EMAIL = "zahidzahangir@gmail.com";
-let people = [], favorites = [];
+let people = [];
 let currentLang = "bn";
 let currentAdminSession = null;
 
@@ -267,7 +270,7 @@ const translations = {
     lblRegEmail: "ইমেইল *", lblRegPass: "পাসওয়ার্ড *", lblRegName: "নাম *", lblRegAge: "বয়স *",
     lblRegGender: "আপনি *", optSelect: "নির্বাচন করুন", optG1: "পাত্র", optG2: "পাত্রী", lblRegDist: "জেলা *", lblRegPhone: "মোবাইল নম্বর *", registerButton: "রেজিস্ট্রেশন সম্পন্ন করুন",
     payTitle: "মোবাইল নম্বর দেখার অ্যাক্সেস", paySub: "ফি: ১০০ টাকা | নগদ/রকেট নম্বর: 01811764518", lblTrx: "ট্রানজেকশন আইডি (TrxID)", submitPaymentBtn: "পেমেন্ট জমা দিন",
-    adminTitle: "অ্যাডমিন লগইন", lblAdminEmail: "ইমেইল", lblAdminPass: "পাসওয়ার্ড", adminLoginBtn: "প্রবেশ করুন", adminMgtTitle: "👥 সব ইউজার ও প্রোফাইল ব্যবস্থাপনা", footerText: "পাত্র-পাত্রী ঠিকানা"
+    adminTitle: "অ্যাডমিন লগইন", lblAdminEmail: "ইমেইল", lblAdminPass: "পাসওয়ার্ড", adminLoginBtn: "প্রবেশ করুন", adminMgtTitle: "👥 প্রোফাইল ব্যবস্থাপনা (অনুমোদন, এডিট ও ডিলিট)", footerText: "পাত্র-পাত্রী ঠিকানা"
   },
   en: {
     docTitle: "Patro-Patri Thikana", brandTitle: "♡ Patro-Patri Thikana", tagline: "A beautiful beginning with the right match",
@@ -283,7 +286,7 @@ const translations = {
     lblRegEmail: "Email *", lblRegPass: "Password *", lblRegName: "Name *", lblRegAge: "Age *",
     lblRegGender: "Gender *", optSelect: "Select", optG1: "Groom", optG2: "Bride", lblRegDist: "District *", lblRegPhone: "Mobile Number *", registerButton: "Complete Registration",
     payTitle: "Access to Mobile Numbers", paySub: "Fee: 100 BDT | Nagad/Rocket: 01811764518", lblTrx: "Transaction ID (TrxID)", submitPaymentBtn: "Submit Payment",
-    adminTitle: "Admin Login", lblAdminEmail: "Email", lblAdminPass: "Password", adminLoginBtn: "Login", adminMgtTitle: "👥 User & Profile Management", footerText: "Patro-Patri Thikana"
+    adminTitle: "Admin Login", lblAdminEmail: "Email", lblAdminPass: "Password", adminLoginBtn: "Login", adminMgtTitle: "👥 Profile Management (Approval, Edit & Delete)", footerText: "Patro-Patri Thikana"
   }
 };
 
@@ -351,11 +354,12 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
         age: parseInt(document.getElementById("regAge").value),
         gender: document.getElementById("regGender").value,
         district: document.getElementById("regDistrict").value.trim(),
-        phone: document.getElementById("regPhone").value.trim()
+        phone: document.getElementById("regPhone").value.trim(),
+        status: "pending"
       }]);
       if (profileError) throw profileError;
     }
-    msgEl.textContent = "রেজিস্ট্রেশন সফল হয়েছে! এখন লগইন করুন।";
+    msgEl.textContent = "রেজিস্ট্রেশন সফল হয়েছে! অ্যাডমিন অনুমোদনের পর প্রোফাইল লাইভ হবে।";
     document.getElementById("registerForm").reset();
   } catch (err) {
     msgEl.textContent = err.message || "সমস্যা হয়েছে।";
@@ -434,21 +438,26 @@ document.getElementById("adminLogoutButton")?.addEventListener("click", async ()
   refreshAdminState();
 });
 
-// অ্যাডমিন সব ইউজার ও মোবাইল নম্বরসহ দেখবে ও ডিলিট করবে
 async function renderAdminProfiles() {
   const c = document.getElementById("adminProfiles");
   if (!adminAllowed()) return;
   c.textContent = "লোড হচ্ছে...";
   try {
-    const { data, error } = await supabaseClient.from("profiles").select("*");
+    const { data, error } = await supabaseClient.from("profiles").select("*").order("created_at", { ascending: false });
     if (error) throw error;
     c.innerHTML = data?.length ? data.map(p => `
-      <div class="row">
-        <div>
+      <div class="row" id="prof-row-${p.id}">
+        <div style="flex: 1; min-width: 200px;">
           <b>${escapeHTML(p.name)}</b> (${escapeHTML(p.gender)}, ${escapeHTML(p.age)} বছর, ${escapeHTML(p.district)})<br>
-          <small class="muted">📱 মোবাইল: <b>${escapeHTML(p.phone || "দেওয়া নেই")}</b></small>
+          <small class="muted">📱 মোবাইল: <b>${escapeHTML(p.phone || "দেওয়া নেই")}</b></small><br>
+          <span>স্ট্যাটাস: <b class="${p.status === 'approved' ? 'badge' : p.status === 'rejected' ? 'badge-rejected' : 'badge-pending'}">${p.status || 'pending'}</b></span>
         </div>
-        <button type="button" class="edit" onclick="deleteProfile('${p.id}')">মুছে ফেলুন</button>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+          ${p.status !== 'approved' ? `<button type="button" class="success-btn" onclick="updateProfileStatus('${p.id}', 'approved')">অনুমোদন</button>` : ''}
+          ${p.status !== 'rejected' ? `<button type="button" class="danger" onclick="updateProfileStatus('${p.id}', 'rejected')">প্রত্যাখ্যান</button>` : ''}
+          <button type="button" class="edit" onclick="editProfilePrompt('${p.id}', '${escapeHTML(p.name)}', '${escapeHTML(p.district)}', '${escapeHTML(p.phone)}')">এডিট</button>
+          <button type="button" class="danger" onclick="deleteProfile('${p.id}')">মুছে ফেলুন</button>
+        </div>
       </div>
     `).join("") : "কোনো ইউজার প্রোফাইল পাওয়া যায়নি।";
   } catch (e) {
@@ -456,7 +465,39 @@ async function renderAdminProfiles() {
   }
 }
 
-// অ্যাডমিন পেমেন্ট অ্যাপ্রুভ করবে
+async function updateProfileStatus(id, newStatus) {
+  try {
+    const { error } = await supabaseClient.from("profiles").update({ status: newStatus }).eq("id", id);
+    if (error) throw error;
+    renderAdminProfiles();
+  } catch (err) {
+    alert("স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে: " + err.message);
+  }
+}
+
+async function editProfilePrompt(id, oldName, oldDistrict, oldPhone) {
+  const newName = prompt("নতুন নাম লিখুন:", oldName);
+  if (newName === null) return;
+  const newDistrict = prompt("নতুন জেলা লিখুন:", oldDistrict);
+  if (newDistrict === null) return;
+  const newPhone = prompt("নতুন মোবাইল নম্বর লিখুন:", oldPhone);
+  if (newPhone === null) return;
+
+  try {
+    const { error } = await supabaseClient.from("profiles").update({
+      name: newName.trim(),
+      district: newDistrict.trim(),
+      phone: newPhone.trim()
+    }).eq("id", id);
+
+    if (error) throw error;
+    alert("প্রোফাইল সফলভাবে আপডেট করা হয়েছে!");
+    renderAdminProfiles();
+  } catch (err) {
+    alert("আপডেট করতে সমস্যা হয়েছে: " + err.message);
+  }
+}
+
 async function renderAdminPayments() {
   const c = document.getElementById("adminPayments");
   if (!adminAllowed()) return;
@@ -484,7 +525,7 @@ async function approvePayment(payId) {
 }
 
 async function deleteProfile(id) {
-  if (!confirm("আপনি কি নিশ্চিত এই প্রোফাইলটি মুছে ফেলতে চান?")) return;
+  if (!confirm("আপনি কি নিশ্চিত এই প্রোফাইলটি চিরতরে মুছে ফেলতে চান?")) return;
   await supabaseClient.from("profiles").delete().eq("id", id);
   renderAdminProfiles();
 }
