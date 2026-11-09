@@ -10,7 +10,7 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--background);color:var(--text);font-family:system-ui,"Noto Sans Bengali",sans-serif}
 header{background:var(--primary);color:white;padding:14px 16px;position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center}
-.brand{font-size:20px;font-weight:800}
+.brand{font-size:20px;font-weight:800;cursor:pointer}
 header small{display:block;margin-top:2px}
 #languageButton{background:white;color:var(--primary);font-weight:bold;padding:6px 12px;border-radius:8px}
 main{max-width:960px;margin:auto;padding:16px}
@@ -22,7 +22,7 @@ button{cursor:pointer;font:inherit;border:0;border-radius:10px;padding:10px 14px
 .hero{background:linear-gradient(135deg,#fff0f5,#f7d4e0);border-radius:20px;padding:22px;display:flex;justify-content:space-between;gap:15px;align-items:center}
 .hero h1{color:#7f0a35;font-size:26px;margin-top:0}
 .couple{font-size:55px}
-.profile{border:1px solid #eedbe2;border-radius:14px;padding:12px;display:flex;gap:12px;align-items:center;margin:10px 0;min-width:0}
+.profile{border:1px solid #eedbe2;border-radius:14px;padding:12px;display:flex;gap:12px;align-items:center;margin:10px 0;min-width:0;justify-content:space-between}
 .muted{color:#79666e;font-size:13px}
 .searchrow{display:flex;gap:8px;flex-wrap:wrap}
 input,select,textarea{font:inherit;border:1px solid #decbd2;border-radius:10px;padding:11px;min-width:0;max-width:100%;width:100%;background:white;color:#28151c}
@@ -31,6 +31,8 @@ input,select,textarea{font:inherit;border:1px solid #decbd2;border-radius:10px;p
 .field label{font-weight:700;font-size:14px}
 .row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid #f0e1e6}
 .edit{background:#fff0f5;color:var(--primary)}
+.badge{background:#e8f5e9;color:#2e7d32;padding:4px 8px;border-radius:6px;font-size:12px;font-weight:bold}
+.badge-pending{background:#fff3e0;color:#ef6c00}
 .hidden{display:none!important}
 footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 </style>
@@ -38,7 +40,7 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <body>
 <div id="app">
 <header>
-  <div>
+  <div onclick="showPage('home')">
     <div class="brand" id="brandTitle">♡ পাত্র-পাত্রী ঠিকানা</div>
     <small id="tagline">সঠিক পরিচয়ে, সুন্দর জীবনের শুরু</small>
   </div>
@@ -129,27 +131,13 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <section id="messages" class="page hidden">
   <div class="panel">
     <h2 id="msgPageTitle">✉ আমার বার্তা</h2>
-    <p id="messageStatus" class="muted">বার্তা লোড হচ্ছে...</p>
-    <div id="messageInbox"></div>
-  </div>
-
-  <div class="panel hidden" id="messageConversation">
-    <h3 id="messageConversationTitle">কথোপকথন</h3>
-    <div id="messageList" style="max-height:350px;overflow-y:auto;padding:10px 0"></div>
-
-    <form id="messageForm">
-      <div class="field">
-        <textarea id="messageText" maxlength="2000" required placeholder="আপনার মেসেজ লিখুন..."></textarea>
-      </div>
-      <button type="submit" class="primary" id="sendMessageButton">মেসেজ পাঠান</button>
-    </form>
-    <p id="messageFormStatus" class="muted"></p>
+    <p id="messageStatus" class="muted">কোনো নতুন বার্তা নেই।</p>
   </div>
 </section>
 
 <section id="profile" class="page hidden">
  <div class="panel">
-<h2 id="regPageTitle">রেজিস্ট্রেশন</h2>
+<h2 id="regPageTitle">রেজিস্ট্রেশন / প্রোফাইল</h2>
 <form id="registerForm">
  <div class="field">
   <label id="lblRegEmail">ইমেইল *</label>
@@ -183,8 +171,9 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <label id="lblRegPhone">মোবাইল নম্বর *</label>
 <input id="regPhone" type="tel" required maxlength="30" placeholder="মোবাইল নম্বর">
 </div>
-<button class="primary" id="registerButton" type="submit">রেজিস্ট্রেশন করুন</button>
+<button class="primary" id="registerButton" type="submit">রেজিস্ট্রেশন সম্পন্ন করুন</button>
 </form>
+<p id="regMessage" class="muted" style="margin-top:10px;"></p>
 </div>
 </section>
 
@@ -192,10 +181,12 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
   <div class="panel">
     <h2 id="payTitle">মোবাইল নম্বর দেখার অ্যাক্সেস</h2>
     <p id="paySub">ফি: ১০০ টাকা | নগদ/রকেট নম্বর: 01811764518</p>
-    <label id="lblTrx">ট্রানজেকশন আইডি</label>
-    <input id="transactionId" type="text" placeholder="TrxID লিখুন">
-    <button type="button" class="primary" id="submitPayment">পেমেন্ট জমা দিন</button>
-    <p id="paymentMessage"></p>
+    <div class="field">
+      <label id="lblTrx">ট্রানজেকশন আইডি (TrxID)</label>
+      <input id="transactionId" type="text" placeholder="যেমন: 8N7A6D5C">
+    </div>
+    <button type="button" class="primary" id="submitPaymentBtn">পেমেন্ট জমা দিন</button>
+    <p id="paymentMessage" style="margin-top:10px;font-weight:bold;"></p>
   </div>
 </section>
 
@@ -221,9 +212,17 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <p id="adminSignedIn" class="muted"></p>
 <button type="button" id="adminLogoutButton">লগআউট</button>
 </div>
+
+<!-- অ্যাডমিন পেমেন্ট অপশন -->
 <div class="panel">
-  <h2 id="adminMgtTitle">প্রোফাইল ব্যবস্থাপনা</h2>
-  <div id="adminProfiles"></div>
+  <h2>💳 পেমেন্ট ভেরিফিকেশন (Pending Payments)</h2>
+  <div id="adminPayments">পেমেন্ট লিস্ট লোড হচ্ছে...</div>
+</div>
+
+<!-- অ্যাডমিন ইউজার অপশন -->
+<div class="panel">
+  <h2 id="adminMgtTitle">👥 সব ইউজার ও প্রোফাইল ব্যবস্থাপনা</h2>
+  <div id="adminProfiles">প্রোফাইল তালিকা লোড হচ্ছে...</div>
 </div>
 </div>
 </section>
@@ -244,9 +243,6 @@ function escapeHTML(str) {
     .replace(/'/g, "&#039;");
 }
 
-function renderFavorites() {}
-function loadMessageInbox() {}
-
 const supabaseClient = window.supabase.createClient(
   "https://ekrablggrintqifpsdou.supabase.co",
   "sb_publishable_n7RIZqEDvlyMxng5l8H6aA_cDNXvka4"
@@ -254,12 +250,11 @@ const supabaseClient = window.supabase.createClient(
 const ADMIN_EMAIL = "zahidzahangir@gmail.com";
 let people = [], favorites = [];
 let currentLang = "bn";
+let currentAdminSession = null;
 
 const translations = {
   bn: {
-    docTitle: "পাত্র-পাত্রী ঠিকানা",
-    brandTitle: "♡ পাত্র-পাত্রী ঠিকানা",
-    tagline: "সঠিক পরিচয়ে, সুন্দর জীবনের শুরু",
+    docTitle: "পাত্র-পাত্রী ঠিকানা", brandTitle: "♡ পাত্র-পাত্রী ঠিকানা", tagline: "সঠিক পরিচয়ে, সুন্দর জীবনের শুরু",
     tabHome: "🏠 হোম", tabSearch: "🔎 পাত্র-পাত্রী খুঁজুন", tabFav: "♡ পছন্দ", tabMsg: "✉ বার্তা",
     tabProfile: "👤 রেজিস্ট্রেশন", tabAdmin: "⚙ অ্যাডমিন", tabPay: "💳 পেমেন্ট", logoutButton: "🚪 লগআউট",
     welTitle: "পাত্র-পাত্রী ঠিকানায় স্বাগতম", welLoginBtn: "লগইন", welRegBtn: "রেজিস্ট্রেশন",
@@ -268,17 +263,14 @@ const translations = {
     heroSearchBtn: "পাত্র-পাত্রী খুঁজুন →", heroRegBtn: "👤 রেজিস্ট্রেশন করুন",
     howTitle: "কীভাবে ব্যবহার করবেন?", how1: "🧾 প্রোফাইল তৈরি করুন", how2: "🔎 বয়স ও জেলা দিয়ে খুঁজুন", how3: "🤝 সম্মতি নিয়ে যোগাযোগ করুন",
     searchPageTitle: "পাত্র-পাত্রী খুঁজুন", optAll: "সব প্রোফাইল", optMale: "পাত্র", optFemale: "পাত্রী", searchButton: "খুঁজুন",
-    favPageTitle: "আমার পছন্দ", msgPageTitle: "✉ আমার বার্তা",
-    regPageTitle: "রেজিস্ট্রেশন", lblRegEmail: "ইমেইল *", lblRegPass: "পাসওয়ার্ড *", lblRegName: "নাম *", lblRegAge: "বয়স *",
-    lblRegGender: "আপনি *", optSelect: "নির্বাচন করুন", optG1: "পাত্র", optG2: "পাত্রী", lblRegDist: "জেলা *", lblRegPhone: "মোবাইল নম্বর *", registerButton: "রেজিস্ট্রেশন করুন",
-    payTitle: "মোবাইল নম্বর দেখার অ্যাক্সেস", paySub: "ফি: ১০০ টাকা | নগদ/রকেট নম্বর: 01811764518", lblTrx: "ট্রানজেকশন আইডি", submitPayment: "পেমেন্ট জমা দিন",
-    adminTitle: "অ্যাডমিন লগইন", lblAdminEmail: "ইমেইল", lblAdminPass: "পাসওয়ার্ড", adminLoginBtn: "প্রবেশ করুন", adminMgtTitle: "প্রোফাইল ব্যবস্থাপনা", adminLogoutButton: "লগআউট",
-    footerText: "পাত্র-পাত্রী ঠিকানা"
+    favPageTitle: "আমার পছন্দ", msgPageTitle: "✉ আমার বার্তা", regPageTitle: "রেজিস্ট্রেশন",
+    lblRegEmail: "ইমেইল *", lblRegPass: "পাসওয়ার্ড *", lblRegName: "নাম *", lblRegAge: "বয়স *",
+    lblRegGender: "আপনি *", optSelect: "নির্বাচন করুন", optG1: "পাত্র", optG2: "পাত্রী", lblRegDist: "জেলা *", lblRegPhone: "মোবাইল নম্বর *", registerButton: "রেজিস্ট্রেশন সম্পন্ন করুন",
+    payTitle: "মোবাইল নম্বর দেখার অ্যাক্সেস", paySub: "ফি: ১০০ টাকা | নগদ/রকেট নম্বর: 01811764518", lblTrx: "ট্রানজেকশন আইডি (TrxID)", submitPaymentBtn: "পেমেন্ট জমা দিন",
+    adminTitle: "অ্যাডমিন লগইন", lblAdminEmail: "ইমেইল", lblAdminPass: "পাসওয়ার্ড", adminLoginBtn: "প্রবেশ করুন", adminMgtTitle: "👥 সব ইউজার ও প্রোফাইল ব্যবস্থাপনা", footerText: "পাত্র-পাত্রী ঠিকানা"
   },
   en: {
-    docTitle: "Patro-Patri Thikana",
-    brandTitle: "♡ Patro-Patri Thikana",
-    tagline: "A beautiful beginning with the right match",
+    docTitle: "Patro-Patri Thikana", brandTitle: "♡ Patro-Patri Thikana", tagline: "A beautiful beginning with the right match",
     tabHome: "🏠 Home", tabSearch: "🔎 Search Match", tabFav: "♡ Favorites", tabMsg: "✉ Messages",
     tabProfile: "👤 Registration", tabAdmin: "⚙ Admin", tabPay: "💳 Payment", logoutButton: "🚪 Logout",
     welTitle: "Welcome to Patro-Patri Thikana", welLoginBtn: "Login", welRegBtn: "Register",
@@ -287,12 +279,11 @@ const translations = {
     heroSearchBtn: "Search Match →", heroRegBtn: "👤 Register Now",
     howTitle: "How to use?", how1: "🧾 Create Profile", how2: "🔎 Search by Age & District", how3: "🤝 Contact with Consent",
     searchPageTitle: "Find Match", optAll: "All Profiles", optMale: "Groom", optFemale: "Bride", searchButton: "Search",
-    favPageTitle: "My Favorites", msgPageTitle: "✉ My Messages",
-    regPageTitle: "Registration", lblRegEmail: "Email *", lblRegPass: "Password *", lblRegName: "Name *", lblRegAge: "Age *",
-    lblRegGender: "Gender *", optSelect: "Select", optG1: "Groom", optG2: "Bride", lblRegDist: "District *", lblRegPhone: "Mobile Number *", registerButton: "Register",
-    payTitle: "Access to Mobile Numbers", paySub: "Fee: 100 BDT | Nagad/Rocket: 01811764518", lblTrx: "Transaction ID", submitPayment: "Submit Payment",
-    adminTitle: "Admin Login", lblAdminEmail: "Email", lblAdminPass: "Password", adminLoginBtn: "Login", adminMgtTitle: "Profile Management", adminLogoutButton: "Logout",
-    footerText: "Patro-Patri Thikana"
+    favPageTitle: "My Favorites", msgPageTitle: "✉ My Messages", regPageTitle: "Registration",
+    lblRegEmail: "Email *", lblRegPass: "Password *", lblRegName: "Name *", lblRegAge: "Age *",
+    lblRegGender: "Gender *", optSelect: "Select", optG1: "Groom", optG2: "Bride", lblRegDist: "District *", lblRegPhone: "Mobile Number *", registerButton: "Complete Registration",
+    payTitle: "Access to Mobile Numbers", paySub: "Fee: 100 BDT | Nagad/Rocket: 01811764518", lblTrx: "Transaction ID (TrxID)", submitPaymentBtn: "Submit Payment",
+    adminTitle: "Admin Login", lblAdminEmail: "Email", lblAdminPass: "Password", adminLoginBtn: "Login", adminMgtTitle: "👥 User & Profile Management", footerText: "Patro-Patri Thikana"
   }
 };
 
@@ -311,9 +302,8 @@ function showPage(id) {
   if (!target) return;
   document.querySelectorAll(".page").forEach(p => p.classList.toggle("hidden", p.id !== id));
   document.querySelectorAll(".tabs [data-page]").forEach(b => b.classList.toggle("active", b.dataset.page === id));
-  if (id === "admin") { refreshAdminState(); if (adminAllowed()) renderAdminProfiles(); }
-  if (id === "favorites") renderFavorites();
-  if (id === "messages") loadMessageInbox();
+  if (id === "admin") { refreshAdminState(); if (adminAllowed()) { renderAdminProfiles(); renderAdminPayments(); } }
+  if (id === "search") renderProfiles();
   window.scrollTo(0, 0);
 }
 
@@ -323,9 +313,11 @@ document.getElementById("searchButton").addEventListener("click", renderProfiles
 
 async function renderProfiles() {
   const c = document.getElementById("profiles");
+  if (!c) return;
   c.textContent = currentLang === "bn" ? "লোড হচ্ছে..." : "Loading...";
   try {
-    const { data } = await supabaseClient.from("public_profiles").select("id,name,age,gender,district,education,occupation,created_at").order("created_at", { ascending: false });
+    const { data, error } = await supabaseClient.from("public_profiles").select("*").order("created_at", { ascending: false });
+    if (error) throw error;
     people = data || [];
     c.innerHTML = people.length ? people.map(p => `
       <div class="profile">
@@ -333,27 +325,75 @@ async function renderProfiles() {
           <b>${escapeHTML(p.name)}</b>
           <div class="muted">${escapeHTML(p.gender)} • ${escapeHTML(p.age || "")} ${currentLang === "bn" ? "বছর" : "yrs"} • 📍 ${escapeHTML(p.district || "")}</div>
         </div>
+        <button type="button" class="edit" onclick="showPage('payment')">${currentLang === "bn" ? "নম্বর দেখুন" : "View Phone"}</button>
       </div>
     `).join("") : (currentLang === "bn" ? "কোনো প্রোফাইল পাওয়া যায়নি।" : "No profiles found.");
   } catch (e) {
-    c.textContent = currentLang === "bn" ? "লোডিং এ সমস্যা হয়েছে।" : "Error loading profiles.";
+    c.textContent = currentLang === "bn" ? "প্রোফাইল লোড করা যাচ্ছে না।" : "Error loading profiles.";
   }
 }
 
+document.getElementById("registerForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const msgEl = document.getElementById("regMessage");
+  msgEl.textContent = "সংরক্ষণ করা হচ্ছে...";
+  try {
+    const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+      email: document.getElementById("regEmail").value.trim(),
+      password: document.getElementById("regPassword").value
+    });
+    if (authError) throw authError;
+
+    if (authData.user) {
+      const { error: profileError } = await supabaseClient.from("profiles").insert([{
+        id: authData.user.id,
+        name: document.getElementById("regName").value.trim(),
+        age: parseInt(document.getElementById("regAge").value),
+        gender: document.getElementById("regGender").value,
+        district: document.getElementById("regDistrict").value.trim(),
+        phone: document.getElementById("regPhone").value.trim()
+      }]);
+      if (profileError) throw profileError;
+    }
+    msgEl.textContent = "রেজিস্ট্রেশন সফল হয়েছে! এখন লগইন করুন।";
+    document.getElementById("registerForm").reset();
+  } catch (err) {
+    msgEl.textContent = err.message || "সমস্যা হয়েছে।";
+  }
+});
+
 document.getElementById("userLoginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const { error } = await supabaseClient.auth.signInWithPassword({
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
     email: document.getElementById("userLoginEmail").value.trim(),
     password: document.getElementById("userLoginPassword").value
   });
   if (error) { document.getElementById("userLoginMessage").textContent = error.message; return; }
+  currentAdminSession = data.session;
   document.getElementById("tabs").classList.remove("hidden");
   showPage("home");
-  renderProfiles();
+});
+
+document.getElementById("submitPaymentBtn").addEventListener("click", async () => {
+  const trx = document.getElementById("transactionId").value.trim();
+  const msg = document.getElementById("paymentMessage");
+  if (!trx) { msg.textContent = "অনুগ্রহ করে TrxID লিখুন।"; return; }
+  msg.textContent = "পেমেন্ট জমা দেওয়া হচ্ছে...";
+  try {
+    const { error } = await supabaseClient.from("payments").insert([{ transaction_id: trx, status: "pending" }]);
+    if (error) throw error;
+    msg.style.color = "green";
+    msg.textContent = "পেমেন্ট সফলভাবে জমা হয়েছে! অ্যাডমিন যাচাই করার পর নম্বর দেখতে পারবেন।";
+    document.getElementById("transactionId").value = "";
+  } catch (err) {
+    msg.style.color = "red";
+    msg.textContent = "জমাদানে সমস্যা হয়েছে (অথবা আগে থেকেই জমা আছে)।";
+  }
 });
 
 document.getElementById("logoutButton").addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
+  currentAdminSession = null;
   document.getElementById("tabs").classList.add("hidden");
   showPage("welcome");
 });
@@ -362,12 +402,11 @@ function adminAllowed() {
   return currentAdminSession?.user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 }
 
-let currentAdminSession = null;
 function refreshAdminState() {
   const ok = adminAllowed();
   document.getElementById("adminLoginPanel").classList.toggle("hidden", ok);
   document.getElementById("adminContent").classList.toggle("hidden", !ok);
-  if (ok) document.getElementById("adminSignedIn").textContent = (currentLang === "bn" ? "লগইন: " : "Logged in: ") + currentAdminSession.user.email;
+  if (ok) document.getElementById("adminSignedIn").textContent = "লগইনকৃত অ্যাডমিন: " + currentAdminSession.user.email;
 }
 
 document.getElementById("adminLoginForm").addEventListener("submit", async e => {
@@ -379,37 +418,81 @@ document.getElementById("adminLoginForm").addEventListener("submit", async e => 
     });
     if (error) throw error;
     currentAdminSession = data.session;
-    if (!adminAllowed()) { await supabaseClient.auth.signOut(); throw new Error(currentLang === "bn" ? "অনুমোদিত নয়।" : "Not authorized."); }
+    if (!adminAllowed()) { await supabaseClient.auth.signOut(); throw new Error("অনুমোদিত অ্যাডমিন নন।"); }
     document.getElementById("tabs").classList.remove("hidden");
     refreshAdminState();
     renderAdminProfiles();
+    renderAdminPayments();
   } catch (err) {
     document.getElementById("adminAuthMessage").textContent = err.message;
   }
 });
 
+document.getElementById("adminLogoutButton")?.addEventListener("click", async () => {
+  await supabaseClient.auth.signOut();
+  currentAdminSession = null;
+  refreshAdminState();
+});
+
+// অ্যাডমিন সব ইউজার ও মোবাইল নম্বরসহ দেখবে ও ডিলিট করবে
 async function renderAdminProfiles() {
   const c = document.getElementById("adminProfiles");
   if (!adminAllowed()) return;
-  const { data } = await supabaseClient.from("profiles").select("*");
-  c.innerHTML = data?.length ? data.map(p => `
-    <div class="row">
-      <span><b>${escapeHTML(p.name)}</b> (${escapeHTML(p.district)})</span>
-      <button type="button" class="edit" onclick="deleteProfile('${p.id}')">${currentLang === "bn" ? "মুছে ফেলুন" : "Delete"}</button>
-    </div>
-  `).join("") : (currentLang === "bn" ? "কোনো প্রোফাইল নেই।" : "No profiles.");
+  c.textContent = "লোড হচ্ছে...";
+  try {
+    const { data, error } = await supabaseClient.from("profiles").select("*");
+    if (error) throw error;
+    c.innerHTML = data?.length ? data.map(p => `
+      <div class="row">
+        <div>
+          <b>${escapeHTML(p.name)}</b> (${escapeHTML(p.gender)}, ${escapeHTML(p.age)} বছর, ${escapeHTML(p.district)})<br>
+          <small class="muted">📱 মোবাইল: <b>${escapeHTML(p.phone || "দেওয়া নেই")}</b></small>
+        </div>
+        <button type="button" class="edit" onclick="deleteProfile('${p.id}')">মুছে ফেলুন</button>
+      </div>
+    `).join("") : "কোনো ইউজার প্রোফাইল পাওয়া যায়নি।";
+  } catch (e) {
+    c.textContent = "প্রোফাইল লোড করা যায়নি।";
+  }
+}
+
+// অ্যাডমিন পেমেন্ট অ্যাপ্রুভ করবে
+async function renderAdminPayments() {
+  const c = document.getElementById("adminPayments");
+  if (!adminAllowed()) return;
+  c.textContent = "লোড হচ্ছে...";
+  try {
+    const { data, error } = await supabaseClient.from("payments").select("*").order("created_at", { ascending: false });
+    if (error) throw error;
+    c.innerHTML = data?.length ? data.map(pay => `
+      <div class="row">
+        <div>
+          <b>TrxID: ${escapeHTML(pay.transaction_id)}</b>
+          <span class="badge ${pay.status === 'pending' ? 'badge-pending' : ''}">${pay.status}</span>
+        </div>
+        ${pay.status === 'pending' ? `<button type="button" class="primary" onclick="approvePayment('${pay.id}')">Approve</button>` : '<span>✓ অনুমোদিত</span>'}
+      </div>
+    `).join("") : "কোনো পেমেন্ট রিকোয়েস্ট নেই।";
+  } catch (e) {
+    c.textContent = "পেমেন্ট লোড করা যায়নি।";
+  }
+}
+
+async function approvePayment(payId) {
+  await supabaseClient.from("payments").update({ status: "approved" }).eq("id", payId);
+  renderAdminPayments();
 }
 
 async function deleteProfile(id) {
-  if (!confirm(currentLang === "bn" ? "মুছে ফেলতে চান?" : "Are you sure?")) return;
+  if (!confirm("আপনি কি নিশ্চিত এই প্রোফাইলটি মুছে ফেলতে চান?")) return;
   await supabaseClient.from("profiles").delete().eq("id", id);
   renderAdminProfiles();
 }
 
 supabaseClient.auth.getSession().then(({ data }) => {
-  if (data.session) {
+  if (data && data.session) {
     currentAdminSession = data.session;
-    document.getElementById("tabs").classList.remove("hidden");
+    if (adminAllowed()) document.getElementById("tabs").classList.remove("hidden");
   }
 });
 </script>
