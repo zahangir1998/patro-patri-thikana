@@ -60,15 +60,15 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <button type="button" data-page="messages" id="tabMsg">✉ বার্তা</button>
 <button type="button" data-page="profile" id="tabProfile">👤 প্রোফাইল তৈরি</button>
 <button type="button" data-page="admin" id="tabAdmin">⚙ অ্যাডমিন</button>
-<button type="button" data-open-page="payment" id="tabPay">💳 পেমেন্ট</button>
+<button type="button" onclick="showPage('payment')" id="tabPay">💳 পেমেন্ট</button>
 <button type="button" id="logoutButton">🚪 লগআউট</button>
 </nav>
 
 <section id="welcome" class="page">
   <div class="panel">
     <h2 id="welTitle">পাত্র-পাত্রী ঠিকানায় স্বাগতম</h2>
-    <button type="button" class="primary" data-open-page="login" id="welLoginBtn">লগইন</button>
-    <button type="button" class="primary" data-open-page="profile" id="welRegBtn">প্রোফাইল তৈরি</button>
+    <p class="muted">পরিষেবাটি ব্যবহার করতে প্রথমে লগইন করুন অথবা অ্যাকাউন্ট তৈরি করুন।</p>
+    <button type="button" class="primary" onclick="showPage('login')" id="welLoginBtn">লগইন</button>
   </div>
 </section>
 
@@ -95,8 +95,8 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <div>
 <h1 id="heroTitle">জীবনসঙ্গী খুঁজুন সহজে</h1>
 <p id="heroText">আপনার পছন্দ ও প্রয়োজন অনুযায়ী পাত্র-পাত্রী খুঁজুন।</p>
-<button type="button" class="primary" data-open-page="search" id="heroSearchBtn">পাত্র-পাত্রী খুঁজুন →</button>
-<button type="button" class="primary" data-open-page="profile" id="heroRegBtn">👤 প্রোফাইল তৈরি করুন</button>
+<button type="button" class="primary" onclick="showPage('search')" id="heroSearchBtn">পাত্র-পাত্রী খুঁজুন →</button>
+<button type="button" class="primary" onclick="showPage('profile')" id="heroRegBtn">👤 প্রোফাইল তৈরি করুন</button>
 </div>
 <div class="couple">💞</div>
 </div>
@@ -248,6 +248,15 @@ function escapeHTML(str) {
     .replace(/'/g, "&#039;");
 }
 
+// ফোন নম্বরকে আন্তর্জাতিক ৮৮ কান্ট্রি কোড ফর্মেটে রূপান্তর করার হেলপার ফাংশন
+function formatWhatsAppNumber(phone) {
+  if (!phone) return "8801811764518";
+  let clean = phone.replace(/[^0-9]/g, ""); // শুধু সংখ্যা ফিল্টার করা
+  if (clean.startsWith("880")) return clean;
+  if (clean.startsWith("0")) return "88" + clean;
+  return "880" + clean;
+}
+
 const supabaseClient = window.supabase.createClient(
   "https://ekrablggrintqifpsdou.supabase.co",
   "sb_publishable_n7RIZqEDvlyMxng5l8H6aA_cDNXvka4"
@@ -263,7 +272,7 @@ const translations = {
     docTitle: "পাত্র-পাত্রী ঠিকানা", brandTitle: "♡ পাত্র-পাত্রী ঠিকানা", tagline: "সঠিক পরিচয়ে, সুন্দর জীবনের শুরু",
     tabHome: "🏠 হোম", tabSearch: "🔎 পাত্র-পাত্রী খুঁজুন", tabFav: "♡ পছন্দ", tabMsg: "✉ বার্তা",
     tabProfile: "👤 প্রোফাইল তৈরি", tabAdmin: "⚙ অ্যাডমিন", tabPay: "💳 পেমেন্ট", logoutButton: "🚪 লগআউট",
-    welTitle: "পাত্র-পাত্রী ঠিকানায় স্বাগতম", welLoginBtn: "লগইন", welRegBtn: "প্রোফাইল তৈরি",
+    welTitle: "পাত্র-পাত্রী ঠিকানায় স্বাগতম", welLoginBtn: "লগইন",
     loginTitle: "সদস্য লগইন", lblLoginEmail: "ইমেইল", lblLoginPass: "পাসওয়ার্ড", loginSubmitBtn: "লগইন করুন",
     heroTitle: "জীবনসঙ্গী খুঁজুন সহজে", heroText: "আপনার পছন্দ ও প্রয়োজন অনুযায়ী পাত্র-পাত্রী খুঁজুন।",
     heroSearchBtn: "পাত্র-পাত্রী খুঁজুন →", heroRegBtn: "👤 প্রোফাইল তৈরি করুন",
@@ -278,7 +287,7 @@ const translations = {
     docTitle: "Patro-Patri Thikana", brandTitle: "♡ Patro-Patri Thikana", tagline: "A beautiful beginning with the right match",
     tabHome: "🏠 Home", tabSearch: "🔎 Search Match", tabFav: "♡ Favorites", tabMsg: "✉ Messages",
     tabProfile: "👤 Create Profile", tabAdmin: "⚙ Admin", tabPay: "💳 Payment", logoutButton: "🚪 Logout",
-    welTitle: "Welcome to Patro-Patri Thikana", welLoginBtn: "Login", welRegBtn: "Create Profile",
+    welTitle: "Welcome to Patro-Patri Thikana", welLoginBtn: "Login",
     loginTitle: "Member Login", lblLoginEmail: "Email", lblLoginPass: "Password", loginSubmitBtn: "Login",
     heroTitle: "Find Life Partner Easily", heroText: "Find matches according to your preference and needs.",
     heroSearchBtn: "Search Match →", heroRegBtn: "👤 Create Profile",
@@ -312,7 +321,6 @@ function showPage(id) {
 }
 
 document.querySelectorAll(".tabs [data-page]").forEach(b => b.addEventListener("click", () => showPage(b.dataset.page)));
-document.querySelectorAll("[data-open-page]").forEach(b => b.addEventListener("click", () => showPage(b.dataset.openPage)));
 document.getElementById("searchButton").addEventListener("click", renderProfiles);
 
 async function checkUserPaymentStatus() {
@@ -340,11 +348,12 @@ async function renderProfiles() {
     c.innerHTML = people.length ? people.map(p => {
       let actionArea = "";
       if (userHasPaid || adminAllowed()) {
-        const phoneNum = p.phone || "01811764518";
+        const rawPhone = p.phone || "01811764518";
+        const waNumber = formatWhatsAppNumber(rawPhone);
         actionArea = `
           <div style="margin-top:8px; background:#e8f5e9; padding:10px; border-radius:8px;">
-            <small>📱 মোবাইল/WhatsApp: <b>${escapeHTML(phoneNum)}</b></small><br>
-            <a href="https://wa.me/${phoneNum}?text=سلام،%20আপনার%20পাত্র-পাত্রী%20প্রোফাইলটি%20সম্পর্কে%20কথা বলতে%20চাই।" target="_blank" class="video-btn">📹 সরাসরি ভিডিও কল করুন (WhatsApp)</a>
+            <small>📱 মোবাইল/WhatsApp: <b>${escapeHTML(rawPhone)}</b></small><br>
+            <a href="https://wa.me/${waNumber}?text=السلام%20عليكم،%20আপনার%20পাত্র-পাত্রী%20প্রোফাইলটি%20সম্পর্কে%20কথা%20বলতে%20চাই।" target="_blank" class="video-btn">📹 সরাসরি ভিডিও কল করুন (WhatsApp)</a>
           </div>
         `;
       } else {
