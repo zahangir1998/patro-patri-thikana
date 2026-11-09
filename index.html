@@ -9,7 +9,10 @@
 :root{--primary:#a30d43;--secondary:#f8dbe5;--background:#fff8fa;--text:#28151c}
 *{box-sizing:border-box}
 body{margin:0;background:var(--background);color:var(--text);font-family:system-ui,"Noto Sans Bengali",sans-serif}
-header{background:var(--primary);color:white;padding:14px 16px;position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center}
+header{background:var(--primary);color:white;padding:12px 16px;position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center}
+.brand-container{display:flex;align-items:center;gap:12px}
+.app-logo{background:white;color:var(--primary);width:45px;height:45px;border-radius:50%;display:grid;place-items:center;font-size:24px;overflow:hidden;box-shadow:0 2px 5px rgba(0,0,0,0.2);flex-shrink:0}
+.app-logo img{width:100%;height:100%;object-fit:cover}
 .brand{font-size:20px;font-weight:800}
 header small{display:block;margin-top:2px}
 #languageButton{background:white;color:var(--primary);font-weight:bold;padding:6px 12px;border-radius:8px}
@@ -38,9 +41,12 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <body>
 <div id="app">
 <header>
-  <div>
-    <div class="brand" id="brandTitle">♡ পাত্র-পাত্রী ঠিকানা</div>
-    <small id="tagline">সঠিক পরিচয়ে, সুন্দর জীবনের শুরু</small>
+  <div class="brand-container">
+    <div class="app-logo">💍</div>
+    <div>
+      <div class="brand" id="brandTitle">♡ পাত্র-পাত্রী ঠিকানা</div>
+      <small id="tagline">সঠিক পরিচয়ে, সুন্দর জীবনের শুরু</small>
+    </div>
   </div>
   <button type="button" id="languageButton" onclick="toggleLanguage()">English</button>
 </header>
