@@ -13,8 +13,8 @@ header{background:var(--primary);color:white;padding:14px 16px;position:sticky;t
 .brand{font-size:20px;font-weight:800;cursor:pointer}
 header small{display:block;margin-top:2px}
 .header-actions{display:flex;gap:8px;align-items:center;}
-#backButton{background:white;color:var(--primary);font-weight:bold;padding:6px 12px;border-radius:8px;display:none;}
-#languageButton{background:white;color:var(--primary);font-weight:bold;padding:6px 12px;border-radius:8px}
+#backButton{background:white;color:var(--primary);font-weight:bold;padding:6px 12px;border-radius:8px;display:none;border:none;cursor:pointer;}
+#languageButton{background:white;color:var(--primary);font-weight:bold;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;}
 main{max-width:960px;margin:auto;padding:16px}
 .tabs{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;padding:10px 0}
 button{cursor:pointer;font:inherit;border:0;border-radius:10px;padding:10px 14px}
@@ -310,7 +310,6 @@ function formatWhatsAppNumber(phone) {
   if (!phone) return "8801811764518";
   let clean = phone.replace(/[^0-9]/g, "");
   if (clean.startsWith("0")) clean = clean.substring(1);
-  if (!clean.startsWith("880") && clean.length === 10) return "880" + clean;
   return clean;
 }
 
@@ -321,9 +320,9 @@ const supabaseClient = window.supabase.createClient(
 const ADMIN_EMAIL = "zahidzahangir@gmail.com";
 let people = [];
 let currentLang = "bn";
-let currentAdminSession = null;
+let currentSession = null;
 let userHasPaid = false;
-let pageHistory = ["home"];
+let pageHistory = ["welcome"];
 
 const translations = {
   bn: {
@@ -376,9 +375,8 @@ function showPage(id, addToHistory = true) {
     pageHistory.push(id);
   }
   
-  // ব্যাক বাটন কন্ট্রোল (ওয়েলকাম বা হোম ছাড়া অন্য পেজে গেলে দেখাবে)
   const backBtn = document.getElementById("backButton");
-  if (pageHistory.length > 1 && id !== "welcome" && id !== "home") {
+  if (pageHistory.length > 1 && id !== "welcome") {
     backBtn.style.display = "inline-block";
   } else {
     backBtn.style.display = "none";
@@ -388,13 +386,13 @@ function showPage(id, addToHistory = true) {
   document.querySelectorAll(".tabs [data-page]").forEach(b => b.classList.toggle("active", b.dataset.page === id));
   
   if (id === "admin") { refreshAdminState(); if (adminAllowed()) { renderAdminProfiles(); renderAdminPayments(); } }
-  if (id === "search") { checkUserPaymentStatus(); renderProfiles(); }
+  if (id === "search") { checkUserPaymentStatus().then(() => renderProfiles()); }
   window.scrollTo(0, 0);
 }
 
 function goBack() {
   if (pageHistory.length > 1) {
-    pageHistory.pop(); // বর্তমান পেজ বাদ
+    pageHistory.pop();
     const prevPage = pageHistory[pageHistory.length - 1] || "home";
     showPage(prevPage, false);
   } else {
@@ -406,8 +404,17 @@ document.querySelectorAll(".tabs [data-page]").forEach(b => b.addEventListener("
 document.getElementById("searchButton").addEventListener("click", renderProfiles);
 
 async function checkUserPaymentStatus() {
+  if (!currentSession || !currentSession.user) {
+    userHasPaid = false;
+    return;
+  }
   try {
-    const { data } = await supabaseClient.from("payments").select("*").eq("status", "approved");
+    const { data } = await supabaseClient
+      .from("payments")
+      .select("*")
+      .eq("user_id", currentSession.user.id)
+      .eq("status", "approved");
+      
     if (data && data.length > 0) {
       userHasPaid = true;
     } else {
@@ -429,8 +436,9 @@ async function renderProfiles() {
     
     c.innerHTML = people.length ? people.map(p => {
       let actionArea = "";
+      // পেমেন্ট অনুমোদিত হলে বা অ্যাডমিন হলে তবেই ফোন এবং ভিডিও বাটন দেখাবে
       if (userHasPaid || adminAllowed()) {
-        const rawPhone = p.phone || "8801811764518";
+        const rawPhone = p.phone || "";
         const imoPhone = p.imo_phone || "";
         const waNumber = formatWhatsAppNumber(rawPhone);
         
@@ -443,6 +451,7 @@ async function renderProfiles() {
           </div>
         `;
       } else {
+        // পেমেন্ট ছাড়া নম্বর এবং কল বাটন সম্পূর্ণ লক বা হাইড থাকবে
         actionArea = `
           <div style="margin-top:8px;">
             <button type="button" class="edit" onclick="showPage('payment')">${currentLang === "bn" ? "🔒 পেমেন্ট করে ভিডিও কল ও নম্বর দেখুন (১০০ টাকা)" : "🔒 Pay to Unlock Video Call & Phone"}</button>
@@ -469,7 +478,7 @@ async function renderProfiles() {
   }
 }
 
-// রেজিস্ট্রেশন ও অটো-লগইন
+// রেজিস্ট্রেশন সম্পন্ন হলে সাথে সাথে অটো-লগইন
 document.getElementById("registerForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const msgEl = document.getElementById("regMessage");
@@ -493,6 +502,7 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
   }
 
   try {
+    // ১. সাইন-আপ করা
     const { data: authData, error: authError } = await supabaseClient.auth.signUp({
       email: email,
       password: password
@@ -500,7 +510,11 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
     
     if (authError) throw authError;
 
+    const userId = authData.user ? authData.user.id : null;
+
+    // ২. প্রোফাইল ডাটাবেজে সংরক্ষণ করা
     const { error: profileError } = await supabaseClient.from("profiles").insert([{
+      user_id: userId,
       name: document.getElementById("regName").value.trim(),
       age: parseInt(document.getElementById("regAge").value),
       gender: document.getElementById("regGender").value,
@@ -514,23 +528,25 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
 
     if (profileError) throw profileError;
 
-    // অটো সাইন-ইন করে ভেতরে নিয়ে যাওয়া
+    // ৩. তাৎক্ষণিক অটো-লগইন করানো
     const { data: loginData, error: loginError } = await supabaseClient.auth.signInWithPassword({
       email: email,
       password: password
     });
+
     if (!loginError && loginData) {
-      currentAdminSession = loginData.session;
+      currentSession = loginData.session;
     }
 
     document.getElementById("tabs").classList.remove("hidden");
     msgEl.style.color = "green";
-    msgEl.textContent = "রেজিস্ট্রেশন ও লগইন সফল হয়েছে!";
+    msgEl.textContent = "রেজিস্ট্রেশন সফল হয়েছে! হোম পেজে নিয়ে যাওয়া হচ্ছে...";
     document.getElementById("registerForm").reset();
     
+    // কোনো ব্যাক করা ছাড়াই সাথে সাথে ভেতরে নিয়ে যাবে
     setTimeout(() => {
       showPage("home");
-    }, 1000);
+    }, 800);
 
   } catch (err) {
     msgEl.style.color = "red";
@@ -538,7 +554,7 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
   }
 });
 
-// ইউজার লগইন
+// ইউজারের ম্যানুয়াল লগইন
 document.getElementById("userLoginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const msgEl = document.getElementById("userLoginMessage");
@@ -552,17 +568,18 @@ document.getElementById("userLoginForm").addEventListener("submit", async (e) =>
     });
     if (error) throw error;
     
-    currentAdminSession = data.session;
+    currentSession = data.session;
     document.getElementById("tabs").classList.remove("hidden");
     msgEl.style.color = "green";
     msgEl.textContent = "সফলভাবে লগইন হয়েছে!";
-    setTimeout(() => showPage("home"), 1000);
+    setTimeout(() => showPage("home"), 500);
   } catch (err) {
     msgEl.style.color = "red";
     msgEl.textContent = "লগইনে ত্রুটি: " + err.message;
   }
 });
 
+// পেমেন্ট জমা দেওয়া
 document.getElementById("submitPaymentBtn").addEventListener("click", async () => {
   const trx = document.getElementById("transactionId").value.trim();
   const msg = document.getElementById("paymentMessage");
@@ -570,7 +587,8 @@ document.getElementById("submitPaymentBtn").addEventListener("click", async () =
   msg.style.color = "#28151c";
   msg.textContent = "পেমেন্ট জমা দেওয়া হচ্ছে...";
   try {
-    const { error } = await supabaseClient.from("payments").insert([{ transaction_id: trx, status: "pending" }]);
+    const userId = currentSession && currentSession.user ? currentSession.user.id : null;
+    const { error } = await supabaseClient.from("payments").insert([{ transaction_id: trx, user_id: userId, status: "pending" }]);
     if (error) throw error;
     msg.style.color = "green";
     msg.textContent = "পেমেন্ট সফলভাবে জমা হয়েছে! অ্যাডমিন যাচাই করার পর ভিডিও কল ও নম্বর আনলক হয়ে যাবে।";
@@ -583,21 +601,22 @@ document.getElementById("submitPaymentBtn").addEventListener("click", async () =
 
 document.getElementById("logoutButton").addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
-  currentAdminSession = null;
+  currentSession = null;
+  userHasPaid = false;
   pageHistory = ["welcome"];
   document.getElementById("tabs").classList.add("hidden");
   showPage("welcome");
 });
 
 function adminAllowed() {
-  return currentAdminSession?.user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+  return currentSession?.user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 }
 
 function refreshAdminState() {
   const ok = adminAllowed();
   document.getElementById("adminLoginPanel").classList.toggle("hidden", ok);
   document.getElementById("adminContent").classList.toggle("hidden", !ok);
-  if (ok) document.getElementById("adminSignedIn").textContent = "লগইনকৃত অ্যাডমিন: " + currentAdminSession.user.email;
+  if (ok) document.getElementById("adminSignedIn").textContent = "লগইনকৃত অ্যাডমিন: " + currentSession.user.email;
 }
 
 document.getElementById("adminLoginForm").addEventListener("submit", async e => {
@@ -608,7 +627,7 @@ document.getElementById("adminLoginForm").addEventListener("submit", async e => 
       password: document.getElementById("adminPassword").value
     });
     if (error) throw error;
-    currentAdminSession = data.session;
+    currentSession = data.session;
     if (!adminAllowed()) { await supabaseClient.auth.signOut(); throw new Error("অনুমোদিত অ্যাডমিন নন।"); }
     document.getElementById("tabs").classList.remove("hidden");
     refreshAdminState();
@@ -621,7 +640,7 @@ document.getElementById("adminLoginForm").addEventListener("submit", async e => 
 
 document.getElementById("adminLogoutButton")?.addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
-  currentAdminSession = null;
+  currentSession = null;
   refreshAdminState();
 });
 
@@ -720,7 +739,7 @@ async function deleteProfile(id) {
 
 supabaseClient.auth.getSession().then(({ data }) => {
   if (data && data.session) {
-    currentAdminSession = data.session;
+    currentSession = data.session;
     if (adminAllowed()) document.getElementById("tabs").classList.remove("hidden");
   }
 });
