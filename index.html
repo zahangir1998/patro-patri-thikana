@@ -12,6 +12,8 @@ body{margin:0;background:var(--background);color:var(--text);font-family:system-
 header{background:var(--primary);color:white;padding:14px 16px;position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center}
 .brand{font-size:20px;font-weight:800;cursor:pointer}
 header small{display:block;margin-top:2px}
+.header-actions{display:flex;gap:8px;align-items:center;}
+#backButton{background:white;color:var(--primary);font-weight:bold;padding:6px 12px;border-radius:8px;display:none;}
 #languageButton{background:white;color:var(--primary);font-weight:bold;padding:6px 12px;border-radius:8px}
 main{max-width:960px;margin:auto;padding:16px}
 .tabs{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;padding:10px 0}
@@ -53,7 +55,10 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
     <div class="brand" id="brandTitle">♡ পাত্র-পাত্রী ঠিকানা</div>
     <small id="tagline">সঠিক পরিচয়ে, সুন্দর জীবনের শুরু</small>
   </div>
-  <button type="button" id="languageButton" onclick="toggleLanguage()">English</button>
+  <div class="header-actions">
+    <button type="button" id="backButton" onclick="goBack()">← ব্যাক</button>
+    <button type="button" id="languageButton" onclick="toggleLanguage()">English</button>
+  </div>
 </header>
 
 <main>
@@ -318,6 +323,7 @@ let people = [];
 let currentLang = "bn";
 let currentAdminSession = null;
 let userHasPaid = false;
+let pageHistory = ["home"];
 
 const translations = {
   bn: {
@@ -362,14 +368,38 @@ function toggleLanguage() {
   }
 }
 
-function showPage(id) {
+function showPage(id, addToHistory = true) {
   const target = document.getElementById(id);
   if (!target) return;
+  
+  if (addToHistory && pageHistory[pageHistory.length - 1] !== id) {
+    pageHistory.push(id);
+  }
+  
+  // ব্যাক বাটন কন্ট্রোল (ওয়েলকাম বা হোম ছাড়া অন্য পেজে গেলে দেখাবে)
+  const backBtn = document.getElementById("backButton");
+  if (pageHistory.length > 1 && id !== "welcome" && id !== "home") {
+    backBtn.style.display = "inline-block";
+  } else {
+    backBtn.style.display = "none";
+  }
+
   document.querySelectorAll(".page").forEach(p => p.classList.toggle("hidden", p.id !== id));
   document.querySelectorAll(".tabs [data-page]").forEach(b => b.classList.toggle("active", b.dataset.page === id));
+  
   if (id === "admin") { refreshAdminState(); if (adminAllowed()) { renderAdminProfiles(); renderAdminPayments(); } }
   if (id === "search") { checkUserPaymentStatus(); renderProfiles(); }
   window.scrollTo(0, 0);
+}
+
+function goBack() {
+  if (pageHistory.length > 1) {
+    pageHistory.pop(); // বর্তমান পেজ বাদ
+    const prevPage = pageHistory[pageHistory.length - 1] || "home";
+    showPage(prevPage, false);
+  } else {
+    showPage("home", false);
+  }
 }
 
 document.querySelectorAll(".tabs [data-page]").forEach(b => b.addEventListener("click", () => showPage(b.dataset.page)));
@@ -401,7 +431,7 @@ async function renderProfiles() {
       let actionArea = "";
       if (userHasPaid || adminAllowed()) {
         const rawPhone = p.phone || "8801811764518";
-        const imoPhone = p.imo_phone || rawPhone;
+        const imoPhone = p.imo_phone || "";
         const waNumber = formatWhatsAppNumber(rawPhone);
         
         actionArea = `
@@ -439,7 +469,7 @@ async function renderProfiles() {
   }
 }
 
-// ইমেইল, পাসওয়ার্ড, WhatsApp ও imo নম্বর সহ রেজিস্ট্রেশন
+// রেজিস্ট্রেশন ও অটো-লগইন
 document.getElementById("registerForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const msgEl = document.getElementById("regMessage");
@@ -449,13 +479,11 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
   const email = document.getElementById("regEmail").value.trim();
   const password = document.getElementById("regPassword").value;
   
-  // WhatsApp নম্বর ফিল্টারিং
   const waCode = document.getElementById("waCountryCode").value;
   let rawWa = document.getElementById("regWaPhone").value.trim();
   if (rawWa.startsWith("0")) rawWa = rawWa.substring(1);
   const fullWaPhone = waCode + rawWa;
 
-  // imo নম্বর ফিল্টারিং
   const imoCode = document.getElementById("imoCountryCode").value;
   let rawImo = document.getElementById("regImoPhone").value.trim();
   let fullImoPhone = "";
@@ -486,9 +514,24 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
 
     if (profileError) throw profileError;
 
+    // অটো সাইন-ইন করে ভেতরে নিয়ে যাওয়া
+    const { data: loginData, error: loginError } = await supabaseClient.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
+    if (!loginError && loginData) {
+      currentAdminSession = loginData.session;
+    }
+
+    document.getElementById("tabs").classList.remove("hidden");
     msgEl.style.color = "green";
-    msgEl.textContent = "রেজিস্ট্রেশন সফল হয়েছে! অ্যাডমিন অনুমোদন করার পর আপনার প্রোফাইলটি দেখানো হবে। আপনি এখন লগইন করতে পারবেন।";
+    msgEl.textContent = "রেজিস্ট্রেশন ও লগইন সফল হয়েছে!";
     document.getElementById("registerForm").reset();
+    
+    setTimeout(() => {
+      showPage("home");
+    }, 1000);
+
   } catch (err) {
     msgEl.style.color = "red";
     msgEl.textContent = "ত্রুটি: " + (err.message || "রেজিস্ট্রেশনে সমস্যা হয়েছে।");
@@ -541,6 +584,7 @@ document.getElementById("submitPaymentBtn").addEventListener("click", async () =
 document.getElementById("logoutButton").addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
   currentAdminSession = null;
+  pageHistory = ["welcome"];
   document.getElementById("tabs").classList.add("hidden");
   showPage("welcome");
 });
