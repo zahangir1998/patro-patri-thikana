@@ -24,8 +24,23 @@ button{cursor:pointer;font:inherit;border:0;border-radius:10px;padding:10px 14px
 .hero{background:linear-gradient(135deg,#fff0f5,#f7d4e0);border-radius:20px;padding:22px;display:flex;justify-content:space-between;gap:15px;align-items:center}
 .hero h1{color:#7f0a35;font-size:26px;margin-top:0}
 .couple{font-size:55px}
+
+/* লগইন পেজের জন্য ফুল ব্যাকগ্রাউন্ড ও ডিজাইন */
+.login-hero {
+  background: linear-gradient(rgba(163, 13, 67, 0.65), rgba(163, 13, 67, 0.65)), url('https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=1200&q=80');
+  background-size: cover;
+  background-position: center;
+  border-radius: 20px;
+  padding: 35px 20px;
+  color: white;
+  text-align: center;
+  margin-bottom: 15px;
+}
+.login-hero h2 { color: white; margin-bottom: 5px; }
+
 .profile{border:1px solid #eedbe2;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;margin:10px 0;background:#fff}
-.profile-header{display:flex;justify-content:space-between;align-items:center;width:100%}
+.profile-header{display:flex;gap:15px;align-items:center;width:100%}
+.profile-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); background: #fce4ec; }
 .muted{color:#79666e;font-size:13px}
 .searchrow{display:flex;gap:8px;flex-wrap:wrap}
 input,select,textarea{font:inherit;border:1px solid #decbd2;border-radius:10px;padding:11px;min-width:0;max-width:100%;width:100%;background:white;color:#28151c}
@@ -51,8 +66,8 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <body>
 <div id="app">
 <header>
-  <div onclick="showPage('home')">
-    <div class="brand" id="brandTitle">♡ পাত্র-পাত্রী ঠিকানা</div>
+  <div onclick="handleBrandClick()">
+    <div class="brand" id="brandTitle">💍 পাত্র-পাত্রী ঠিকানা</div>
     <small id="tagline">সঠিক পরিচয়ে, সুন্দর জীবনের শুরু</small>
   </div>
   <div class="header-actions">
@@ -66,7 +81,7 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <button type="button" class="active" data-page="home" id="tabHome">🏠 হোম</button>
 <button type="button" data-page="search" id="tabSearch">🔎 পাত্র-পাত্রী খুঁজুন</button>
 <button type="button" data-page="favorites" id="tabFav">♡ পছন্দ</button>
-<button type="button" data-page="messages" id="tabMsg">✉ বার্তা</button>
+<button type="button" data-page="messages" id="tabMsg">✉ হটলাইন বার্তা</button>
 <button type="button" data-page="profile" id="tabProfile">👤 প্রোফাইল তৈরি</button>
 <button type="button" data-page="admin" id="tabAdmin">⚙ অ্যাডমিন</button>
 <button type="button" onclick="showPage('payment')" id="tabPay">💳 পেমেন্ট</button>
@@ -85,8 +100,12 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 </section>
 
 <section id="login" class="page hidden">
-  <div class="panel">
+  <div class="login-hero">
+    <div style="font-size: 45px; margin-bottom: 5px;">👩‍❤️‍👨</div>
     <h2 id="loginTitle">সদস্য লগইন</h2>
+    <p style="margin: 0; font-size: 14px;">আপনার জীবনসঙ্গী খুঁজে পেতে লগইন করুন</p>
+  </div>
+  <div class="panel">
     <form id="userLoginForm">
       <div class="field">
         <label id="lblLoginEmail">ইমেইল *</label>
@@ -111,7 +130,7 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <button type="button" class="primary" onclick="showPage('search')" id="heroSearchBtn">পাত্র-পাত্রী খুঁজুন →</button>
 <button type="button" class="primary" onclick="showPage('profile')" id="heroRegBtn">👤 প্রোফাইল তৈরি করুন</button>
 </div>
-<div class="couple">💞</div>
+<div class="couple">💍</div>
 </div>
 
 <div class="panel">
@@ -148,8 +167,13 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 
 <section id="messages" class="page hidden">
   <div class="panel">
-    <h2 id="msgPageTitle">✉ আমার বার্তা</h2>
-    <p id="messageStatus" class="muted">কোনো নতুন বার্তা নেই।</p>
+    <h2 id="msgPageTitle">✉ হটলাইন মেসেজ (সরাসরি অ্যাডমিনের সাথে কথা বলুন)</h2>
+    <p class="muted">আপনার যেকোনো জিজ্ঞাসা বা সাহায্যের জন্য সরাসরি অ্যাডমিনকে বার্তা পাঠান।</p>
+    <div class="field">
+      <textarea id="hotlineMsg" rows="4" placeholder="আপনার বার্তা এখানে লিখুন..."></textarea>
+    </div>
+    <button type="button" class="primary" onclick="sendHotlineMessage()">মেসেজ পাঠান</button>
+    <p id="hotlineStatus" style="margin-top:8px; font-weight:bold;"></p>
   </div>
 </section>
 
@@ -183,52 +207,41 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 </div>
 <div class="field">
 <label id="lblRegDist">জেলা / অবস্থান *</label>
-<input id="regDistrict" required maxlength="100" placeholder="যেমন: ঢাকা, সিলেট বা লন্ডন">
+<input id="regDistrict" required maxlength="100" placeholder="যেমন: ঢাকা, সিলেট">
 </div>
 <div class="field">
 <label id="lblRegEdu">শিক্ষাগত যোগ্যতা</label>
-<input id="regEdu" placeholder="যেমন: এসএসসি, এইচএসসি, বিএসসি, এমবিএ ইত্যাদি">
+<input id="regEdu" placeholder="যেমন: বিএসসি, এইচএসসি ইত্যাদি">
 </div>
 <div class="field">
-<label id="lblRegJob">পেশা / জব (যদি করেন)</label>
-<input id="regJob" placeholder="যেমন: সরকারি চাকরি, প্রাইভেট চাকরি, ব্যবসা, গৃহিণী ইত্যাদি">
+<label id="lblRegJob">পেশা / জব</label>
+<input id="regJob" placeholder="যেমন: চাকরি, ব্যবসা ইত্যাদি">
+</div>
+<div class="field">
+<label>প্রোফাইল ছবির লিংক (Image URL)</label>
+<input id="regPhoto" type="url" placeholder="https://example.com/photo.jpg (ঐচ্ছিক)">
 </div>
 
-<!-- WhatsApp নম্বর -->
 <div class="field">
 <label id="lblRegWa">WhatsApp নম্বর *</label>
 <div class="phone-group">
   <select id="waCountryCode">
-    <option value="880">🇧🇩 +880 (বাংলাদেশ)</option>
-    <option value="91">🇮🇳 +91 (ভারত)</option>
-    <option value="966">🇸🇦 +966 (সৌদি আরব)</option>
-    <option value="971">🇦🇪 +971 (ইউএই)</option>
-    <option value="965">🇰🇼 +965 (কুয়েত)</option>
-    <option value="974">🇶🇦 +974 (কাতার)</option>
-    <option value="968">🇴🇲 +968 (ওমান)</option>
-    <option value="60">🇲🇾 +60 (মালয়েশিয়া)</option>
-    <option value="44">🇬🇧 +44 (যুক্তরাজ্য)</option>
-    <option value="1">🇺🇸 +1 (যুক্তরাষ্ট্র/কানাডা)</option>
+    <option value="880">🇧🇩 +880</option>
+    <option value="91">🇮🇳 +91</option>
+    <option value="966">🇸🇦 +966</option>
+    <option value="971">🇦🇪 +971</option>
+    <option value="44">🇬🇧 +44</option>
   </select>
   <input id="regWaPhone" type="tel" required maxlength="20" placeholder="017XXXXXXXX">
 </div>
 </div>
 
-<!-- imo নম্বর -->
 <div class="field">
 <label id="lblRegImo">imo নম্বর (যদি থাকে)</label>
 <div class="phone-group">
   <select id="imoCountryCode">
-    <option value="880">🇧🇩 +880 (বাংলাদেশ)</option>
-    <option value="91">🇮🇳 +91 (ভারত)</option>
-    <option value="966">🇸🇦 +966 (সৌদি আরব)</option>
-    <option value="971">🇦🇪 +971 (ইউএই)</option>
-    <option value="965">🇰🇼 +965 (কুয়েত)</option>
-    <option value="974">🇶🇦 +974 (কাতার)</option>
-    <option value="968">🇴🇲 +968 (ওমান)</option>
-    <option value="60">🇲🇾 +60 (মালয়েশিয়া)</option>
-    <option value="44">🇬🇧 +44 (যুক্তরাজ্য)</option>
-    <option value="1">🇺🇸 +1 (যুক্তরাষ্ট্র/কানাডা)</option>
+    <option value="880">🇧🇩 +880</option>
+    <option value="91">🇮🇳 +91</option>
   </select>
   <input id="regImoPhone" type="tel" maxlength="20" placeholder="017XXXXXXXX">
 </div>
@@ -243,7 +256,7 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <section id="payment" class="page hidden">
   <div class="panel">
     <h2 id="payTitle">ভিডিও কল ও নম্বর আনলক পেমেন্ট</h2>
-    <p id="paySub">ফি: ১০০ টাকা | নগদ/বিকাশ/রকেট নম্বর: 01811764518 (Send Money)</p>
+    <p id="paySub">ফি: ১০০ টাকা | নগদ/রকেট নম্বর: 01811764518 (Send Money)</p>
     <div class="field">
       <label id="lblTrx">আপনার ট্রানজেকশন আইডি (TrxID)</label>
       <input id="transactionId" type="text" placeholder="যেমন: 8N7A6D5C">
@@ -276,15 +289,18 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <button type="button" id="adminLogoutButton">লগআউট</button>
 </div>
 
-<!-- অ্যাডমিন পেমেন্ট অপশন -->
 <div class="panel">
-  <h2>💳 পেমেন্ট ভেরিফিকেশন (Pending Payments)</h2>
+  <h2>💳 পেমেন্ট ভেরিফিকেশন</h2>
   <div id="adminPayments">পেমেন্ট লিস্ট লোড হচ্ছে...</div>
 </div>
 
-<!-- অ্যাডমিন প্রোফাইল ব্যবস্থাপনা -->
 <div class="panel">
-  <h2 id="adminMgtTitle">👥 প্রোফাইল ব্যবস্থাপনা (অনুমোদন, এডিট ও ডিলিট)</h2>
+  <h2>✉ ইউজারের হটলাইন মেসেজসমূহ</h2>
+  <div id="adminHotlineMsgs">মেসেজ লোড হচ্ছে...</div>
+</div>
+
+<div class="panel">
+  <h2 id="adminMgtTitle">👥 প্রোফাইল ব্যবস্থাপনা (সম্পূর্ণ এডিট ও কন্ট্রোল)</h2>
   <div id="adminProfiles">প্রোফাইল তালিকা লোড হচ্ছে...</div>
 </div>
 </div>
@@ -326,8 +342,8 @@ let pageHistory = ["welcome"];
 
 const translations = {
   bn: {
-    docTitle: "পাত্র-পাত্রী ঠিকানা", brandTitle: "♡ পাত্র-পাত্রী ঠিকানা", tagline: "সঠিক পরিচয়ে, সুন্দর জীবনের শুরু",
-    tabHome: "🏠 হোম", tabSearch: "🔎 পাত্র-পাত্রী খুঁজুন", tabFav: "♡ পছন্দ", tabMsg: "✉ বার্তা",
+    docTitle: "পাত্র-পাত্রী ঠিকানা", brandTitle: "💍 পাত্র-পাত্রী ঠিকানা", tagline: "সঠিক পরিচয়ে, সুন্দর জীবনের শুরু",
+    tabHome: "🏠 হোম", tabSearch: "🔎 পাত্র-পাত্রী খুঁজুন", tabFav: "♡ পছন্দ", tabMsg: "✉ হটলাইন",
     tabProfile: "👤 প্রোফাইল তৈরি", tabAdmin: "⚙ অ্যাডমিন", tabPay: "💳 পেমেন্ট", logoutButton: "🚪 লগআউট",
     welTitle: "পাত্র-পাত্রী ঠিকানায় স্বাগতম", welLoginBtn: "লগইন", welRegBtn: "প্রোফাইল তৈরি",
     loginTitle: "সদস্য লগইন", lblLoginEmail: "ইমেইল *", lblLoginPass: "পাসওয়ার্ড *", loginSubmitBtn: "লগইন করুন",
@@ -335,24 +351,24 @@ const translations = {
     heroSearchBtn: "পাত্র-পাত্রী খুঁজুন →", heroRegBtn: "👤 প্রোফাইল তৈরি করুন",
     howTitle: "কীভাবে ব্যবহার করবেন?", how1: "🧾 প্রোফাইল তৈরি করুন", how2: "🔎 বয়স ও জেলা দিয়ে খুঁজুন", how3: "💳 পেমেন্ট করে ভিডিও কল ও নম্বর আনলক করুন",
     searchPageTitle: "পাত্র-পাত্রী খুঁজুন", optAll: "সব প্রোফাইল", optMale: "পাত্র", optFemale: "পাত্রী", searchButton: "খুঁজুন",
-    favPageTitle: "আমার পছন্দ", msgPageTitle: "✉ আমার বার্তা", regPageTitle: "পরিবারের সদস্যের প্রোফাইল তৈরি / রেজিস্ট্রেশন",
-    lblRegEmail: "ইমেইল আইডি *", lblRegPass: "পাসওয়ার্ড *", lblRegName: "নাম *", lblRegAge: "বয়স *", lblRegGender: "পাত্র নাকি পাত্রী *", optSelect: "নির্বাচন করুন", optG1: "পাত্র", optG2: "পাত্রী", lblRegDist: "জেলা / অবস্থান *", lblRegEdu: "শিক্ষাগত যোগ্যতা", lblRegJob: "পেশা / জব (যদি করেন)", lblRegWa: "WhatsApp নম্বর *", lblRegImo: "imo নম্বর (যদি থাকে)", registerButton: "অ্যাকাউন্ট ও প্রোফাইল তৈরি করুন",
-    payTitle: "ভিডিও কল ও নম্বর আনলক পেমেন্ট", paySub: "ফি: ১০০ টাকা | নগদ/বিকাশ/রকেট নম্বর: 01811764518", lblTrx: "আপনার ট্রানজেকশন আইডি (TrxID)", submitPaymentBtn: "পেমেন্ট জমা দিন",
-    adminTitle: "অ্যাডমিন লগইন", lblAdminEmail: "ইমেইল", lblAdminPass: "পাসওয়ার্ড", adminLoginBtn: "প্রবেশ করুন", adminMgtTitle: "👥 প্রোফাইল ব্যবস্থাপনা (অনুমোদন, এডিট ও ডিলিট)", footerText: "পাত্র-পাত্রী ঠিকানা"
+    favPageTitle: "আমার পছন্দ", msgPageTitle: "✉ হটলাইন বার্তা", regPageTitle: "পরিবারের সদস্যের প্রোফাইল তৈরি / রেজিস্ট্রেশন",
+    lblRegEmail: "ইমেইল আইডি *", lblRegPass: "পাসওয়ার্ড *", lblRegName: "নাম *", lblRegAge: "বয়স *", lblRegGender: "পাত্র নাকি পাত্রী *", optSelect: "নির্বাচন করুন", optG1: "পাত্র", optG2: "পাত্রী", lblRegDist: "জেলা / অবস্থান *", lblRegEdu: "শিক্ষাগত যোগ্যতা", lblRegJob: "পেশা / জব", lblRegWa: "WhatsApp নম্বর *", lblRegImo: "imo নম্বর (যদি থাকে)", registerButton: "অ্যাকাউন্ট ও প্রোফাইল তৈরি করুন",
+    payTitle: "ভিডিও কল ও নম্বর আনলক পেমেন্ট", paySub: "ফি: ১০০ টাকা | নগদ/রকেট নম্বর: 01811764518", lblTrx: "আপনার ট্রানজেকশন আইডি (TrxID)", submitPaymentBtn: "পেমেন্ট জমা দিন",
+    adminTitle: "অ্যাডমিন লগইন", lblAdminEmail: "ইমেইল", lblAdminPass: "পাসওয়ার্ড", adminLoginBtn: "প্রবেশ করুন", adminMgtTitle: "👥 প্রোফাইল ব্যবস্থাপনা", footerText: "পাত্র-পাত্রী ঠিকানা"
   },
   en: {
-    docTitle: "Patro-Patri Thikana", brandTitle: "♡ Patro-Patri Thikana", tagline: "A beautiful beginning with the right match",
-    tabHome: "🏠 Home", tabSearch: "🔎 Search Match", tabFav: "♡ Favorites", tabMsg: "✉ Messages",
-    tabProfile: "👤 Create Profile", tabAdmin: "⚙ Admin", tabPay: "💳 Payment", logoutButton: "🚪 Logout",
+    docTitle: "Patro-Patri Thikana", brandTitle: "💍 Patro-Patri Thikana", tagline: "A beautiful beginning with the right match",
+    tabHome: "🏠 Home", tabSearch: "🔎 Search Match", tabFav: "♡ Favorites", tabMsg: "✉ Hotline",
+    tabProfile: "👤 Create Profile", tabAdmin: "⚙ Admin", tabPayment: "💳 Payment", logoutButton: "🚪 Logout",
     welTitle: "Welcome to Patro-Patri Thikana", welLoginBtn: "Login", welRegBtn: "Create Profile",
     loginTitle: "Member Login", lblLoginEmail: "Email *", lblLoginPass: "Password *", loginSubmitBtn: "Login",
     heroTitle: "Find Life Partner Easily", heroText: "Find matches according to your preference and needs.",
     heroSearchBtn: "Search Match →", heroRegBtn: "👤 Create Profile",
     howTitle: "How to use?", how1: "🧾 Create Profile", how2: "🔎 Search by Age & District", how3: "💳 Pay to Unlock Video Call & Phone",
     searchPageTitle: "Find Match", optAll: "All Profiles", optMale: "Groom", optFemale: "Bride", searchButton: "Search",
-    favPageTitle: "My Favorites", msgPageTitle: "✉ My Messages", regPageTitle: "Register & Create Profile",
-    lblRegEmail: "Email *", lblRegPass: "Password *", lblRegName: "Name *", lblRegAge: "Age *", lblRegGender: "Gender *", optSelect: "Select", optG1: "Groom", optG2: "Bride", lblRegDist: "District / Location *", lblRegEdu: "Education", lblRegJob: "Occupation / Job", lblRegWa: "WhatsApp Number *", lblRegImo: "imo Number (Optional)", registerButton: "Create Account & Profile",
-    payTitle: "Unlock Video Call & Phone Access", paySub: "Fee: 100 BDT | bKash/Nagad: 01811764518", lblTrx: "Transaction ID (TrxID)", submitPaymentBtn: "Submit Payment",
+    favPageTitle: "My Favorites", msgPageTitle: "✉ Hotline Messages", regPageTitle: "Register & Create Profile",
+    lblRegEmail: "Email *", lblRegPass: "Password *", lblRegName: "Name *", lblRegAge: "Age *", lblRegGender: "Gender *", optSelect: "Select", optG1: "Groom", optG2: "Bride", lblRegDist: "District / Location *", lblRegEdu: "Education", lblRegJob: "Occupation", lblRegWa: "WhatsApp Number *", lblRegImo: "imo Number (Optional)", registerButton: "Create Account & Profile",
+    payTitle: "Unlock Video Call & Phone Access", paySub: "Fee: 100 BDT | Nagad/Rocket: 01811764518", lblTrx: "Transaction ID (TrxID)", submitPaymentBtn: "Submit Payment",
     adminTitle: "Admin Login", lblAdminEmail: "Email", lblAdminPass: "Password", adminLoginBtn: "Login", adminMgtTitle: "👥 Profile Management", footerText: "Patro-Patri Thikana"
   }
 };
@@ -367,6 +383,12 @@ function toggleLanguage() {
   }
 }
 
+function handleBrandClick() {
+  const activePage = pageHistory[pageHistory.length - 1];
+  if (activePage === "login") return; // লগইন পেজে থাকাকালীন হেডার ক্লিক নিষ্ক্রিয় থাকবে
+  showPage("home");
+}
+
 function showPage(id, addToHistory = true) {
   const target = document.getElementById(id);
   if (!target) return;
@@ -374,9 +396,10 @@ function showPage(id, addToHistory = true) {
   if (addToHistory && pageHistory[pageHistory.length - 1] !== id) {
     pageHistory.push(id);
   }
+  localStorage.setItem("current_page", id);
   
   const backBtn = document.getElementById("backButton");
-  if (pageHistory.length > 1 && id !== "welcome") {
+  if (pageHistory.length > 1 && id !== "welcome" && id !== "home") {
     backBtn.style.display = "inline-block";
   } else {
     backBtn.style.display = "none";
@@ -385,7 +408,7 @@ function showPage(id, addToHistory = true) {
   document.querySelectorAll(".page").forEach(p => p.classList.toggle("hidden", p.id !== id));
   document.querySelectorAll(".tabs [data-page]").forEach(b => b.classList.toggle("active", b.dataset.page === id));
   
-  if (id === "admin") { refreshAdminState(); if (adminAllowed()) { renderAdminProfiles(); renderAdminPayments(); } }
+  if (id === "admin") { refreshAdminState(); if (adminAllowed()) { renderAdminProfiles(); renderAdminPayments(); renderAdminHotline(); } }
   if (id === "search") { checkUserPaymentStatus().then(() => renderProfiles()); }
   window.scrollTo(0, 0);
 }
@@ -408,6 +431,7 @@ async function checkUserPaymentStatus() {
     userHasPaid = false;
     return;
   }
+  if (adminAllowed()) { userHasPaid = true; return; }
   try {
     const { data } = await supabaseClient
       .from("payments")
@@ -415,11 +439,7 @@ async function checkUserPaymentStatus() {
       .eq("user_id", currentSession.user.id)
       .eq("status", "approved");
       
-    if (data && data.length > 0) {
-      userHasPaid = true;
-    } else {
-      userHasPaid = false;
-    }
+    userHasPaid = (data && data.length > 0);
   } catch (e) {
     userHasPaid = false;
   }
@@ -430,11 +450,14 @@ async function renderProfiles() {
   if (!c) return;
   c.textContent = currentLang === "bn" ? "লোড হচ্ছে..." : "Loading...";
   try {
-    const { data, error } = await supabaseClient.from("public_profiles").select("*").order("created_at", { ascending: false });
+    const { data, error } = await supabaseClient.from("profiles").select("*").order("created_at", { ascending: false });
     if (error) throw error;
     people = data || [];
     
-    c.innerHTML = people.length ? people.map(p => {
+    // ইউজার ও অ্যাডমিন সবার জন্য নিজের প্রোফাইল বা অনুমোদিত প্রোফাইলগুলো ফিল্টার করা
+    const visibleProfiles = people.filter(p => p.status === 'approved' || (currentSession && p.user_id === currentSession.user.id) || adminAllowed());
+
+    c.innerHTML = visibleProfiles.length ? visibleProfiles.map(p => {
       let actionArea = "";
       if (userHasPaid || adminAllowed()) {
         const rawPhone = p.phone || "";
@@ -457,14 +480,18 @@ async function renderProfiles() {
         `;
       }
 
+      const photoUrl = p.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80';
+
       return `
         <div class="profile">
           <div class="profile-header">
-            <div>
-              <b>${escapeHTML(p.name)}</b>
+            <img src="${escapeHTML(photoUrl)}" class="profile-img" alt="Profile Photo">
+            <div style="flex:1;">
+              <b>${escapeHTML(p.name)}</b> ${p.user_id === currentSession?.user?.id ? '<span class="badge">(আপনার প্রোফাইল)</span>' : ''}
               <div class="muted">${escapeHTML(p.gender)} • ${escapeHTML(p.age || "")} ${currentLang === "bn" ? "বছর" : "yrs"} • 📍 ${escapeHTML(p.district || "")}</div>
               ${p.education ? `<div class="muted">🎓 শিক্ষা: ${escapeHTML(p.education)}</div>` : ''}
               ${p.job ? `<div class="muted">💼 পেশা: ${escapeHTML(p.job)}</div>` : ''}
+              <div class="muted">স্ট্যাটাস: <b class="${p.status === 'approved' ? 'badge' : 'badge-pending'}">${p.status || 'pending'}</b></div>
             </div>
           </div>
           ${actionArea}
@@ -484,6 +511,7 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
   
   const email = document.getElementById("regEmail").value.trim();
   const password = document.getElementById("regPassword").value;
+  const photoUrl = document.getElementById("regPhoto").value.trim();
   
   const waCode = document.getElementById("waCountryCode").value;
   let rawWa = document.getElementById("regWaPhone").value.trim();
@@ -507,7 +535,6 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
     });
     
     if (authError) throw authError;
-
     const userId = authData.user ? authData.user.id : null;
 
     const { error: profileError } = await supabaseClient.from("profiles").insert([{
@@ -520,6 +547,7 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
       job: document.getElementById("regJob").value.trim(),
       phone: fullWaPhone,
       imo_phone: fullImoPhone,
+      photo: photoUrl,
       status: "pending"
     }]);
 
@@ -592,11 +620,40 @@ document.getElementById("submitPaymentBtn").addEventListener("click", async () =
   }
 });
 
+async function sendHotlineMessage() {
+  const txt = document.getElementById("hotlineMsg").value.trim();
+  const statusEl = document.getElementById("hotlineStatus");
+  if (!txt) { statusEl.style.color = "red"; statusEl.textContent = "অনুগ্রহ করে কিছু লিখুন।"; return; }
+  if (!currentSession || !currentSession.user) {
+    statusEl.style.color = "red";
+    statusEl.textContent = "মেসেজ পাঠানোর জন্য প্রথমে লগইন করুন।";
+    return;
+  }
+  statusEl.style.color = "#28151c";
+  statusEl.textContent = "মেসেজ পাঠানো হচ্ছে...";
+  try {
+    const { error } = await supabaseClient.from("hotline_messages").insert([{
+      user_id: currentSession.user.id,
+      email: currentSession.user.email,
+      message: txt,
+      status: "unread"
+    }]);
+    if (error) throw error;
+    statusEl.style.color = "green";
+    statusEl.textContent = "আপনার মেসেজ সফলভাবে অ্যাডমিনের কাছে পাঠানো হয়েছে!";
+    document.getElementById("hotlineMsg").value = "";
+  } catch (err) {
+    statusEl.style.color = "red";
+    statusEl.textContent = "ত্রুটি: " + err.message;
+  }
+}
+
 document.getElementById("logoutButton").addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
   currentSession = null;
   userHasPaid = false;
   pageHistory = ["welcome"];
+  localStorage.removeItem("current_page");
   document.getElementById("tabs").classList.add("hidden");
   showPage("welcome");
 });
@@ -626,6 +683,7 @@ document.getElementById("adminLoginForm").addEventListener("submit", async e => 
     refreshAdminState();
     renderAdminProfiles();
     renderAdminPayments();
+    renderAdminHotline();
   } catch (err) {
     document.getElementById("adminAuthMessage").textContent = err.message;
   }
@@ -642,7 +700,6 @@ async function renderAdminProfiles() {
   if (!adminAllowed()) return;
   c.textContent = "লোড হচ্ছে...";
   try {
-    // সরাসরি profiles টেবিল থেকে সব ডাটা আনবে যাতে কোনো পেন্ডিং প্রোফাইল মিস না হয়
     const { data, error } = await supabaseClient.from("profiles").select("*").order("created_at", { ascending: false });
     if (error) throw error;
     c.innerHTML = data?.length ? data.map(p => `
@@ -651,13 +708,13 @@ async function renderAdminProfiles() {
           <b>${escapeHTML(p.name)}</b> (${escapeHTML(p.gender)}, ${escapeHTML(p.age)} বছর, ${escapeHTML(p.district)})<br>
           <small class="muted">🎓 শিক্ষা: <b>${escapeHTML(p.education || "দেওয়া নেই")}</b> | 💼 পেশা: <b>${escapeHTML(p.job || "দেওয়া নেই")}</b></small><br>
           <small class="muted">📱 WhatsApp: <b>+${escapeHTML(p.phone || "দেওয়া নেই")}</b> | imo: <b>+${escapeHTML(p.imo_phone || "দেওয়া নেই")}</b></small><br>
-          <span>স্ট্যাটাস: <b class="${p.status === 'approved' ? 'badge' : p.status === 'rejected' ? 'badge-rejected' : 'badge-pending'}">${p.status || 'pending'}</b></span>
+          <span>স্ট্যাটাস: <b class="${p.status === 'approved' ? 'badge' : 'badge-pending'}">${p.status || 'pending'}</b></span>
         </div>
         <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
           ${p.status !== 'approved' ? `<button type="button" class="success-btn" onclick="updateProfileStatus('${p.id}', 'approved')">অনুমোদন</button>` : ''}
           ${p.status !== 'rejected' ? `<button type="button" class="danger" onclick="updateProfileStatus('${p.id}', 'rejected')">প্রত্যাখ্যান</button>` : ''}
-          <button type="button" class="edit" onclick="editProfilePrompt('${p.id}', '${escapeHTML(p.name)}', '${escapeHTML(p.district)}', '${escapeHTML(p.phone)}')">এডিট</button>
-          <button type="button" class="danger" onclick="deleteProfile('${p.id}')">মুছে ফেলুন</button>
+          <button type="button" class="edit" onclick="editProfileFull('${p.id}', '${escapeHTML(p.name)}', '${escapeHTML(p.district)}', '${escapeHTML(p.phone)}', '${escapeHTML(p.education || '')}', '${escapeHTML(p.job || '')}')">✏️ এডিট</button>
+          <button type="button" class="danger" onclick="deleteProfile('${p.id}')">🗑️ মুছুন</button>
         </div>
       </div>
     `).join("") : "কোনো ইউজার প্রোফাইল পাওয়া যায়নি।";
@@ -676,23 +733,29 @@ async function updateProfileStatus(id, newStatus) {
   }
 }
 
-async function editProfilePrompt(id, oldName, oldDistrict, oldPhone) {
-  const newName = prompt("নতুন নাম লিখুন:", oldName);
+async function editProfileFull(id, oldName, oldDistrict, oldPhone, oldEdu, oldJob) {
+  const newName = prompt("নাম পরিবর্তন করুন:", oldName);
   if (newName === null) return;
-  const newDistrict = prompt("নতুন জেলা লিখুন:", oldDistrict);
+  const newDistrict = prompt("জেলা পরিবর্তন করুন:", oldDistrict);
   if (newDistrict === null) return;
-  const newPhone = prompt("নতুন মোবাইল নম্বর লিখুন:", oldPhone);
+  const newPhone = prompt("মোবাইল নম্বর পরিবর্তন করুন:", oldPhone);
   if (newPhone === null) return;
+  const newEdu = prompt("শিক্ষাগত যোগ্যতা পরিবর্তন করুন:", oldEdu);
+  if (newEdu === null) return;
+  const newJob = prompt("পেশা পরিবর্তন করুন:", oldJob);
+  if (newJob === null) return;
 
   try {
     const { error } = await supabaseClient.from("profiles").update({
       name: newName.trim(),
       district: newDistrict.trim(),
-      phone: newPhone.trim()
+      phone: newPhone.trim(),
+      education: newEdu.trim(),
+      job: newJob.trim()
     }).eq("id", id);
 
     if (error) throw error;
-    alert("প্রোফাইল সফলভাবে আপডেট করা হয়েছে!");
+    alert("প্রোফাইল সফলভাবে এডিট ও আপডেট করা হয়েছে!");
     renderAdminProfiles();
   } catch (err) {
     alert("আপডেট করতে সমস্যা হয়েছে: " + err.message);
@@ -725,16 +788,52 @@ async function approvePayment(payId) {
   renderAdminPayments();
 }
 
+async function renderAdminHotline() {
+  const c = document.getElementById("adminHotlineMsgs");
+  if (!adminAllowed()) return;
+  c.textContent = "লোড হচ্ছে...";
+  try {
+    const { data, error } = await supabaseClient.from("hotline_messages").select("*").order("created_at", { ascending: false });
+    if (error) throw error;
+    c.innerHTML = data?.length ? data.map(m => `
+      <div class="row">
+        <div>
+          <small class="muted">📧 ${escapeHTML(m.email)}</small><br>
+          <b>${escapeHTML(m.message)}</b>
+        </div>
+        <button type="button" class="danger" onclick="deleteHotlineMsg('${m.id}')">মুছুন</button>
+      </div>
+    `).join("") : "কোনো হটলাইন মেসেজ নেই।";
+  } catch (e) {
+    c.textContent = "মেসেজ লোড করা যায়নি।";
+  }
+}
+
+async function deleteHotlineMsg(id) {
+  await supabaseClient.from("hotline_messages").delete().eq("id", id);
+  renderAdminHotline();
+}
+
 async function deleteProfile(id) {
   if (!confirm("আপনি কি নিশ্চিত এই প্রোফাইলটি চিরতরে মুছে ফেলতে চান?")) return;
   await supabaseClient.from("profiles").delete().eq("id", id);
   renderAdminProfiles();
 }
 
+// পেজ রিফ্রেশ বা রিলোড হলেও ইউজার সেশন ও সঠিক পেজে থাকার লজিক
 supabaseClient.auth.getSession().then(({ data }) => {
   if (data && data.session) {
     currentSession = data.session;
-    if (adminAllowed()) document.getElementById("tabs").classList.remove("hidden");
+    document.getElementById("tabs").classList.remove("hidden");
+    const lastPage = localStorage.getItem("current_page") || "home";
+    showPage(lastPage);
+  } else {
+    const lastPage = localStorage.getItem("current_page");
+    if (lastPage && lastPage !== "admin" && lastPage !== "payment") {
+      showPage(lastPage);
+    } else {
+      showPage("welcome");
+    }
   }
 });
 </script>
