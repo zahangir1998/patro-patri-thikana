@@ -67,8 +67,11 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <section id="welcome" class="page">
   <div class="panel">
     <h2 id="welTitle">পাত্র-পাত্রী ঠিকানায় স্বাগতম</h2>
-    <p class="muted">পরিষেবাটি ব্যবহার করতে প্রথমে লগইন করুন অথবা অ্যাকাউন্ট তৈরি করুন।</p>
-    <button type="button" class="primary" onclick="showPage('login')" id="welLoginBtn">লগইন</button>
+    <p class="muted">পরিষেবাটি ব্যবহার করতে প্রথমে লগইন করুন অথবা সরাসরি প্রোফাইল তৈরি করুন।</p>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+      <button type="button" class="primary" onclick="showPage('login')" id="welLoginBtn">লগইন</button>
+      <button type="button" class="primary" onclick="showPage('profile')" id="welRegBtn">প্রোফাইল তৈরি</button>
+    </div>
   </div>
 </section>
 
@@ -248,7 +251,6 @@ function escapeHTML(str) {
     .replace(/'/g, "&#039;");
 }
 
-// WhatsApp এর জন্য নম্বর ফরম্যাট করার ফাংশন (যেমন: 018... থেকে 88018... করা)
 function formatWhatsAppNumber(phone) {
   if (!phone) return "8801811764518";
   let clean = phone.replace(/[^0-9]/g, "");
@@ -272,7 +274,7 @@ const translations = {
     docTitle: "পাত্র-পাত্রী ঠিকানা", brandTitle: "♡ পাত্র-পাত্রী ঠিকানা", tagline: "সঠিক পরিচয়ে, সুন্দর জীবনের শুরু",
     tabHome: "🏠 হোম", tabSearch: "🔎 পাত্র-পাত্রী খুঁজুন", tabFav: "♡ পছন্দ", tabMsg: "✉ বার্তা",
     tabProfile: "👤 প্রোফাইল তৈরি", tabAdmin: "⚙ অ্যাডমিন", tabPay: "💳 পেমেন্ট", logoutButton: "🚪 লগআউট",
-    welTitle: "পাত্র-পাত্রী ঠিকানায় স্বাগতম", welLoginBtn: "লগইন",
+    welTitle: "পাত্র-পাত্রী ঠিকানায় স্বাগতম", welLoginBtn: "লগইন", welRegBtn: "প্রোফাইল তৈরি",
     loginTitle: "সদস্য লগইন", lblLoginEmail: "ইমেইল", lblLoginPass: "পাসওয়ার্ড", loginSubmitBtn: "লগইন করুন",
     heroTitle: "জীবনসঙ্গী খুঁজুন সহজে", heroText: "আপনার পছন্দ ও প্রয়োজন অনুযায়ী পাত্র-পাত্রী খুঁজুন।",
     heroSearchBtn: "পাত্র-পাত্রী খুঁজুন →", heroRegBtn: "👤 প্রোফাইল তৈরি করুন",
@@ -287,7 +289,7 @@ const translations = {
     docTitle: "Patro-Patri Thikana", brandTitle: "♡ Patro-Patri Thikana", tagline: "A beautiful beginning with the right match",
     tabHome: "🏠 Home", tabSearch: "🔎 Search Match", tabFav: "♡ Favorites", tabMsg: "✉ Messages",
     tabProfile: "👤 Create Profile", tabAdmin: "⚙ Admin", tabPay: "💳 Payment", logoutButton: "🚪 Logout",
-    welTitle: "Welcome to Patro-Patri Thikana", welLoginBtn: "Login",
+    welTitle: "Welcome to Patro-Patri Thikana", welLoginBtn: "Login", welRegBtn: "Create Profile",
     loginTitle: "Member Login", lblLoginEmail: "Email", lblLoginPass: "Password", loginSubmitBtn: "Login",
     heroTitle: "Find Life Partner Easily", heroText: "Find matches according to your preference and needs.",
     heroSearchBtn: "Search Match →", heroRegBtn: "👤 Create Profile",
@@ -353,7 +355,7 @@ async function renderProfiles() {
         actionArea = `
           <div style="margin-top:8px; background:#e8f5e9; padding:10px; border-radius:8px;">
             <small>📱 মোবাইল/WhatsApp: <b>${escapeHTML(rawPhone)}</b></small><br>
-            <a href="https://wa.me/${waNumber}?text=আসসালামু%20আলাইকুম,%20আপনার%20পাত্র-পাত্রী%20প্রোফাইলটি%20সম্পর্কে%20কথা%20বলতে%20চাই।" target="_blank" class="video-btn">📹 সরাসরি ভিডিও কল করুন (WhatsApp)</a>
+            <a href="https://wa.me/${waNumber}?text=السلام%20عليكم،%20আপনার%20পাত্র-পাত্রী%20প্রোফাইলটি%20সম্পর্কে%20কথা%20বলতে%20চাই।" target="_blank" class="video-btn">📹 সরাসরি ভিডিও কল করুন (WhatsApp)</a>
           </div>
         `;
       } else {
