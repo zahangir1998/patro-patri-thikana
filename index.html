@@ -30,6 +30,9 @@ input,select,textarea{font:inherit;border:1px solid #decbd2;border-radius:10px;p
 .searchrow input,.searchrow select{flex:1;width:auto}
 .field{display:grid;gap:6px;margin:12px 0}
 .field label{font-weight:700;font-size:14px}
+.phone-group{display:flex;gap:8px;}
+.phone-group select{width:40%;max-width:140px;}
+.phone-group input{width:60%;flex:1;}
 .row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid #f0e1e6;flex-wrap:wrap}
 .edit{background:#fff0f5;color:var(--primary)}
 .danger{background:#ffebee;color:#c62828}
@@ -80,16 +83,17 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
     <h2 id="loginTitle">সদস্য লগইন</h2>
     <form id="userLoginForm">
       <div class="field">
-        <label id="lblLoginEmail">ইমেইল</label>
-        <input id="userLoginEmail" type="email" required>
+        <label id="lblLoginEmail">ইমেইল *</label>
+        <input id="userLoginEmail" type="email" required placeholder="আপনার ইমেইল">
       </div>
       <div class="field">
-        <label id="lblLoginPass">পাসওয়ার্ড</label>
-        <input id="userLoginPassword" type="password" required>
+        <label id="lblLoginPass">পাসওয়ার্ড *</label>
+        <input id="userLoginPassword" type="password" required placeholder="আপনার পাসওয়ার্ড">
       </div>
       <button type="submit" class="primary" id="loginSubmitBtn">লগইন করুন</button>
     </form>
-    <p id="userLoginMessage" class="muted"></p>
+    <p id="userLoginMessage" class="muted" style="margin-top:10px;"></p>
+    <p class="muted">অ্যাকাউন্ট নেই? <a href="#" onclick="showPage('profile')">এখানে নতুন প্রোফাইল তৈরি করুন</a></p>
   </div>
 </section>
 
@@ -145,8 +149,16 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 
 <section id="profile" class="page hidden">
  <div class="panel">
-<h2 id="regPageTitle">পরিবারের সদস্যের প্রোফাইল তৈরি</h2>
+<h2 id="regPageTitle">পরিবারের সদস্যের প্রোফাইল তৈরি / রেজিস্ট্রেশন</h2>
 <form id="registerForm">
+<div class="field">
+<label id="lblRegEmail">ইমেইল আইডি *</label>
+<input id="regEmail" type="email" required placeholder="যেমন: example@gmail.com">
+</div>
+<div class="field">
+<label id="lblRegPass">পাসওয়ার্ড *</label>
+<input id="regPassword" type="password" required minlength="6" placeholder="কমপক্ষে ৬ অক্ষরের পাসওয়ার্ড">
+</div>
 <div class="field">
 <label id="lblRegName">নাম *</label>
 <input id="regName" required maxlength="100" placeholder="নাম">
@@ -164,8 +176,8 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 </select>
 </div>
 <div class="field">
-<label id="lblRegDist">জেলা *</label>
-<input id="regDistrict" required maxlength="100" placeholder="জেলা">
+<label id="lblRegDist">জেলা / অবস্থান *</label>
+<input id="regDistrict" required maxlength="100" placeholder="যেমন: ঢাকা, সিলেট বা লন্ডন">
 </div>
 <div class="field">
 <label id="lblRegEdu">শিক্ষাগত যোগ্যতা</label>
@@ -176,10 +188,25 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <input id="regJob" placeholder="যেমন: সরকারি চাকরি, প্রাইভেট চাকরি, ব্যবসা, গৃহিণী ইত্যাদি">
 </div>
 <div class="field">
-<label id="lblRegPhone">মোবাইল নম্বর / WhatsApp নম্বর *</label>
-<input id="regPhone" type="tel" required maxlength="30" placeholder="যেমন: 017XXXXXXXX">
+<label id="lblRegPhone">দেশ ও মোবাইল নম্বর / WhatsApp নম্বর *</label>
+<div class="phone-group">
+  <select id="countryCode">
+    <option value="880">🇧🇩 +880 (বাংলাদেশ)</option>
+    <option value="91">🇮🇳 +91 (ভারত)</option>
+    <option value="966">🇸🇦 +966 (সৌদি আরব)</option>
+    <option value="971">🇦🇪 +971 (ইউএই)</option>
+    <option value="965">🇰🇼 +965 (কুয়েত)</option>
+    <option value="974">🇶🇦 +974 (কাতার)</option>
+    <option value="968">🇴🇲 +968 (ওমান)</option>
+    <option value="966">🇲🇾 +60 (মালয়েশিয়া)</option>
+    <option value="44">🇬🇧 +44 (যুক্তরাজ্য)</option>
+    <option value="1">🇺🇸 +1 (যুক্তরাষ্ট্র/কানাডা)</option>
+
+  </select>
+  <input id="regPhone" type="tel" required maxlength="20" placeholder="017XXXXXXXX">
 </div>
-<button class="primary" id="registerButton" type="submit">প্রোফাইল জমা দিন</button>
+</div>
+<button class="primary" id="registerButton" type="submit">অ্যাকাউন্ট ও প্রোফাইল তৈরি করুন</button>
 </form>
 <p id="regMessage" class="muted" style="margin-top:10px;"></p>
 </div>
@@ -254,9 +281,9 @@ function escapeHTML(str) {
 function formatWhatsAppNumber(phone) {
   if (!phone) return "8801811764518";
   let clean = phone.replace(/[^0-9]/g, "");
-  if (clean.startsWith("880")) return clean;
-  if (clean.startsWith("0")) return "88" + clean;
-  return "880" + clean;
+  if (clean.startsWith("0")) clean = clean.substring(1);
+  if (!clean.startsWith("880") && clean.length === 10) return "880" + clean;
+  return clean;
 }
 
 const supabaseClient = window.supabase.createClient(
@@ -275,13 +302,13 @@ const translations = {
     tabHome: "🏠 হোম", tabSearch: "🔎 পাত্র-পাত্রী খুঁজুন", tabFav: "♡ পছন্দ", tabMsg: "✉ বার্তা",
     tabProfile: "👤 প্রোফাইল তৈরি", tabAdmin: "⚙ অ্যাডমিন", tabPay: "💳 পেমেন্ট", logoutButton: "🚪 লগআউট",
     welTitle: "পাত্র-পাত্রী ঠিকানায় স্বাগতম", welLoginBtn: "লগইন", welRegBtn: "প্রোফাইল তৈরি",
-    loginTitle: "সদস্য লগইন", lblLoginEmail: "ইমেইল", lblLoginPass: "পাসওয়ার্ড", loginSubmitBtn: "লগইন করুন",
+    loginTitle: "সদস্য লগইন", lblLoginEmail: "ইমেইল *", lblLoginPass: "পাসওয়ার্ড *", loginSubmitBtn: "লগইন করুন",
     heroTitle: "জীবনসঙ্গী খুঁজুন সহজে", heroText: "আপনার পছন্দ ও প্রয়োজন অনুযায়ী পাত্র-পাত্রী খুঁজুন।",
     heroSearchBtn: "পাত্র-পাত্রী খুঁজুন →", heroRegBtn: "👤 প্রোফাইল তৈরি করুন",
     howTitle: "কীভাবে ব্যবহার করবেন?", how1: "🧾 প্রোফাইল তৈরি করুন", how2: "🔎 বয়স ও জেলা দিয়ে খুঁজুন", how3: "💳 পেমেন্ট করে ভিডিও কল ও নম্বর আনলক করুন",
     searchPageTitle: "পাত্র-পাত্রী খুঁজুন", optAll: "সব প্রোফাইল", optMale: "পাত্র", optFemale: "পাত্রী", searchButton: "খুঁজুন",
-    favPageTitle: "আমার পছন্দ", msgPageTitle: "✉ আমার বার্তা", regPageTitle: "পরিবারের সদস্যের প্রোফাইল তৈরি",
-    lblRegName: "নাম *", lblRegAge: "বয়স *", lblRegGender: "পাত্র নাকি পাত্রী *", optSelect: "নির্বাচন করুন", optG1: "পাত্র", optG2: "পাত্রী", lblRegDist: "জেলা *", lblRegEdu: "শিক্ষাগত যোগ্যতা", lblRegJob: "পেশা / জব (যদি করেন)", lblRegPhone: "মোবাইল নম্বর / WhatsApp নম্বর *", registerButton: "প্রোফাইল জমা দিন",
+    favPageTitle: "আমার পছন্দ", msgPageTitle: "✉ আমার বার্তা", regPageTitle: "পরিবারের সদস্যের প্রোফাইল তৈরি / রেজিস্ট্রেশন",
+    lblRegEmail: "ইমেইল আইডি *", lblRegPass: "পাসওয়ার্ড *", lblRegName: "নাম *", lblRegAge: "বয়স *", lblRegGender: "পাত্র নাকি পাত্রী *", optSelect: "নির্বাচন করুন", optG1: "পাত্র", optG2: "পাত্রী", lblRegDist: "জেলা / অবস্থান *", lblRegEdu: "শিক্ষাগত যোগ্যতা", lblRegJob: "পেশা / জব (যদি করেন)", lblRegPhone: "দেশ ও মোবাইল নম্বর / WhatsApp নম্বর *", registerButton: "অ্যাকাউন্ট ও প্রোফাইল তৈরি করুন",
     payTitle: "ভিডিও কল ও মোবাইল নম্বর আনলক পেমেন্ট", paySub: "ফি: ১০০ টাকা | নগদ/বিকাশ/রকেট নম্বর: 01811764518", lblTrx: "আপনার ট্রানজেকশন আইডি (TrxID)", submitPaymentBtn: "পেমেন্ট জমা দিন",
     adminTitle: "অ্যাডমিন লগইন", lblAdminEmail: "ইমেইল", lblAdminPass: "পাসওয়ার্ড", adminLoginBtn: "প্রবেশ করুন", adminMgtTitle: "👥 প্রোফাইল ব্যবস্থাপনা (অনুমোদন, এডিট ও ডিলিট)", footerText: "পাত্র-পাত্রী ঠিকানা"
   },
@@ -290,13 +317,13 @@ const translations = {
     tabHome: "🏠 Home", tabSearch: "🔎 Search Match", tabFav: "♡ Favorites", tabMsg: "✉ Messages",
     tabProfile: "👤 Create Profile", tabAdmin: "⚙ Admin", tabPay: "💳 Payment", logoutButton: "🚪 Logout",
     welTitle: "Welcome to Patro-Patri Thikana", welLoginBtn: "Login", welRegBtn: "Create Profile",
-    loginTitle: "Member Login", lblLoginEmail: "Email", lblLoginPass: "Password", loginSubmitBtn: "Login",
+    loginTitle: "Member Login", lblLoginEmail: "Email *", lblLoginPass: "Password *", loginSubmitBtn: "Login",
     heroTitle: "Find Life Partner Easily", heroText: "Find matches according to your preference and needs.",
     heroSearchBtn: "Search Match →", heroRegBtn: "👤 Create Profile",
     howTitle: "How to use?", how1: "🧾 Create Profile", how2: "🔎 Search by Age & District", how3: "💳 Pay to Unlock Video Call & Phone",
     searchPageTitle: "Find Match", optAll: "All Profiles", optMale: "Groom", optFemale: "Bride", searchButton: "Search",
-    favPageTitle: "My Favorites", msgPageTitle: "✉ My Messages", regPageTitle: "Create Family Profile",
-    lblRegName: "Name *", lblRegAge: "Age *", lblRegGender: "Gender *", optSelect: "Select", optG1: "Groom", optG2: "Bride", lblRegDist: "District *", lblRegEdu: "Education", lblRegJob: "Occupation / Job", lblRegPhone: "Mobile / WhatsApp Number *", registerButton: "Submit Profile",
+    favPageTitle: "My Favorites", msgPageTitle: "✉ My Messages", regPageTitle: "Register & Create Profile",
+    lblRegEmail: "Email *", lblRegPass: "Password *", lblRegName: "Name *", lblRegAge: "Age *", lblRegGender: "Gender *", optSelect: "Select", optG1: "Groom", optG2: "Bride", lblRegDist: "District / Location *", lblRegEdu: "Education", lblRegJob: "Occupation / Job", lblRegPhone: "Country & Phone Number *", registerButton: "Create Account & Profile",
     payTitle: "Unlock Video Call & Phone Access", paySub: "Fee: 100 BDT | bKash/Nagad: 01811764518", lblTrx: "Transaction ID (TrxID)", submitPaymentBtn: "Submit Payment",
     adminTitle: "Admin Login", lblAdminEmail: "Email", lblAdminPass: "Password", adminLoginBtn: "Login", adminMgtTitle: "👥 Profile Management", footerText: "Patro-Patri Thikana"
   }
@@ -354,7 +381,7 @@ async function renderProfiles() {
         const waNumber = formatWhatsAppNumber(rawPhone);
         actionArea = `
           <div style="margin-top:8px; background:#e8f5e9; padding:10px; border-radius:8px;">
-            <small>📱 মোবাইল/WhatsApp: <b>${escapeHTML(rawPhone)}</b></small><br>
+            <small>📱 মোবাইল/WhatsApp: <b>+${escapeHTML(rawPhone)}</b></small><br>
             <a href="https://wa.me/${waNumber}?text=السلام%20عليكم،%20আপনার%20পাত্র-পাত্রী%20প্রোফাইলটি%20সম্পর্কে%20কথা%20বলতে%20চাই।" target="_blank" class="video-btn">📹 সরাসরি ভিডিও কল করুন (WhatsApp)</a>
           </div>
         `;
@@ -385,11 +412,30 @@ async function renderProfiles() {
   }
 }
 
+// ইমেইল ও পাসওয়ার্ড সহ ইউজার রেজিস্ট্রেশন
 document.getElementById("registerForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const msgEl = document.getElementById("regMessage");
-  msgEl.textContent = "প্রোফাইল জমা দেওয়া হচ্ছে...";
+  msgEl.style.color = "#28151c";
+  msgEl.textContent = "অ্যাকাউন্ট ও প্রোফাইল তৈরি করা হচ্ছে...";
+  
+  const email = document.getElementById("regEmail").value.trim();
+  const password = document.getElementById("regPassword").value;
+  const code = document.getElementById("countryCode").value;
+  let rawPhone = document.getElementById("regPhone").value.trim();
+  if (rawPhone.startsWith("0")) rawPhone = rawPhone.substring(1);
+  const fullPhone = code + rawPhone;
+
   try {
+    // ১. Supabase Auth-এ সাইন আপ
+    const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+      email: email,
+      password: password
+    });
+    
+    if (authError) throw authError;
+
+    // ২. Profiles টেবিলে তথ্য সংরক্ষণ
     const { error: profileError } = await supabaseClient.from("profiles").insert([{
       name: document.getElementById("regName").value.trim(),
       age: parseInt(document.getElementById("regAge").value),
@@ -397,28 +443,44 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
       district: document.getElementById("regDistrict").value.trim(),
       education: document.getElementById("regEdu").value.trim(),
       job: document.getElementById("regJob").value.trim(),
-      phone: document.getElementById("regPhone").value.trim(),
+      phone: fullPhone,
       status: "pending"
     }]);
+
     if (profileError) throw profileError;
 
-    msgEl.textContent = "প্রোফাইল সফলভাবে জমা হয়েছে! অ্যাডমিন অনুমোদন করার পর এটি সাইটে দেখাবে।";
+    msgEl.style.color = "green";
+    msgEl.textContent = "রেজিস্ট্রেশন সফল হয়েছে! অ্যাডমিন অনুমোদন করার পর আপনার প্রোফাইলটি দেখানো হবে। আপনি এখন লগইন করতে পারবেন।";
     document.getElementById("registerForm").reset();
   } catch (err) {
-    msgEl.textContent = "সমস্যা হয়েছে: " + err.message;
+    msgEl.style.color = "red";
+    msgEl.textContent = "ত্রুটি: " + (err.message || "রেজিস্ট্রেশনে সমস্যা হয়েছে।");
   }
 });
 
+// ইউজার লগইন
 document.getElementById("userLoginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email: document.getElementById("userLoginEmail").value.trim(),
-    password: document.getElementById("userLoginPassword").value
-  });
-  if (error) { document.getElementById("userLoginMessage").textContent = error.message; return; }
-  currentAdminSession = data.session;
-  document.getElementById("tabs").classList.remove("hidden");
-  showPage("home");
+  const msgEl = document.getElementById("userLoginMessage");
+  msgEl.style.color = "#28151c";
+  msgEl.textContent = "লগইন করা হচ্ছে...";
+
+  try {
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+      email: document.getElementById("userLoginEmail").value.trim(),
+      password: document.getElementById("userLoginPassword").value
+    });
+    if (error) throw error;
+    
+    currentAdminSession = data.session;
+    document.getElementById("tabs").classList.remove("hidden");
+    msgEl.style.color = "green";
+    msgEl.textContent = "সফলভাবে লগইন হয়েছে!";
+    setTimeout(() => showPage("home"), 1000);
+  } catch (err) {
+    msgEl.style.color = "red";
+    msgEl.textContent = "লগইনে ত্রুটি: " + err.message;
+  }
 });
 
 document.getElementById("submitPaymentBtn").addEventListener("click", async () => {
@@ -494,7 +556,7 @@ async function renderAdminProfiles() {
         <div style="flex: 1; min-width: 200px;">
           <b>${escapeHTML(p.name)}</b> (${escapeHTML(p.gender)}, ${escapeHTML(p.age)} বছর, ${escapeHTML(p.district)})<br>
           <small class="muted">🎓 শিক্ষা: <b>${escapeHTML(p.education || "দেওয়া নেই")}</b> | 💼 পেশা: <b>${escapeHTML(p.job || "দেওয়া নেই")}</b></small><br>
-          <small class="muted">📱 মোবাইল/WhatsApp: <b>${escapeHTML(p.phone || "দেওয়া নেই")}</b></small><br>
+          <small class="muted">📱 মোবাইল/WhatsApp: <b>+${escapeHTML(p.phone || "দেওয়া নেই")}</b></small><br>
           <span>স্ট্যাটাস: <b class="${p.status === 'approved' ? 'badge' : p.status === 'rejected' ? 'badge-rejected' : 'badge-pending'}">${p.status || 'pending'}</b></span>
         </div>
         <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
