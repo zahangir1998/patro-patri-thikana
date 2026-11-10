@@ -436,10 +436,11 @@ async function renderProfiles() {
     
     c.innerHTML = people.length ? people.map(p => {
       let actionArea = "";
-      // পেমেন্ট অনুমোদিত হলে বা অ্যাডমিন হলে তবেই ফোন এবং ভিডিও বাটন দেখাবে
+      
+      // পেমেন্ট অনুমোদিত হলে অথবা অ্যাডমিন হলে সকল নম্বর ও কল বাটন আনলক হবে
       if (userHasPaid || adminAllowed()) {
         const rawPhone = p.phone || "";
-        const imoPhone = p.imo_phone || "";
+        const imoPhone = p.imo_phone || rawPhone;
         const waNumber = formatWhatsAppNumber(rawPhone);
         
         actionArea = `
@@ -451,7 +452,7 @@ async function renderProfiles() {
           </div>
         `;
       } else {
-        // পেমেন্ট ছাড়া নম্বর এবং কল বাটন সম্পূর্ণ লক বা হাইড থাকবে
+        // সাধারণ অবস্থাতে কেবল লক করা বাটন দেখাবে
         actionArea = `
           <div style="margin-top:8px;">
             <button type="button" class="edit" onclick="showPage('payment')">${currentLang === "bn" ? "🔒 পেমেন্ট করে ভিডিও কল ও নম্বর দেখুন (১০০ টাকা)" : "🔒 Pay to Unlock Video Call & Phone"}</button>
@@ -478,7 +479,7 @@ async function renderProfiles() {
   }
 }
 
-// রেজিস্ট্রেশন সম্পন্ন হলে সাথে সাথে অটো-লগইন
+// রেজিস্ট্রেশন
 document.getElementById("registerForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const msgEl = document.getElementById("regMessage");
@@ -499,10 +500,11 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
   if (rawImo) {
     if (rawImo.startsWith("0")) rawImo = rawImo.substring(1);
     fullImoPhone = imoCode + rawImo;
+  } else {
+    fullImoPhone = fullWaPhone; // imo নম্বর খালি রাখলে অটো WhatsApp নম্বরটি সেভ হবে
   }
 
   try {
-    // ১. সাইন-আপ করা
     const { data: authData, error: authError } = await supabaseClient.auth.signUp({
       email: email,
       password: password
@@ -512,7 +514,6 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
 
     const userId = authData.user ? authData.user.id : null;
 
-    // ২. প্রোফাইল ডাটাবেজে সংরক্ষণ করা
     const { error: profileError } = await supabaseClient.from("profiles").insert([{
       user_id: userId,
       name: document.getElementById("regName").value.trim(),
@@ -528,7 +529,6 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
 
     if (profileError) throw profileError;
 
-    // ৩. তাৎক্ষণিক অটো-লগইন করানো
     const { data: loginData, error: loginError } = await supabaseClient.auth.signInWithPassword({
       email: email,
       password: password
@@ -543,7 +543,6 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
     msgEl.textContent = "রেজিস্ট্রেশন সফল হয়েছে! হোম পেজে নিয়ে যাওয়া হচ্ছে...";
     document.getElementById("registerForm").reset();
     
-    // কোনো ব্যাক করা ছাড়াই সাথে সাথে ভেতরে নিয়ে যাবে
     setTimeout(() => {
       showPage("home");
     }, 800);
@@ -554,7 +553,7 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
   }
 });
 
-// ইউজারের ম্যানুয়াল লগইন
+// ইউজারের লগইন
 document.getElementById("userLoginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const msgEl = document.getElementById("userLoginMessage");
