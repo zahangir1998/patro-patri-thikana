@@ -25,7 +25,6 @@ button{cursor:pointer;font:inherit;border:0;border-radius:10px;padding:10px 14px
 .hero h1{color:#7f0a35;font-size:26px;margin-top:0}
 .couple{font-size:55px}
 
-/* লগইন পেজের জন্য ফুল ব্যাকগ্রাউন্ড ও ডিজাইন */
 .login-hero {
   background: linear-gradient(rgba(163, 13, 67, 0.65), rgba(163, 13, 67, 0.65)), url('https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=1200&q=80');
   background-size: cover;
@@ -38,9 +37,9 @@ button{cursor:pointer;font:inherit;border:0;border-radius:10px;padding:10px 14px
 }
 .login-hero h2 { color: white; margin-bottom: 5px; }
 
-.profile{border:1px solid #eedbe2;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;margin:10px 0;background:#fff}
+.profile{border:1px solid #eedbe2;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;margin:10px 0;background:#fff;position:relative;}
 .profile-header{display:flex;gap:15px;align-items:center;width:100%}
-.profile-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); background: #fce4ec; }
+.profile-img { width: 75px; height: 75px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); background: #fce4ec; }
 .muted{color:#79666e;font-size:13px}
 .searchrow{display:flex;gap:8px;flex-wrap:wrap}
 input,select,textarea{font:inherit;border:1px solid #decbd2;border-radius:10px;padding:11px;min-width:0;max-width:100%;width:100%;background:white;color:#28151c}
@@ -54,6 +53,8 @@ input,select,textarea{font:inherit;border:1px solid #decbd2;border-radius:10px;p
 .edit{background:#fff0f5;color:var(--primary)}
 .danger{background:#ffebee;color:#c62828}
 .success-btn{background:#e8f5e9;color:#2e7d32}
+.fav-btn{background:#fff0f5;color:var(--primary);border:1px solid var(--primary);padding:6px 12px;border-radius:8px;font-weight:bold;cursor:pointer;}
+.fav-btn.active{background:var(--primary);color:white;}
 .badge{background:#e8f5e9;color:#2e7d32;padding:4px 8px;border-radius:6px;font-size:12px;font-weight:bold}
 .badge-pending{background:#fff3e0;color:#ef6c00}
 .badge-rejected{background:#ffebee;color:#c62828}
@@ -160,14 +161,14 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 
 <section id="favorites" class="page hidden">
 <div class="panel">
-<h2 id="favPageTitle">আমার পছন্দ</h2>
+<h2 id="favPageTitle">আমার পছন্দ (Favorites)</h2>
 <div id="favList">এখনো কোনো প্রোফাইল পছন্দ করা হয়নি।</div>
 </div>
 </section>
 
 <section id="messages" class="page hidden">
   <div class="panel">
-    <h2 id="msgPageTitle">✉ হটলাইন মেসেজ (সরাসরি অ্যাডমিনের সাথে কথা বলুন)</h2>
+    <h2 id="msgPageTitle">✉ হটলাইন বার্তা (সরাসরি অ্যাডমিনের সাথে কথা বলুন)</h2>
     <p class="muted">আপনার যেকোনো জিজ্ঞাসা বা সাহায্যের জন্য সরাসরি অ্যাডমিনকে বার্তা পাঠান।</p>
     <div class="field">
       <textarea id="hotlineMsg" rows="4" placeholder="আপনার বার্তা এখানে লিখুন..."></textarea>
@@ -217,9 +218,11 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <label id="lblRegJob">পেশা / জব</label>
 <input id="regJob" placeholder="যেমন: চাকরি, ব্যবসা ইত্যাদি">
 </div>
+
+<!-- ডিভাইস থেকে ছবি আপলোড অপশন -->
 <div class="field">
-<label>প্রোফাইল ছবির লিংক (Image URL)</label>
-<input id="regPhoto" type="url" placeholder="https://example.com/photo.jpg (ঐচ্ছিক)">
+<label>প্রোফাইল ছবি আপলোড করুন (গ্যালারি বা ফাইল থেকে)</label>
+<input id="regPhotoFile" type="file" accept="image/*">
 </div>
 
 <div class="field">
@@ -335,6 +338,7 @@ const supabaseClient = window.supabase.createClient(
 );
 const ADMIN_EMAIL = "zahidzahangir@gmail.com";
 let people = [];
+let favoriteIds = JSON.parse(localStorage.getItem("fav_profiles") || "[]");
 let currentLang = "bn";
 let currentSession = null;
 let userHasPaid = false;
@@ -385,7 +389,7 @@ function toggleLanguage() {
 
 function handleBrandClick() {
   const activePage = pageHistory[pageHistory.length - 1];
-  if (activePage === "login") return; // লগইন পেজে থাকাকালীন হেডার ক্লিক নিষ্ক্রিয় থাকবে
+  if (activePage === "login") return;
   showPage("home");
 }
 
@@ -410,6 +414,7 @@ function showPage(id, addToHistory = true) {
   
   if (id === "admin") { refreshAdminState(); if (adminAllowed()) { renderAdminProfiles(); renderAdminPayments(); renderAdminHotline(); } }
   if (id === "search") { checkUserPaymentStatus().then(() => renderProfiles()); }
+  if (id === "favorites") { renderFavorites(); }
   window.scrollTo(0, 0);
 }
 
@@ -445,17 +450,44 @@ async function checkUserPaymentStatus() {
   }
 }
 
+function toggleFavorite(id) {
+  if (favoriteIds.includes(id)) {
+    favoriteIds = favoriteIds.filter(fId => fId !== id);
+  } else {
+    favoriteIds.push(id);
+  }
+  localStorage.setItem("fav_profiles", JSON.stringify(favoriteIds));
+  renderProfiles();
+  if (!document.getElementById("favorites").classList.contains("hidden")) {
+    renderFavorites();
+  }
+}
+
 async function renderProfiles() {
   const c = document.getElementById("profiles");
   if (!c) return;
   c.textContent = currentLang === "bn" ? "লোড হচ্ছে..." : "Loading...";
   try {
+    const filterGender = document.getElementById("gender").value;
+    const filterAge = document.getElementById("age").value;
+    const filterDist = document.getElementById("district").value.toLowerCase().trim();
+
     const { data, error } = await supabaseClient.from("profiles").select("*").order("created_at", { ascending: false });
     if (error) throw error;
     people = data || [];
     
-    // ইউজার ও অ্যাডমিন সবার জন্য নিজের প্রোফাইল বা অনুমোদিত প্রোফাইলগুলো ফিল্টার করা
-    const visibleProfiles = people.filter(p => p.status === 'approved' || (currentSession && p.user_id === currentSession.user.id) || adminAllowed());
+    // নিজের প্রোফাইল ছাড়া অন্য সবার অনুমোদিত (Approved) প্রোফাইল দেখা যাওয়ার ফিক্স
+    let visibleProfiles = people.filter(p => p.status === 'approved' || (currentSession && p.user_id === currentSession.user.id) || adminAllowed());
+
+    if (filterGender && filterGender !== "সব") {
+      visibleProfiles = visibleProfiles.filter(p => p.gender === filterGender);
+    }
+    if (filterAge) {
+      visibleProfiles = visibleProfiles.filter(p => p.age <= parseInt(filterAge));
+    }
+    if (filterDist) {
+      visibleProfiles = visibleProfiles.filter(p => (p.district || "").toLowerCase().includes(filterDist));
+    }
 
     c.innerHTML = visibleProfiles.length ? visibleProfiles.map(p => {
       let actionArea = "";
@@ -481,6 +513,7 @@ async function renderProfiles() {
       }
 
       const photoUrl = p.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80';
+      const isFav = favoriteIds.includes(p.id);
 
       return `
         <div class="profile">
@@ -493,6 +526,9 @@ async function renderProfiles() {
               ${p.job ? `<div class="muted">💼 পেশা: ${escapeHTML(p.job)}</div>` : ''}
               <div class="muted">স্ট্যাটাস: <b class="${p.status === 'approved' ? 'badge' : 'badge-pending'}">${p.status || 'pending'}</b></div>
             </div>
+            <button type="button" class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${p.id}')">
+              ${isFav ? '❤️ পছন্দ করা হয়েছে' : '♡ পছন্দ করুন'}
+            </button>
           </div>
           ${actionArea}
         </div>
@@ -503,6 +539,42 @@ async function renderProfiles() {
   }
 }
 
+function renderFavorites() {
+  const favContainer = document.getElementById("favList");
+  const favProfiles = people.filter(p => favoriteIds.includes(p.id));
+  
+  if (favProfiles.length === 0) {
+    favContainer.innerHTML = "<p class='muted'>এখনো কোনো প্রোফাইল পছন্দ করা হয়নি।</p>";
+    return;
+  }
+
+  favContainer.innerHTML = favProfiles.map(p => {
+    const photoUrl = p.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80';
+    return `
+      <div class="profile">
+        <div class="profile-header">
+          <img src="${escapeHTML(photoUrl)}" class="profile-img" alt="Profile Photo">
+          <div style="flex:1;">
+            <b>${escapeHTML(p.name)}</b>
+            <div class="muted">${escapeHTML(p.gender)} • ${escapeHTML(p.age || "")} বছর • 📍 ${escapeHTML(p.district || "")}</div>
+          </div>
+          <button type="button" class="fav-btn active" onclick="toggleFavorite('${p.id}')">❌ মুছে ফেলুন</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+// মোবাইল ফাইল আপলোড প্রসেসিং (Base64 conversion)
+function getBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+  });
+}
+
 document.getElementById("registerForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const msgEl = document.getElementById("regMessage");
@@ -511,8 +583,17 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
   
   const email = document.getElementById("regEmail").value.trim();
   const password = document.getElementById("regPassword").value;
-  const photoUrl = document.getElementById("regPhoto").value.trim();
   
+  let photoUrl = "";
+  const photoFileInput = document.getElementById("regPhotoFile");
+  if (photoFileInput.files && photoFileInput.files[0]) {
+    try {
+      photoUrl = await getBase64(photoFileInput.files[0]);
+    } catch (err) {
+      console.log("Image read error", err);
+    }
+  }
+
   const waCode = document.getElementById("waCountryCode").value;
   let rawWa = document.getElementById("regWaPhone").value.trim();
   if (rawWa.startsWith("0")) rawWa = rawWa.substring(1);
@@ -820,7 +901,6 @@ async function deleteProfile(id) {
   renderAdminProfiles();
 }
 
-// পেজ রিফ্রেশ বা রিলোড হলেও ইউজার সেশন ও সঠিক পেজে থাকার লজিক
 supabaseClient.auth.getSession().then(({ data }) => {
   if (data && data.session) {
     currentSession = data.session;
