@@ -126,7 +126,9 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 
 <section id="welcome" class="page">
   <div class="login-hero">
-    <div style="font-size: 50px; margin-bottom: 5px;">👩‍❤️‍👨</div>
+    <!-- অ্যাপ আইকন বা বাসর ঘর / কাপল থিম ইমেজ প্রিভিউ -->
+    <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=150&q=80" alt="App Icon" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid white; margin-bottom: 8px;">
+    <div style="font-size: 40px; margin-bottom: 5px;">👩‍❤️‍👨</div>
     <h2 id="welTitle">পাত্র-পাত্রী ঠিকানায় স্বাগতম</h2>
     <p style="margin: 0; font-size: 14px;">সঠিক পরিচয়ে, সুন্দর জীবনের শুরু</p>
   </div>
@@ -167,7 +169,7 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <h2 id="howTitle">কীভাবে ব্যবহার করবেন?</h2>
 <p id="how1">🧾 প্রোফাইল তৈরি করুন</p>
 <p id="how2">🔎 বয়স ও জেলা দিয়ে খুঁজুন</p>
-<p id="how3">💳 ১০০ টাকা পেমেন্ট করে ভিডিও কল ও নম্বর আনলক করুন</p>
+<p id="how3" id="howPaymentInfoText">💳 পেমেন্ট করে ৩০ দিন ভিডিও কল ও নম্বর আনলক করুন</p>
 </div>
 </section>
 
@@ -292,7 +294,7 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <section id="payment" class="page hidden">
   <div class="panel">
     <h2 id="payTitle">ভিডিও কল ও নম্বর আনলক পেমেন্ট</h2>
-    <p id="paySub">ফি: ১০০ টাকা | নগদ/রকেট পার্সোনাল নম্বর: <b>01811764518 (Send Money)</b></p>
+    <p id="paySub">ফি: <span id="displayFeeAmt">১০০</span> টাকা (<span id="displayDurationDays">৩০</span> দিন মেয়াদ) | নগদ/রকেট পার্সোনাল নম্বর: <b>01811764518 (Send Money)</b></p>
     <div class="field">
       <label id="lblTrx">আপনার ট্রানজেকশন আইডি (TrxID)</label>
       <input id="transactionId" type="text" placeholder="যেমন: 8N7A6D5C">
@@ -323,6 +325,23 @@ footer{text-align:center;padding:22px;font-size:12px;color:#7c6971}
 <div class="panel">
 <p id="adminSignedIn" class="muted"></p>
 <button type="button" id="adminLogoutButton">লগআউট</button>
+</div>
+
+<!-- নতুন অ্যাডমিন সেটিং: ফি এবং মেয়াদ পরিবর্তন করার প্যানেল (✏️ কলম আইকনসহ) -->
+<div class="panel">
+  <h2>⚙️ পেমেন্ট ফি ও মেয়াদ সেটিংস (এডিটেবল)</h2>
+  <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap; margin-top: 10px;">
+    <div>
+      <label class="muted">বর্তমান ফি (টাকা):</label>
+      <input id="adminFeeInput" type="number" value="100" style="width: 100px; display: inline-block; margin-left: 5px;">
+    </div>
+    <div>
+      <label class="muted">মেয়াদ (দিন):</label>
+      <input id="adminDaysInput" type="number" value="30" style="width: 100px; display: inline-block; margin-left: 5px;">
+    </div>
+    <button type="button" class="edit" onclick="saveAdminSettings()">✏️ পরিবর্তন ও সেভ করুন</button>
+  </div>
+  <p id="settingsMsg" style="margin-top: 5px; font-size: 13px;"></p>
 </div>
 
 <div class="panel">
@@ -383,6 +402,7 @@ let favoriteIds = JSON.parse(localStorage.getItem("fav_profiles") || "[]");
 let currentLang = "bn";
 let currentSession = null;
 let userHasPaid = false;
+let userRemainingTimeText = "";
 let pageHistory = ["welcome"];
 
 const translations = {
@@ -394,7 +414,7 @@ const translations = {
     loginTitle: "সদস্য লগইন", lblLoginEmail: "ইমেইল *", lblLoginPass: "পাসওয়ার্ড *", loginSubmitBtn: "লগইন করুন",
     heroTitle: "জীবনসঙ্গী খুঁজুন সহজে", heroText: "আপনার পছন্দ ও প্রয়োজন অনুযায়ী পাত্র-পাত্রী খুঁজুন।",
     heroSearchBtn: "পাত্র-পাত্রী খুঁজুন →", heroRegBtn: "👤 প্রোফাইল তৈরি করুন",
-    howTitle: "কীভাবে ব্যবহার করবেন?", how1: "🧾 প্রোফাইল তৈরি করুন", how2: "🔎 বয়স ও জেলা দিয়ে খুঁজুন", how3: "💳 পেমেন্ট করে ভিডিও কল ও নম্বর আনলক করুন",
+    howTitle: "কীভাবে ব্যবহার করবেন?", how1: "🧾 প্রোফাইল তৈরি করুন", how2: "🔎 বয়স ও জেলা দিয়ে খুঁজুন", how3: "💳 পেমেন্ট করে ৩০ দিন ভিডিও কল ও নম্বর আনলক করুন",
     searchPageTitle: "পাত্র-পাত্রী খুঁজুন", optAll: "সব প্রোফাইল", optMale: "পাত্র", optFemale: "পাত্রী", searchButton: "খুঁজুন",
     favPageTitle: "আমার পছন্দ", msgPageTitle: "✉ হটলাইন বার্তা", regPageTitle: "পরিবারের সদস্যের প্রোফাইল তৈরি / রেজিস্ট্রেশন",
     lblRegEmail: "ইমেইল আইডি *", lblRegPass: "পাসওয়ার্ড *", lblRegName: "নাম *", lblRegAge: "বয়স *", lblRegGender: "পাত্র নাকি পাত্রী *", optSelect: "নির্বাচন করুন", optG1: "পাত্র", optG2: "পাত্রী", lblRegDist: "জেলা / অবস্থান *", lblRegEdu: "শিক্ষাগত যোগ্যতা", lblRegJob: "পেশা / জব", lblRegWa: "WhatsApp নম্বর *", lblRegImo: "imo নম্বর (যদি থাকে)", registerButton: "অ্যাকাউন্ট ও প্রোফাইল তৈরি করুন",
@@ -453,10 +473,11 @@ function showPage(id, addToHistory = true) {
   document.querySelectorAll(".page").forEach(p => p.classList.toggle("hidden", p.id !== id));
   document.querySelectorAll(".tabs [data-page]").forEach(b => b.classList.toggle("active", b.dataset.page === id));
   
-  if (id === "admin") { refreshAdminState(); if (adminAllowed()) { renderAdminProfiles(); renderAdminPayments(); renderAdminHotline(); } }
+  if (id === "admin") { refreshAdminState(); if (adminAllowed()) { renderAdminProfiles(); renderAdminPayments(); renderAdminHotline(); loadAdminSettings(); } }
   if (id === "search") { checkUserPaymentStatus().then(() => renderProfiles()); }
   if (id === "favorites") { renderFavorites(); }
   if (id === "messages") { renderUserChat(); }
+  if (id === "payment") { loadPublicSettings(); }
   window.scrollTo(0, 0);
 }
 
@@ -473,22 +494,69 @@ function goBack() {
 document.querySelectorAll(".tabs [data-page]").forEach(b => b.addEventListener("click", () => showPage(b.dataset.page)));
 document.getElementById("searchButton").addEventListener("click", renderProfiles);
 
+// ডাইনামিক ফি ও মেয়াদ লোড এবং ৩০ দিনের কাউন্টডাউন চেকিং ফাংশন
+async function loadPublicSettings() {
+  try {
+    const { data } = await supabaseClient.from("app_settings").select("*").eq("id", 1).single();
+    if (data) {
+      document.getElementById("displayFeeAmt").textContent = data.fee_amount || 100;
+      document.getElementById("displayDurationDays").textContent = data.duration_days || 30;
+      document.getElementById("paySub").innerHTML = `ফি: <b>${data.fee_amount || 100} টাকা</b> (${data.duration_days || 30} দিন মেয়াদ) | নগদ/রকেট পার্সোনাল নম্বর: <b>01811764518 (Send Money)</b>`;
+    }
+  } catch (e) {
+    // ডিফল্ট ভ্যালু শো করবে যদি টেবিল না থাকে
+  }
+}
+
 async function checkUserPaymentStatus() {
   if (!currentSession || !currentSession.user) {
     userHasPaid = false;
+    userRemainingTimeText = "";
     return;
   }
-  if (adminAllowed()) { userHasPaid = true; return; }
+  if (adminAllowed()) { 
+    userHasPaid = true; 
+    userRemainingTimeText = "অ্যাডমিন অ্যাকাউন্ট (আজীবন আনলক)";
+    return; 
+  }
   try {
     const { data } = await supabaseClient
       .from("payments")
       .select("*")
       .eq("user_id", currentSession.user.id)
-      .eq("status", "approved");
+      .eq("status", "approved")
+      .order("approved_at", { ascending: false })
+      .limit(1);
       
-    userHasPaid = (data && data.length > 0);
+    if (data && data.length > 0) {
+      const payRecord = data[0];
+      const approvedTime = new Date(payRecord.approved_at || payRecord.created_at).getTime();
+      
+      // সেটিংস থেকে মেয়াদ দিন আনা (ডিফল্ট ৩০ দিন)
+      let durationDays = 30;
+      try {
+        const { data: setRow } = await supabaseClient.from("app_settings").select("duration_days").eq("id", 1).single();
+        if (setRow && setRow.duration_days) durationDays = setRow.duration_days;
+      } catch(err) {}
+
+      const expiryTime = approvedTime + (durationDays * 24 * 60 * 60 * 1000);
+      const currentTime = new Date().getTime();
+
+      if (currentTime < expiryTime) {
+        userHasPaid = true;
+        const remainingDays = Math.ceil((expiryTime - currentTime) / (1000 * 60 * 60 * 24));
+        userRemainingTimeText = `⏳ প্যাকেজের মেয়াদ বাকি আছে: ${remainingDays} দিন`;
+      } else {
+        userHasPaid = false;
+        userRemainingTimeText = "⚠️ আপনার পেমেন্ট প্যাকেজের মেয়াদ শেষ হয়ে গেছে। দয়া করে আবার পেমেন্ট করুন।";
+      }
+    } else {
+      userHasPaid = false;
+      userRemainingTimeText = "";
+    }
   } catch (e) {
     userHasPaid = false;
+    userRemainingTimeText = "";
   }
 }
 
@@ -554,7 +622,10 @@ async function renderProfiles() {
     visibleProfiles = visibleProfiles.filter(p => (p.district || "").toLowerCase().includes(filterDist));
   }
 
-  c.innerHTML = visibleProfiles.length ? visibleProfiles.map(p => {
+  // কাউন্টডাউন বা মেয়াদ স্ট্যাটাস ব্যানার
+  let timerBanner = userRemainingTimeText ? `<div style="background: #f8dbe5; color: var(--primary); padding: 8px 12px; border-radius: 8px; margin-bottom: 12px; font-weight: bold; font-size: 13px; text-align: center;">${userRemainingTimeText}</div>` : '';
+
+  c.innerHTML = timerBanner + (visibleProfiles.length ? visibleProfiles.map(p => {
     let actionArea = "";
     if (userHasPaid || adminAllowed()) {
       const rawPhone = p.phone || "";
@@ -572,7 +643,7 @@ async function renderProfiles() {
     } else {
       actionArea = `
         <div style="margin-top:8px;">
-          <button type="button" class="edit" onclick="showPage('payment')">${currentLang === "bn" ? "🔒 পেমেন্ট করে ভিডিও কল ও নম্বর দেখুন (১০০ টাকা)" : "🔒 Pay to Unlock Video Call & Phone"}</button>
+          <button type="button" class="edit" onclick="showPage('payment')">${currentLang === "bn" ? "🔒 পেমেন্ট করে ভিডিও কল ও নম্বর দেখুন" : "🔒 Pay to Unlock Video Call & Phone"}</button>
         </div>
       `;
     }
@@ -598,7 +669,7 @@ async function renderProfiles() {
         ${actionArea}
       </div>
     `;
-  }).join("") : (currentLang === "bn" ? "কোনো প্রোফাইল পাওয়া যায়নি।" : "No profiles found.");
+  }).join("") : (currentLang === "bn" ? "কোনো প্রোফাইল পাওয়া যায়নি।" : "No profiles found."));
 }
 
 function renderFavorites() {
@@ -695,7 +766,7 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
 
     if (profileError) throw profileError;
 
-    cachedProfiles = []; // নতুন প্রোফাইল তৈরি হলে ক্যাশ রিসেট হবে
+    cachedProfiles = [];
 
     const { data: loginData, error: loginError } = await supabaseClient.auth.signInWithPassword({
       email: email,
@@ -756,7 +827,7 @@ document.getElementById("submitPaymentBtn").addEventListener("click", async () =
     const { error } = await supabaseClient.from("payments").insert([{ transaction_id: trx, user_id: userId, status: "pending" }]);
     if (error) throw error;
     msg.style.color = "green";
-    msg.textContent = "পেমেন্ট সফলভাবে জমা হয়েছে! অ্যাডমিন যাচাই করার পর ভিডিও কল ও নম্বর আনলক হয়ে যাবে।";
+    msg.textContent = "পেমেন্ট সফলভাবে জমা হয়েছে! অ্যাডমিন যাচাই করার পর ৩০ দিনের জন্য ভিডিও কল ও নম্বর আনলক হয়ে যাবে।";
     document.getElementById("transactionId").value = "";
   } catch (err) {
     msg.style.color = "red";
@@ -834,6 +905,7 @@ document.getElementById("logoutButton").addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
   currentSession = null;
   userHasPaid = false;
+  userRemainingTimeText = "";
   pageHistory = ["welcome"];
   localStorage.removeItem("current_page");
   document.getElementById("tabs").classList.add("hidden");
@@ -866,6 +938,7 @@ document.getElementById("adminLoginForm").addEventListener("submit", async e => 
     renderAdminProfiles();
     renderAdminPayments();
     renderAdminHotline();
+    loadAdminSettings();
   } catch (err) {
     document.getElementById("adminAuthMessage").textContent = err.message;
   }
@@ -876,6 +949,47 @@ document.getElementById("adminLogoutButton")?.addEventListener("click", async ()
   currentSession = null;
   refreshAdminState();
 });
+
+// অ্যাডমিন সেটিংস লোড ও সেভ করার ফাংশন (ফি এবং মেয়াদ পরিবর্তন)
+async function loadAdminSettings() {
+  if (!adminAllowed()) return;
+  try {
+    const { data } = await supabaseClient.from("app_settings").select("*").eq("id", 1).single();
+    if (data) {
+      document.getElementById("adminFeeInput").value = data.fee_amount || 100;
+      document.getElementById("adminDaysInput").value = data.duration_days || 30;
+    }
+  } catch (e) {
+    // যদি রো না থাকে তৈরি করে নেবে
+  }
+}
+
+async function saveAdminSettings() {
+  if (!adminAllowed()) return;
+  const newFee = parseInt(document.getElementById("adminFeeInput").value) || 100;
+  const newDays = parseInt(document.getElementById("adminDaysInput").value) || 30;
+  const msgEl = document.getElementById("settingsMsg");
+
+  msgEl.style.color = "#28151c";
+  msgEl.textContent = "সেটিংস সংরক্ষণ করা হচ্ছে...";
+
+  try {
+    const { error } = await supabaseClient.from("app_settings").upsert({
+      id: 1,
+      fee_amount: newFee,
+      duration_days: newDays,
+      updated_at: new Date()
+    });
+
+    if (error) throw error;
+    msgEl.style.color = "green";
+    msgEl.textContent = "সফলভাবে ফি এবং মেয়াদ আপডেট করা হয়েছে!";
+    loadPublicSettings();
+  } catch (err) {
+    msgEl.style.color = "red";
+    msgEl.textContent = "সংরক্ষণে সমস্যা: " + err.message;
+  }
+}
 
 async function renderAdminProfiles() {
   const c = document.getElementById("adminProfiles");
@@ -909,7 +1023,7 @@ async function updateProfileStatus(id, newStatus) {
   try {
     const { error } = await supabaseClient.from("profiles").update({ status: newStatus }).eq("id", id);
     if (error) throw error;
-    cachedProfiles = []; // ক্যাশ ক্লিয়ার করা হলো যাতে নতুন স্ট্যাটাস আপডেট হয়
+    cachedProfiles = [];
     renderAdminProfiles();
   } catch (err) {
     alert("স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে: " + err.message);
@@ -973,7 +1087,12 @@ async function renderAdminPayments() {
 
 async function updatePaymentStatus(payId, newStatus) {
   try {
-    const { error } = await supabaseClient.from("payments").update({ status: newStatus }).eq("id", payId);
+    // পেমেন্ট অ্যাপ্রুভ করার সাথে সাথে approved_at টাইমস্ট্যাম্প সেভ হবে, যেখান থেকে ৩০ দিনের কাউন্টডাউন শুরু হবে
+    const updateData = { status: newStatus };
+    if (newStatus === 'approved') {
+      updateData.approved_at = new Date().toISOString();
+    }
+    const { error } = await supabaseClient.from("payments").update(updateData).eq("id", payId);
     if (error) throw error;
     renderAdminPayments();
   } catch (err) {
@@ -1025,7 +1144,7 @@ async function replyHotline(targetUserId, userEmail) {
 }
 
 async function deleteHotlineMsg(id) {
-  await supabaseClient.app ? await supabaseClient.from("hotline_messages").delete().eq("id", id) : await supabaseClient.from("hotline_messages").delete().eq("id", id);
+  await supabaseClient.from("hotline_messages").delete().eq("id", id);
   renderAdminHotline();
 }
 
@@ -1050,6 +1169,7 @@ supabaseClient.auth.getSession().then(({ data }) => {
       showPage("welcome");
     }
   }
+  loadPublicSettings();
 });
 </script>
 </body>
